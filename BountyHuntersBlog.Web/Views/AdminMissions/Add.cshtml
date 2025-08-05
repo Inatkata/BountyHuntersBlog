@@ -1,0 +1,61 @@
+﻿@model BountyHuntersBlog.Models.ViewModels.AddMissionPostRequest
+
+@{
+    ViewData["Title"] = "Add New Mission";
+}
+
+<h2>Add New Mission</h2>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input type="text" asp-for="Title" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Page Title</label>
+        <input type="text" asp-for="PageTitle" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Short Description</label>
+        <textarea asp-for="ShortDescription" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Content</label>
+        <textarea asp-for="Content" class="form-control" rows="8"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Featured Image</label>
+        <input type="file" asp-for="FeaturedImage" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mission Date</label>
+        <input type="date" asp-for="MissionDate" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">URL Handle</label>
+        <input type="text" asp-for="UrlHandle" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Status</label>
+        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<BountyHuntersBlog.Models.Domain.MissionStatus>()"></select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Factions</label>
+        <select asp-for="SelectedFactions" class="form-select" multiple asp-items="Model.Factions"></select>
+    </div>
+
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" asp-for="Visible" />
+        <label class="form-check-label">Visible</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>

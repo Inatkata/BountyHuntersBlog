@@ -1,0 +1,27 @@
+﻿@model List<BountyHuntersBlog.Models.Domain.Faction>
+
+<h2>All Factions</h2>
+
+<a class="btn btn-primary mb-3" asp-action="Add">+ Add Faction</a>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Display Name</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var faction in Model)
+    {
+        <tr>
+            <td>@faction.Name</td>
+            <td>@faction.DisplayName</td>
+            <td>
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@faction.Id">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
