@@ -1,7 +1,6 @@
 ﻿using BountyHuntersBlog.Models.Domain;
-using BountyHuntersBlog.Models.ViewModels;
+using BountyHuntersBlog.Models.Requests;
 using BountyHuntersBlog.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Controllers
@@ -16,20 +15,21 @@ namespace BountyHuntersBlog.Controllers
         {
             this.missionLikeRepository = missionLikeRepository;
         }
-
         [HttpPost]
         [Route("Add")]
-        public async Task<IActionResult> AddLike([FromBody] AddMissionLikeRequest request)
+        public async Task<IActionResult> AddLike([FromBody] AddLikeRequest addLikeRequest)
         {
             var model = new MissionLike
             {
-                MissionPostId = request.MissionPostId,
-                UserId = request.UserId
+                MissionPostId = addLikeRequest.MissionPostId,
+                HunterId = addLikeRequest.HunterId
             };
 
-            await missionLikeRepository.AddLikeAsync(model);
+            await missionLikeRepository.AddLike(model);
+
             return Ok();
         }
+
 
         [HttpGet]
         [Route("{missionPostId:Guid}/totalLikes")]

@@ -1,6 +1,6 @@
 ﻿using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Models.Domain;
-using BountyHuntersBlog.Web.Repositories;
+using BountyHuntersBlog.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Repositories
@@ -13,11 +13,57 @@ namespace BountyHuntersBlog.Repositories
         {
             this.dbContext = dbContext;
         }
-
-        public async Task<IEnumerable<Faction>> GetAllAsync()
+        public async Task<IEnumerable<Faction>> GetAllAsync(
+            string? searchQuery,
+            string? sortBy,
+            string? sortDirection,
+            int pageNumber,
+            int pageSize)
         {
-            return await dbContext.Factions.ToListAsync();
+            var query = dbContext.Factions.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                query = query.Where(f => f.Name.Contains(searchQuery)
+                                         || f.DisplayName.Contains(searchQuery));
+            }
+
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                if (sortBy.Equals("Name", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = sortDirection == "desc"
+                        ? query.OrderByDescending(f => f.Name)
+                        : query.OrderBy(f => f.Name);
+                }
+                else if (sortBy.Equals("DisplayName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = sortDirection == "desc"
+                        ? query.OrderByDescending(f => f.DisplayName)
+                        : query.OrderBy(f => f.DisplayName);
+                }
+            }
+
+            return await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
+
+        public async Task<int> CountAsync(string? searchQuery)
+        {
+            var query = dbContext.Factions.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                query = query.Where(f => f.Name.Contains(searchQuery)
+                                         || f.DisplayName.Contains(searchQuery));
+            }
+
+            return await query.CountAsync();
+        }
+
+
 
         public async Task<Faction?> GetAsync(Guid id)
         {

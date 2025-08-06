@@ -1,7 +1,6 @@
 ﻿using BountyHuntersBlog.Models.Domain;
-using BountyHuntersBlog.Models.ViewModels;
-using BountyHuntersBlog.Repositories;
-using BountyHuntersBlog.Web.Repositories;
+using BountyHuntersBlog.Models.Requests;
+using BountyHuntersBlog.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +9,11 @@ namespace BountyHuntersBlog.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminFactionsController : Controller
     {
-        private readonly IFactionRepository factionRepository;
+        private readonly IFactionService factionService;
 
-        public AdminFactionsController(IFactionRepository factionRepository)
+        public AdminFactionsController(IFactionService factionService)
         {
-            this.factionRepository = factionRepository;
+            this.factionService = factionService;
         }
 
         [HttpGet]
@@ -24,11 +23,8 @@ namespace BountyHuntersBlog.Controllers
         }
 
         [HttpPost]
-        [ActionName("Add")]
-        public async Task<IActionResult> Add(AddFactionRequest addFactionRequest)
+        public async Task<IActionResult> Add(AddFactionRequest request)
         {
-            ValidateAddFactionRequest(addFactionRequest);
-
             if (!ModelState.IsValid)
             {
                 return View();
@@ -36,60 +32,39 @@ namespace BountyHuntersBlog.Controllers
 
             var faction = new Faction
             {
-                Name = addFactionRequest.Name,
-                DisplayName = addFactionRequest.DisplayName
+                Name = request.Name,
+                DisplayName = request.DisplayName
             };
 
-            await factionRepository.AddAsync(faction);
+            await factionService.AddAsync(faction);
 
             return RedirectToAction("List");
         }
 
         [HttpGet]
-        [ActionName("List")]
-        public async Task<IActionResult> List(
-            string? searchQuery,
-            string? sortBy,
-            string? sortDirection,
-            int pageSize = 3,
-            int pageNumber = 1)
+        public async Task<IActionResult> List()
         {
-            var totalRecords = await factionRepository.CountAsync();
-            var totalPages = Math.Ceiling((decimal)totalRecords / pageSize);
-
-            if (pageNumber > totalPages) pageNumber--;
-            if (pageNumber < 1) pageNumber++;
-
-            ViewBag.TotalPages = totalPages;
-            ViewBag.SearchQuery = searchQuery;
-            ViewBag.SortBy = sortBy;
-            ViewBag.SortDirection = sortDirection;
-            ViewBag.PageSize = pageSize;
-            ViewBag.PageNumber = pageNumber;
-
-            var factions = await factionRepository.GetAllAsync(searchQuery, sortBy, sortDirection, pageNumber, pageSize);
-
+            var factions = await factionService.GetAllAsync();
             return View(factions);
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var faction = await factionRepository.GetAsync(id);
-
-            if (faction != null)
+            var faction = await factionService.GetByIdAsync(id);
+            if (faction == null)
             {
-                var editRequest = new EditFactionRequest
-                {
-                    Id = faction.Id,
-                    Name = faction.Name,
-                    DisplayName = faction.DisplayName
-                };
-
-                return View(editRequest);
+                return RedirectToAction("List");
             }
 
-            return View(null);
+            var model = new EditFactionRequest
+            {
+                Id = faction.Id,
+                Name = faction.Name,
+                DisplayName = faction.DisplayName
+            };
+
+            return View(model);
         }
 
         [HttpPost]
@@ -102,33 +77,17 @@ namespace BountyHuntersBlog.Controllers
                 DisplayName = request.DisplayName
             };
 
-            var updatedFaction = await factionRepository.UpdateAsync(faction);
+            await factionService.UpdateAsync(faction);
 
-            // Optional: notification logic
-            return RedirectToAction("Edit", new { id = request.Id });
+            return RedirectToAction("Edit", new { id = faction.Id });
         }
 
         [HttpPost]
         public async Task<IActionResult> Delete(EditFactionRequest request)
         {
-            var deletedFaction = await factionRepository.DeleteAsync(request.Id);
+            await factionService.DeleteAsync(request.Id);
 
-            if (deletedFaction != null)
-            {
-                return RedirectToAction("List");
-            }
-
-            return RedirectToAction("Edit", new { id = request.Id });
-        }
-
-        private void ValidateAddFactionRequest(AddFactionRequest request)
-        {
-            if (!string.IsNullOrWhiteSpace(request.Name) &&
-                !string.IsNullOrWhiteSpace(request.DisplayName) &&
-                request.Name == request.DisplayName)
-            {
-                ModelState.AddModelError("DisplayName", "Name cannot be the same as DisplayName");
-            }
+            return RedirectToAction("List");
         }
     }
 }

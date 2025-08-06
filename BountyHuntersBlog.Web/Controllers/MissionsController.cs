@@ -1,7 +1,7 @@
 ﻿using BountyHuntersBlog.Models.Domain;
 using BountyHuntersBlog.Models.ViewModels;
 using BountyHuntersBlog.Repositories;
-using BountyHuntersBlog.Web.Repositories;
+using BountyHuntersBlog.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,7 +47,7 @@ namespace BountyHuntersBlog.Controllers
 
                     if (userId != null)
                     {
-                        liked = likes.Any(x => x.UserId == userId);
+                        liked = likes.Any(x => x.HunterId == userId);
                     }
                 }
 
@@ -62,30 +62,30 @@ namespace BountyHuntersBlog.Controllers
                     {
                         Description = comment.Description,
                         DateAdded = comment.DateAdded,
-                        Username = username
+                        Hunter = username
                     });
                 }
 
                 missionDetailsViewModel = new MissionDetailsViewModel
                 {
                     Id = missionPost.Id,
-                    Heading = missionPost.Title,
+                    Title = missionPost.Title,
                     PageTitle = missionPost.PageTitle,
                     Content = missionPost.Content,
                     ShortDescription = missionPost.ShortDescription,
                     UrlHandle = missionPost.UrlHandle,
                     FeaturedImageUrl = missionPost.FeaturedImageUrl,
                     MissionDate = missionPost.MissionDate,
-                    Author = missionPost.Author?.UserName ?? "Unknown",
+                    Author = missionPost.Author,
                     Visible = missionPost.Visible,
-                    Tags = missionPost.Factions.ToList(),
+                    Factions = missionPost.Factions.ToList(),
                     TotalLikes = totalLikes,
                     Liked = liked,
                     Comments = viewComments
                 };
             }
 
-            return View(missionDetailsViewModel);
+            return View("Details");
         }
 
         [HttpPost]
@@ -106,7 +106,7 @@ namespace BountyHuntersBlog.Controllers
                 return RedirectToAction("Index", "Missions", new { urlHandle = model.UrlHandle });
             }
 
-            return View();
+            return View("Details");
         }
     }
 }

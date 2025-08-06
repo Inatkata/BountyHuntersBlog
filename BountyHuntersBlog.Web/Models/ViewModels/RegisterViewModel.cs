@@ -12,7 +12,9 @@ namespace BountyHuntersBlog.Models.ViewModels
         public string Email { get; set; }
 
         [Required]
-        [MinLength(6, ErrorMessage = "Password has to be at least 6 characters")]
+        [DataType(DataType.Password)]
         public string Password { get; set; }
+
+        public bool IsAdmin { get; set; }
     }
 }

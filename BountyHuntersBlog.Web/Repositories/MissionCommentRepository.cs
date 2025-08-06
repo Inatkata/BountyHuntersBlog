@@ -1,9 +1,8 @@
-﻿
-using BountyHuntersBlog.Data;
+﻿using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace BountyHuntersBlog.Web.Repositories
+namespace BountyHuntersBlog.Repositories
 {
     public class MissionCommentRepository : IMissionCommentRepository
     {
@@ -22,7 +21,7 @@ namespace BountyHuntersBlog.Web.Repositories
             return comment;
         }
 
-        public async Task<IEnumerable<MissionComment>> GetAllAsync(Guid missionPostId)
+        public async Task<List<MissionComment>> GetCommentsByMissionIdAsync(Guid missionPostId)
         {
             return await dbContext.MissionComments
                 .Where(x => x.MissionPostId == missionPostId)

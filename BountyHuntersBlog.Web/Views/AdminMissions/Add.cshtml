@@ -1,10 +1,15 @@
-﻿@{
+﻿@using BountyHuntersBlog.Models.Requests
+@model AddMissionPostRequest
+
+@{
     ViewData["Title"] = "Add Mission";
 }
 
 <h1>@ViewData["Title"]</h1>
 
 <form method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="AuthorId" />
+
     <div class="mb-3">
         <label class="form-label">Featured Image URL</label>
         <input type="text" class="form-control" id="featuredImageUrl" asp-for="FeaturedImageUrl" />
@@ -18,11 +23,6 @@
     <div class="mb-3">
         <label class="form-label">Mission Date</label>
         <input type="date" class="form-control" id="missionDate" asp-for="MissionDate" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Author</label>
-        <input type="text" class="form-control" id="author" asp-for="Author" />
     </div>
 
     <div class="form-check mb-3">

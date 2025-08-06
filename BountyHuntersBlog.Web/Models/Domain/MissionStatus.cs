@@ -2,10 +2,10 @@
 {
     public enum MissionStatus
     {
-        Active,
-        Completed,
-        Failed,
-        Cancelled
+        Draft,
+        Published,
+        Archived
     }
+
 
 }

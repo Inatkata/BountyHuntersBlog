@@ -1,9 +1,9 @@
-﻿
-using BountyHuntersBlog.Data;
+﻿using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Models.Domain;
+
 using Microsoft.EntityFrameworkCore;
 
-namespace BountyHuntersBlog.Web.Repositories
+namespace BountyHuntersBlog.Repositories
 {
     public class MissionLikeRepository : IMissionLikeRepository
     {
@@ -20,16 +20,25 @@ namespace BountyHuntersBlog.Web.Repositories
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> AlreadyLiked(Guid missionPostId, string userId)
+        public async Task<bool> AlreadyLiked(Guid missionPostId, string hunterId)
         {
-            return await dbContext.MissionLikes.AnyAsync(x =>
-                x.MissionPostId == missionPostId && x.UserId == userId);
+            return await dbContext.MissionLikes
+                .AnyAsync(x => x.MissionPostId == missionPostId && x.HunterId.ToString() == hunterId);
+        }
+
+        public async Task<int> GetTotalLikesAsync(Guid missionPostId)
+        {
+            return await dbContext.MissionLikes
+                .CountAsync(x => x.MissionPostId == missionPostId);
+        }
+
+        public async Task<List<MissionLike>> GetLikesByMissionIdAsync(Guid missionPostId)
+        {
+            return await dbContext.MissionLikes
+                .Where(x => x.MissionPostId == missionPostId)
+                .ToListAsync();
         }
 
 
-        public async Task<int> GetTotalLikes(Guid missionPostId)
-        {
-            return await dbContext.MissionLikes.CountAsync(x => x.MissionPostId == missionPostId);
-        }
     }
 }

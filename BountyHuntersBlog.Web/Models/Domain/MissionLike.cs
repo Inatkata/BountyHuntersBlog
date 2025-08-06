@@ -1,10 +1,22 @@
-﻿
-namespace BountyHuntersBlog.Models.Domain
-{
-    public class MissionLike
+﻿using System.ComponentModel.DataAnnotations;
+using BountyHuntersBlog.Models.Domain;
+
+
+
+    namespace BountyHuntersBlog.Models.Domain
     {
-        public Guid MissionPostId { get; set; }
-        public string UserId { get; set; }
-        public MissionPost MissionPost { get; set; }
-    }
+        public class MissionLike
+        {
+            public Guid Id { get; set; }
+
+            public Guid MissionPostId { get; set; }
+            public MissionPost MissionPost { get; set; } = null!;
+
+            public string HunterId { get; set; } = null!;
+            public Hunter Hunter { get; set; } = null!;
+        }
+
+
 }
+
+

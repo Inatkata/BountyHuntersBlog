@@ -1,7 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<Hunter> signInManager
 @inject UserManager<Hunter> HunterManager
-
 @model BountyHuntersBlog.Models.ViewModels.MissionDetailsViewModel
 
 @{
@@ -28,18 +27,9 @@
                 <div class="mb-3">
                     @if (signInManager.IsSignedIn(User))
                     {
-                        if (Model.Liked)
-                        {
-                            <a style="cursor: pointer;">
-                                <i class="bi bi-hand-thumbs-up-fill"></i>
-                            </a>
-                        }
-                        else
-                        {
-                            <a id="btnLike" style="cursor: pointer;">
-                                <i class="bi bi-hand-thumbs-up"></i>
-                            </a>
-                        }
+                        <a id="btnLike" style="cursor: pointer;">
+                            <i class="bi @(Model.Liked ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-up")"></i>
+                        </a>
                     }
 
                     <span id="totalLikes">@Model.TotalLikes</span> likes
@@ -86,7 +76,7 @@
                                     <div class="card-body">
                                         <div>@comment.Description</div>
                                         <div class="d-flex justify-content-between mt-2">
-                                            <span class="text-secondary">@comment.User?.DisplayName</span>
+                                            <span class="text-secondary">@comment.Hunter</span>
                                             <span class="text-secondary">@comment.DateAdded.ToShortDateString()</span>
                                         </div>
                                     </div>
@@ -109,40 +99,37 @@
 </div>
 
 @section Scripts {
-    <script>
-        const btnLikeElement = document.getElementById('btnLike');
-        const totalLikeElement = document.getElementById('totalLikes');
+    @if (signInManager.IsSignedIn(User))
+    {
+        <script>
+            const btnLikeElement = document.getElementById('btnLike');
+            const totalLikeElement = document.getElementById('totalLikes');
 
-        async function getTotalLikes() {
-            fetch('/api/MissionLike/@Model.Id/totalLikes', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': '*/*'
-                }
-            })
-                .then(data => data.json())
-                .then(result => totalLikeElement.innerHTML = result);
-        }
+            async function getTotalLikes() {
+                const response = await fetch('/api/MissionLike/@Model.Id/totalLikes');
+                const result = await response.json();
+                totalLikeElement.innerHTML = result;
+            }
 
-        async function addLikeForMission() {
-            fetch('/api/MissionLike/Add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': '*/*'
-                },
-                body: JSON.stringify({
-                    MissionPostId: '@Model.Id',
-                    HunterId: '@HunterManager.GetUserId(User)'
-                })
-            }).then(() => {
+            async function addLikeForMission() {
+                await fetch('/api/MissionLike/Add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': '*/*'
+                    },
+                    body: JSON.stringify({
+                        MissionPostId: '@Model.Id',
+                        HunterId: '@HunterManager.GetUserId(User)'
+                    })
+                });
+
                 btnLikeElement.innerHTML = '<i class="bi bi-hand-thumbs-up-fill"></i>';
                 btnLikeElement.removeEventListener('click', addLikeForMission);
                 getTotalLikes();
-            });
-        }
+            }
 
-        btnLikeElement?.addEventListener('click', addLikeForMission);
-    </script>
+            btnLikeElement?.addEventListener('click', addLikeForMission);
+        </script>
+    }
 }

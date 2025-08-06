@@ -12,7 +12,7 @@ namespace BountyHuntersBlog.Models.ViewModels
         public string Content { get; set; }
 
         public string FeaturedImageUrl { get; set; }
-
+        public string ShortDescription { get; set; }
         public DateTime MissionDate { get; set; }
 
         public string UrlHandle { get; set; }
@@ -27,7 +27,7 @@ namespace BountyHuntersBlog.Models.ViewModels
 
         public List<MissionCommentViewModel> Comments { get; set; }
 
-
+        public bool Visible { get; set; }
         public string CommentDescription { get; set; }
     }
 }

@@ -25,7 +25,7 @@ namespace BountyHuntersBlog.Controllers
         public async Task<IActionResult> Index()
         {
             var missions = await missionPostRepository.GetAllAsync();
-            var factions = await factionRepository.GetAllAsync();
+            var factions = await factionRepository.GetAllAsync(null, null, null, 1, 100);
 
             var model = new HomeViewModel
             {

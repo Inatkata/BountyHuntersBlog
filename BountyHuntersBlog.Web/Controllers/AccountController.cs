@@ -39,17 +39,19 @@ namespace BountyHuntersBlog.Controllers
 
                 if (result.Succeeded)
                 {
-                    var roleResult = await userManager.AddToRoleAsync(hunter, "Hunter");
+                    var role = registerViewModel.IsAdmin ? "Admin" : "Hunter";
+                    var roleResult = await userManager.AddToRoleAsync(hunter, role);
 
                     if (roleResult.Succeeded)
                     {
-                        return RedirectToAction("Register");
+                        return RedirectToAction("Login");
                     }
                 }
             }
 
-            return View();
+            return View(registerViewModel);
         }
+
 
         [HttpGet]
         public IActionResult Login(string returnUrl)
@@ -87,7 +89,7 @@ namespace BountyHuntersBlog.Controllers
             return View();
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();

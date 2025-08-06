@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Data
 {
-    public class BountyHuntersDbContext : IdentityDbContext
+    public class BountyHuntersDbContext : IdentityDbContext<Hunter>
     {
         public BountyHuntersDbContext(DbContextOptions<BountyHuntersDbContext> options)
             : base(options)
@@ -15,42 +15,29 @@ namespace BountyHuntersBlog.Data
         public DbSet<Faction> Factions { get; set; }
         public DbSet<MissionLike> MissionLikes { get; set; }
         public DbSet<MissionComment> MissionComments { get; set; }
-        public DbSet<Hunter> Hunters { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // One-to-Many: MissionPost <-> Hunter (Author)
             builder.Entity<MissionPost>()
                 .HasOne(mp => mp.Author)
-                .WithMany(h => h.Missions)
+                .WithMany(h => h.MissionPosts)
                 .HasForeignKey(mp => mp.AuthorId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Many-to-Many: MissionPost <-> Faction
             builder.Entity<MissionPost>()
                 .HasMany(m => m.Factions)
                 .WithMany(f => f.MissionPosts);
 
-            // Composite Key: MissionLike
             builder.Entity<MissionLike>()
-                .HasKey(l => new { l.MissionPostId, l.UserId });
+                .HasKey(l => new { l.MissionPostId, l.HunterId });
 
-            // One-to-Many: MissionPost <-> MissionComment
             builder.Entity<MissionComment>()
                 .HasOne(c => c.MissionPost)
                 .WithMany(m => m.Comments)
                 .HasForeignKey(c => c.MissionPostId);
-
-            // One-to-Many (optional): Hunter <-> Missions
-            builder.Entity<Hunter>()
-                .HasMany(h => h.Missions)
-                .WithOne()
-                .HasForeignKey(m => m.AuthorId)
-                .OnDelete(DeleteBehavior.SetNull);
         }
-
     }
 }

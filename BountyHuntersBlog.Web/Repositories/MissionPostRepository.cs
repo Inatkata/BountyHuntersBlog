@@ -4,7 +4,7 @@ using BountyHuntersBlog.Models.Domain;
 using BountyHuntersBlog.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace BountyHuntersBlog.Web.Repositories
+namespace BountyHuntersBlog.Repositories
 {
     public class MissionPostRepository : IMissionPostRepository
     {
@@ -45,6 +45,11 @@ namespace BountyHuntersBlog.Web.Repositories
             await dbContext.SaveChangesAsync();
 
             return mission;
+        }
+        public async Task<MissionPost?> GetByUrlHandleAsync(string urlHandle)
+        {
+            return await dbContext.MissionPosts
+                .FirstOrDefaultAsync(x => x.UrlHandle == urlHandle);
         }
 
         public async Task<MissionPost?> UpdateAsync(MissionPost mission, List<Guid> factionIds)

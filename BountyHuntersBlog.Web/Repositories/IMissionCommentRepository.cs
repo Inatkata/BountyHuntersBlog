@@ -1,10 +1,10 @@
 ﻿using BountyHuntersBlog.Models.Domain;
 
-namespace BountyHuntersBlog.Web.Repositories
+namespace BountyHuntersBlog.Repositories
 {
     public interface IMissionCommentRepository
     {
         Task<MissionComment> AddAsync(MissionComment comment);
-        Task<IEnumerable<MissionComment>> GetAllAsync(Guid missionPostId);
+        Task<List<MissionComment>> GetCommentsByMissionIdAsync(Guid missionPostId);
     }
 }

@@ -1,5 +1,5 @@
 ﻿using BountyHuntersBlog.Models.Domain;
-using BountyHuntersBlog.Web.Repositories;
+using BountyHuntersBlog.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

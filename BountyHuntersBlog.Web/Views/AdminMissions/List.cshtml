@@ -15,10 +15,12 @@
         <table class="table">
             <thead>
             <tr>
-                <td>Id</td>
-                <td>Title</td>
-                <td>Factions</td>
-                <td> </td>
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Factions</th>
+                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -36,12 +38,14 @@
                         </div>
                     </td>
                     <td>
-                        <a asp-area=""
+                        <a class="btn btn-sm btn-outline-secondary"
+                           asp-area=""
                            asp-controller="AdminMissions"
                            asp-action="Edit"
                            asp-route-id="@mission.Id">
                             Edit
                         </a>
+
                     </td>
                 </tr>
             }

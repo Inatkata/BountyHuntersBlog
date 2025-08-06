@@ -405,9 +405,9 @@ namespace BountyHuntersBlog.Migrations
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionPost", b =>
-                {
+            {
 
-                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Author")
+                b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Author");
 
                     b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", null)
 
