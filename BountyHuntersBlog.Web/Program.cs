@@ -11,17 +11,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<BountyHuntersDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("AuthBountyHuntersDb")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AuthBountyHuntersDb")));
 
 builder.Services.AddIdentity<IdentityHunter, IdentityRole>()
     .AddEntityFrameworkStores<AuthDbContext>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    // Default settings
+    // Default password settings
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -30,13 +30,12 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredUniqueChars = 1;
 });
 
-
+// Dependency injection for repositories
 builder.Services.AddScoped<IMissionPostRepository, MissionPostRepository>();
 builder.Services.AddScoped<IMissionCommentRepository, MissionCommentRepository>();
 builder.Services.AddScoped<IMissionLikeRepository, MissionLikeRepository>();
 builder.Services.AddScoped<IFactionRepository, FactionRepository>();
 builder.Services.AddScoped<IImageRepository, CloudinaryImageRepository>();
-
 
 var app = builder.Build();
 
@@ -44,14 +43,13 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.Hunterouting();
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();

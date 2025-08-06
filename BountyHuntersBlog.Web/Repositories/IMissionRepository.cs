@@ -1,6 +1,6 @@
 ﻿using BountyHuntersBlog.Models.Domain;
 
-namespace BountyHuntersBlog.Web.Repositories
+namespace BountyHuntersBlog.Repositories
 {
     public interface IMissionPostRepository
     {

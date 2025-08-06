@@ -20,11 +20,12 @@ namespace BountyHuntersBlog.Web.Repositories
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task<bool> AlreadyLiked(Guid missionPostId, string HunterId)
+        public async Task<bool> AlreadyLiked(Guid missionPostId, string userId)
         {
             return await dbContext.MissionLikes.AnyAsync(x =>
-                x.MissionPostId == missionPostId && x.HunterId == HunterId);
+                x.MissionPostId == missionPostId && x.UserId == userId);
         }
+
 
         public async Task<int> GetTotalLikes(Guid missionPostId)
         {

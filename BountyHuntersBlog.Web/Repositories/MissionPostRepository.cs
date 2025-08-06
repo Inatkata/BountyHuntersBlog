@@ -1,6 +1,7 @@
 ﻿
 using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Models.Domain;
+using BountyHuntersBlog.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Web.Repositories
