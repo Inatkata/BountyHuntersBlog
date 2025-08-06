@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> signInManager
+@inject SignInManager<Hunter> signInManager
 
 <!DOCTYPE html>
 <html lang="en">
@@ -59,7 +59,7 @@
                                     <li>
                                         <a class="dropdown-item"
                                            asp-area=""
-                                           asp-controller="AdminMissionPosts"
+                                           asp-controller="AdminMissions"
                                            asp-action="Add">
                                             Add Blog Post
                                         </a>
@@ -69,7 +69,7 @@
                                     <li>
                                         <a class="dropdown-item"
                                            asp-area=""
-                                           asp-controller="AdminMissionPosts"
+                                           asp-controller="AdminMissions"
                                            asp-action="List">
                                             All MissionPosts
                                         </a>
@@ -79,9 +79,9 @@
                                     <li>
                                         <a class="dropdown-item"
                                            asp-area=""
-                                           asp-controller="AdminUsers"
+                                           asp-controller="AdminHunters"
                                            asp-action="List">
-                                            All Users
+                                            All Hunters
                                         </a>
                                     </li>
                                 </ul>

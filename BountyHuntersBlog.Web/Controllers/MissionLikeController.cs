@@ -1,12 +1,13 @@
 ﻿using BountyHuntersBlog.Models.Domain;
-using BountyHuntersBlog.Web.Repositories;
-using Microsoft.AspNetCore.Authorization;
+using BountyHuntersBlog.Models.ViewModels;
+using BountyHuntersBlog.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BountyHuntersBlog.Web.Controllers
+namespace BountyHuntersBlog.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class MissionLikeController : ControllerBase
     {
         private readonly IMissionLikeRepository missionLikeRepository;
@@ -16,23 +17,25 @@ namespace BountyHuntersBlog.Web.Controllers
             this.missionLikeRepository = missionLikeRepository;
         }
 
-        [HttpPost("Add")]
-        [Authorize]
-        public async Task<IActionResult> AddLike([FromBody] MissionLike request)
+        [HttpPost]
+        [Route("Add")]
+        public async Task<IActionResult> AddLike([FromBody] AddMissionLikeRequest request)
         {
-            if (await missionLikeRepository.AlreadyLiked(request.MissionPostId, request.UserId))
+            var model = new MissionLike
             {
-                return BadRequest("Already liked");
-            }
+                MissionPostId = request.MissionPostId,
+                UserId = request.UserId
+            };
 
-            await missionLikeRepository.AddLike(request);
+            await missionLikeRepository.AddLikeAsync(model);
             return Ok();
         }
 
-        [HttpGet("{missionPostId}/totalLikes")]
+        [HttpGet]
+        [Route("{missionPostId:Guid}/totalLikes")]
         public async Task<IActionResult> GetTotalLikes([FromRoute] Guid missionPostId)
         {
-            var totalLikes = await missionLikeRepository.GetTotalLikes(missionPostId);
+            var totalLikes = await missionLikeRepository.GetTotalLikesAsync(missionPostId);
             return Ok(totalLikes);
         }
     }

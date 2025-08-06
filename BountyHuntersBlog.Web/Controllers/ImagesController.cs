@@ -11,21 +11,19 @@ namespace BountyHuntersBlog.Controllers
     {
         private readonly IImageRepository imageRepository;
 
-        public ImagesController(IImageRepository imageRespository)
+        public ImagesController(IImageRepository imageRepository)
         {
-            this.imageRepository = imageRespository;
+            this.imageRepository = imageRepository;
         }
-
 
         [HttpPost]
         public async Task<IActionResult> UploadAsync(IFormFile file)
         {
-            // call a repository
             var imageURL = await imageRepository.UploadAsync(file);
 
             if (imageURL == null)
             {
-                return Problem("Sometihng went wrong!", null, (int)HttpStatusCode.InternalServerError);
+                return Problem("Something went wrong!", null, (int)HttpStatusCode.InternalServerError);
             }
 
             return new JsonResult(new { link = imageURL });

@@ -2,8 +2,8 @@
 
 namespace BountyHuntersBlog.Repositories
 {
-    public interface IUserRepository
+    public interface IHunterRepository
     {
-        Task<IEnumerable<IdentityUser>> GetAll();
+        Task<IEnumerable<IdentityHunter>> GetAll();
     }
 }

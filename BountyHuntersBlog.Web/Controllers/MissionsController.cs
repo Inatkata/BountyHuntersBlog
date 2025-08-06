@@ -1,70 +1,112 @@
 ﻿using BountyHuntersBlog.Models.Domain;
 using BountyHuntersBlog.Models.ViewModels;
+using BountyHuntersBlog.Repositories;
 using BountyHuntersBlog.Web.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BountyHuntersBlog.Web.Controllers
+namespace BountyHuntersBlog.Controllers
 {
     public class MissionsController : Controller
     {
-        private readonly IMissionPostRepository missionRepository;
-        private readonly IMissionLikeRepository likeRepository;
-        private readonly IMissionCommentRepository commentRepository;
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly IMissionPostRepository missionPostRepository;
+        private readonly IMissionLikeRepository missionLikeRepository;
+        private readonly SignInManager<Hunter> signInManager;
+        private readonly UserManager<Hunter> userManager;
+        private readonly IMissionCommentRepository missionCommentRepository;
 
         public MissionsController(
-            IMissionPostRepository missionRepository,
-            IMissionLikeRepository likeRepository,
-            IMissionCommentRepository commentRepository,
-            UserManager<IdentityUser> userManager)
+            IMissionPostRepository missionPostRepository,
+            IMissionLikeRepository missionLikeRepository,
+            SignInManager<Hunter> signInManager,
+            UserManager<Hunter> userManager,
+            IMissionCommentRepository missionCommentRepository)
         {
-            this.missionRepository = missionRepository;
-            this.likeRepository = likeRepository;
-            this.commentRepository = commentRepository;
+            this.missionPostRepository = missionPostRepository;
+            this.missionLikeRepository = missionLikeRepository;
+            this.signInManager = signInManager;
             this.userManager = userManager;
+            this.missionCommentRepository = missionCommentRepository;
         }
 
-        [HttpGet("{urlHandle}")]
-        [HttpGet("{urlHandle}")]
-        public async Task<IActionResult> Details(string urlHandle)
+        [HttpGet]
+        public async Task<IActionResult> Index(string urlHandle)
         {
-            var mission = (await missionRepository.GetAllAsync())
-                .FirstOrDefault(m => m.UrlHandle == urlHandle && m.Visible);
+            var liked = false;
+            var missionPost = await missionPostRepository.GetByUrlHandleAsync(urlHandle);
+            var missionDetailsViewModel = new MissionDetailsViewModel();
 
-            if (mission == null)
-                return View("NotFound");
-
-            var likes = await likeRepository.GetTotalLikes(mission.Id);
-            var userId = userManager.GetUserId(User);
-            var liked = userId != null && await likeRepository.AlreadyLiked(mission.Id, userId);
-            var comments = await commentRepository.GetAllAsync(mission.Id);
-            var author = await userManager.FindByIdAsync(mission.AuthorId);
-
-            var model = new MissionDetailsViewModel
+            if (missionPost != null)
             {
-                Id = mission.Id,
-                Title = mission.Title,
-                PageTitle = mission.PageTitle,
-                Content = mission.Content,
-                FeaturedImageUrl = mission.FeaturedImageUrl,
-                MissionDate = mission.MissionDate,
-                UrlHandle = mission.UrlHandle,
-                Factions = mission.Factions.ToList(),
-                TotalLikes = likes,
-                Liked = liked,
-                Author = author as Hunter,
-                Comments = comments.Select(c => new MissionComment
-                {
-                    Description = c.Description,
-                    UserId = c.UserId,
-                    DateAdded = c.DateAdded,
-                    MissionPostId = c.MissionPostId
-                }).ToList()
-            };
+                var totalLikes = await missionLikeRepository.GetTotalLikesAsync(missionPost.Id);
 
-            return View(model);
+                if (signInManager.IsSignedIn(User))
+                {
+                    var likes = await missionLikeRepository.GetLikesByMissionIdAsync(missionPost.Id);
+                    var userId = userManager.GetUserId(User);
+
+                    if (userId != null)
+                    {
+                        liked = likes.Any(x => x.UserId == userId);
+                    }
+                }
+
+                // Get comments
+                var missionComments = await missionCommentRepository.GetCommentsByMissionIdAsync(missionPost.Id);
+
+                var viewComments = new List<MissionCommentViewModel>();
+                foreach (var comment in missionComments)
+                {
+                    var username = (await userManager.FindByIdAsync(comment.UserId))?.UserName ?? "Unknown";
+                    viewComments.Add(new MissionCommentViewModel
+                    {
+                        Description = comment.Description,
+                        DateAdded = comment.DateAdded,
+                        Username = username
+                    });
+                }
+
+                missionDetailsViewModel = new MissionDetailsViewModel
+                {
+                    Id = missionPost.Id,
+                    Heading = missionPost.Title,
+                    PageTitle = missionPost.PageTitle,
+                    Content = missionPost.Content,
+                    ShortDescription = missionPost.ShortDescription,
+                    UrlHandle = missionPost.UrlHandle,
+                    FeaturedImageUrl = missionPost.FeaturedImageUrl,
+                    MissionDate = missionPost.MissionDate,
+                    Author = missionPost.Author?.UserName ?? "Unknown",
+                    Visible = missionPost.Visible,
+                    Tags = missionPost.Factions.ToList(),
+                    TotalLikes = totalLikes,
+                    Liked = liked,
+                    Comments = viewComments
+                };
+            }
+
+            return View(missionDetailsViewModel);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Index(MissionDetailsViewModel model)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                var comment = new MissionComment
+                {
+                    MissionPostId = model.Id,
+                    Description = model.CommentDescription,
+                    UserId = userManager.GetUserId(User),
+                    DateAdded = DateTime.Now
+                };
+
+                await missionCommentRepository.AddAsync(comment);
+
+                return RedirectToAction("Index", "Missions", new { urlHandle = model.UrlHandle });
+            }
+
+            return View();
+        }
     }
 }

@@ -52,20 +52,20 @@ namespace BountyHuntersBlog.Data
 
             // Seed SuperAdminUser
             var superAdminId = "472ba632-6133-44a1-b158-6c10bd7d850d";
-            var superAdminUser = new IdentityUser
+            var superAdminUser = new Hunter
             {
                 UserName = "superadmin@bloggie.com",
                 Email = "superadmin@bloggie.com",
-                NormalizedEmail = "superadmin@bloggie.com".ToUpper(),
-                NormalizedUserName = "superadmin@bloggie.com".ToUpper(),
-                Id = superAdminId
+                NormalizedEmail = "SUPERADMIN@BLOGGIE.COM",
+                NormalizedUserName = "SUPERADMIN@BLOGGIE.COM",
+                Id = superAdminId,
+                DisplayName = "Super Admin" // ако имаш такова поле
             };
 
-            superAdminUser.PasswordHash = new PasswordHasher<IdentityUser>()
-                .HashPassword(superAdminUser, "Superadmin@123");
+            superAdminUser.PasswordHash =
+                new PasswordHasher<Hunter>().HashPassword(superAdminUser, "Superadmin@123");
 
-
-            builder.Entity<IdentityUser>().HasData(superAdminUser);
+            builder.Entity<Hunter>().HasData(superAdminUser);
 
 
             // Add All roles to SuperAdminUser
@@ -89,6 +89,7 @@ namespace BountyHuntersBlog.Data
             };
 
             builder.Entity<IdentityUserRole<string>>().HasData(superAdminRoles);
+
 
         }
     }

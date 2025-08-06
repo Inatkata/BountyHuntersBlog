@@ -1,4 +1,5 @@
-﻿using BountyHuntersBlog.Models.ViewModels;
+﻿using BountyHuntersBlog.Models.Domain;
+using BountyHuntersBlog.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,16 +7,15 @@ namespace BountyHuntersBlog.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly SignInManager<IdentityUser> signInManager;
+        private readonly UserManager<Hunter> userManager;
+        private readonly SignInManager<Hunter> signInManager;
 
-        public AccountController(UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+        public AccountController(UserManager<Hunter> userManager,
+                                 SignInManager<Hunter> signInManager)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
         }
-
 
         [HttpGet]
         public IActionResult Register()
@@ -23,49 +23,44 @@ namespace BountyHuntersBlog.Controllers
             return View();
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
         {
             if (ModelState.IsValid)
             {
-                var identityUser = new IdentityUser
+                var hunter = new Hunter
                 {
                     UserName = registerViewModel.Username,
-                    Email = registerViewModel.Email
+                    Email = registerViewModel.Email,
+                    DisplayName = registerViewModel.Username
                 };
 
-                var identityResult = await userManager.CreateAsync(identityUser, registerViewModel.Password);
+                var result = await userManager.CreateAsync(hunter, registerViewModel.Password);
 
-                if (identityResult.Succeeded)
+                if (result.Succeeded)
                 {
-                    // assign this user the "User" role
-                    var roleIdentityResult = await userManager.AddToRoleAsync(identityUser, "User");
+                    var roleResult = await userManager.AddToRoleAsync(hunter, "Hunter");
 
-                    if (roleIdentityResult.Succeeded)
+                    if (roleResult.Succeeded)
                     {
-                        // Show success notification
                         return RedirectToAction("Register");
                     }
                 }
             }
 
-            // Show error notification
             return View();
         }
 
-
         [HttpGet]
-        public IActionResult Login(string ReturnUrl)
+        public IActionResult Login(string returnUrl)
         {
             var model = new LoginViewModel
             {
-                ReturnUrl = ReturnUrl
+                ReturnUrl = returnUrl
             };
 
             return View(model);
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginViewModel)
@@ -75,10 +70,11 @@ namespace BountyHuntersBlog.Controllers
                 return View();
             }
 
-            var signInResult = await signInManager.PasswordSignInAsync(loginViewModel.Username,
-                loginViewModel.Password, false, false);
+            var result = await signInManager.PasswordSignInAsync(loginViewModel.Username,
+                                                                  loginViewModel.Password,
+                                                                  false, false);
 
-            if (signInResult != null && signInResult.Succeeded)
+            if (result.Succeeded)
             {
                 if (!string.IsNullOrWhiteSpace(loginViewModel.ReturnUrl))
                 {
@@ -88,7 +84,6 @@ namespace BountyHuntersBlog.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // Show errors
             return View();
         }
 
@@ -98,7 +93,6 @@ namespace BountyHuntersBlog.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
-
 
         [HttpGet]
         public IActionResult AccessDenied()

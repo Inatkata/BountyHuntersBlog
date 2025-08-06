@@ -23,5 +23,7 @@ namespace BountyHuntersBlog.Models.ViewModels
 
         public List<Guid> SelectedFactions { get; set; }
         public List<SelectListItem> Factions { get; set; }
+        public string Hunter { get; set; } // Assuming Hunter is a string, adjust as necessary
+
     }
 }

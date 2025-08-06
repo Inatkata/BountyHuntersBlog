@@ -21,37 +21,36 @@ namespace BountyHuntersBlog.Data
         {
             base.OnModelCreating(builder);
 
-            // Many-to-many: MissionPost <-> Faction
+            // One-to-Many: MissionPost <-> Hunter (Author)
             builder.Entity<MissionPost>()
-
                 .HasOne(mp => mp.Author)
                 .WithMany(h => h.Missions)
                 .HasForeignKey(mp => mp.AuthorId)
-                .IsRequired(false) // ако авторът може да бъде null
-                .OnDelete(DeleteBehavior.SetNull); // или DeleteBehavior.Restrict/Cascade
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
 
-
+            // Many-to-Many: MissionPost <-> Faction
+            builder.Entity<MissionPost>()
                 .HasMany(m => m.Factions)
                 .WithMany(f => f.MissionPosts);
 
-
-            // Optional: Config for MissionLike (composite key if needed)
+            // Composite Key: MissionLike
             builder.Entity<MissionLike>()
                 .HasKey(l => new { l.MissionPostId, l.UserId });
 
+            // One-to-Many: MissionPost <-> MissionComment
             builder.Entity<MissionComment>()
                 .HasOne(c => c.MissionPost)
                 .WithMany(m => m.Comments)
                 .HasForeignKey(c => c.MissionPostId);
 
-
-            // Optional: If using custom Identity user (Hunter), configure here
+            // One-to-Many (optional): Hunter <-> Missions
             builder.Entity<Hunter>()
                 .HasMany(h => h.Missions)
                 .WithOne()
                 .HasForeignKey(m => m.AuthorId)
                 .OnDelete(DeleteBehavior.SetNull);
-
         }
+
     }
 }

@@ -6,6 +6,6 @@ namespace BountyHuntersBlog.Web.Repositories
     {
         Task<int> GetTotalLikes(Guid missionPostId);
         Task AddLike(MissionLike like);
-        Task<bool> AlreadyLiked(Guid missionPostId, string userId);
+        Task<bool> AlreadyLiked(Guid missionPostId, string HunterId);
     }
 }

@@ -18,46 +18,78 @@ namespace BountyHuntersBlog.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> List()
-        {
-            var factions = await factionRepository.GetAllAsync();
-            return View(factions);
-        }
-
-        [HttpGet]
         public IActionResult Add()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(AddFactionRequest request)
+        [ActionName("Add")]
+        public async Task<IActionResult> Add(AddFactionRequest addFactionRequest)
         {
+            ValidateAddFactionRequest(addFactionRequest);
+
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
             var faction = new Faction
             {
-                Id = Guid.NewGuid(),
-                Name = request.Name,
-                DisplayName = request.DisplayName
+                Name = addFactionRequest.Name,
+                DisplayName = addFactionRequest.DisplayName
             };
 
             await factionRepository.AddAsync(faction);
+
             return RedirectToAction("List");
+        }
+
+        [HttpGet]
+        [ActionName("List")]
+        public async Task<IActionResult> List(
+            string? searchQuery,
+            string? sortBy,
+            string? sortDirection,
+            int pageSize = 3,
+            int pageNumber = 1)
+        {
+            var totalRecords = await factionRepository.CountAsync();
+            var totalPages = Math.Ceiling((decimal)totalRecords / pageSize);
+
+            if (pageNumber > totalPages) pageNumber--;
+            if (pageNumber < 1) pageNumber++;
+
+            ViewBag.TotalPages = totalPages;
+            ViewBag.SearchQuery = searchQuery;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDirection = sortDirection;
+            ViewBag.PageSize = pageSize;
+            ViewBag.PageNumber = pageNumber;
+
+            var factions = await factionRepository.GetAllAsync(searchQuery, sortBy, sortDirection, pageNumber, pageSize);
+
+            return View(factions);
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
             var faction = await factionRepository.GetAsync(id);
-            if (faction == null) return NotFound();
 
-            var model = new EditFactionRequest
+            if (faction != null)
             {
-                Id = faction.Id,
-                Name = faction.Name,
-                DisplayName = faction.DisplayName
-            };
+                var editRequest = new EditFactionRequest
+                {
+                    Id = faction.Id,
+                    Name = faction.Name,
+                    DisplayName = faction.DisplayName
+                };
 
-            return View(model);
+                return View(editRequest);
+            }
+
+            return View(null);
         }
 
         [HttpPost]
@@ -70,15 +102,33 @@ namespace BountyHuntersBlog.Controllers
                 DisplayName = request.DisplayName
             };
 
-            await factionRepository.UpdateAsync(faction);
-            return RedirectToAction("List");
+            var updatedFaction = await factionRepository.UpdateAsync(faction);
+
+            // Optional: notification logic
+            return RedirectToAction("Edit", new { id = request.Id });
         }
 
         [HttpPost]
         public async Task<IActionResult> Delete(EditFactionRequest request)
         {
-            await factionRepository.DeleteAsync(request.Id);
-            return RedirectToAction("List");
+            var deletedFaction = await factionRepository.DeleteAsync(request.Id);
+
+            if (deletedFaction != null)
+            {
+                return RedirectToAction("List");
+            }
+
+            return RedirectToAction("Edit", new { id = request.Id });
+        }
+
+        private void ValidateAddFactionRequest(AddFactionRequest request)
+        {
+            if (!string.IsNullOrWhiteSpace(request.Name) &&
+                !string.IsNullOrWhiteSpace(request.DisplayName) &&
+                request.Name == request.DisplayName)
+            {
+                ModelState.AddModelError("DisplayName", "Name cannot be the same as DisplayName");
+            }
         }
     }
 }
