@@ -1,22 +1,30 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using static BountyHuntersBlog.Constants.EntityConstants.MissionComment;
 using BountyHuntersBlog.Models.Domain;
 
-public class MissionComment
+namespace BountyHuntersBlog.Models.Domain
 {
-    public Guid Id { get; set; }
+    public class MissionComment
+    {
+        [Key]
+        public Guid Id { get; set; }
 
-    public Guid MissionPostId { get; set; }
+        [Required]
+        public Guid MissionPostId { get; set; }
 
-    public MissionPost MissionPost { get; set; } = null!;
+        public MissionPost MissionPost { get; set; } = null!;
 
-    [Required]
-    [MaxLength(DescriptionMaxLength)]
-    public string Description { get; set; } = null!;
-    
-    public string UserId { get; set; } = null!;
+        [Required]
+        [MaxLength(DescriptionMaxLength)]
+        public string Description { get; set; } = null!;
 
-    public Hunter Hunter { get; set; } = null!;
+        [Required]
+        public string HunterId { get; set; } = null!; // Важно: string, ако използваш IdentityUser с string ID
 
-    public DateTime DateAdded { get; set; }
+        [ForeignKey(nameof(HunterId))]
+        public Hunter Hunter { get; set; } = null!;
+
+        public DateTime DateAdded { get; set; } = DateTime.UtcNow;
+    }
 }

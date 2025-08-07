@@ -1,135 +1,64 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<Hunter> signInManager
-@inject UserManager<Hunter> HunterManager
-@model BountyHuntersBlog.Models.ViewModels.MissionDetailsViewModel
-
+﻿@model BountyHuntersBlog.Models.ViewModels.MissionDetailsViewModel
 @{
-    ViewData["Title"] = Model.PageTitle;
+    ViewData["Title"] = Model.Title;
 }
 
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-6">
+<div class="container mt-4">
+    <h2>@Model.Title</h2>
+    <p class="text-muted">by @Model.Author.DisplayName on @Model.MissionDate.ToString("dd MMM yyyy")</p>
 
-            @if (Model != null)
-            {
-                <h1 class="mb-3">@Model.Title</h1>
+    <img src="@Model.FeaturedImageUrl" class="img-fluid mb-3" alt="Image">
 
-                <div class="d-flex justify-content-between mb-3">
-                    <span class="text-secondary">
-                        Posted by: @Model.Author.DisplayName
-                    </span>
-                    <span class="text-secondary">
-                        @Model.MissionDate.ToShortDateString()
-                    </span>
-                </div>
+    <p class="lead">@Model.Content</p>
 
+    <div class="d-flex align-items-center mb-3">
+        <form method="post" asp-action="Like" asp-route-id="@Model.Id" class="me-2">
+            <button type="submit" class="btn btn-outline-danger">
+                @(Model.Liked ? "Unlike" : "Like")
+            </button>
+        </form>
+        <span class="text-muted">@Model.TotalLikes likes</span>
+    </div>
+
+    <hr />
+
+    <div class="mt-4">
+        <h4>Comments</h4>
+
+        @if (User.Identity?.IsAuthenticated ?? false)
+        {
+            <form method="post" asp-action="Details">
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="UrlHandle" value="@Model.UrlHandle" />
                 <div class="mb-3">
-                    @if (signInManager.IsSignedIn(User))
-                    {
-                        <a id="btnLike" style="cursor: pointer;">
-                            <i class="bi @(Model.Liked ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-up")"></i>
-                        </a>
-                    }
-
-                    <span id="totalLikes">@Model.TotalLikes</span> likes
+                    <textarea class="form-control" name="CommentDescription" rows="3" placeholder="Leave a comment..." required></textarea>
                 </div>
+                <button type="submit" class="btn btn-primary">Post Comment</button>
+            </form>
+        }
+        else
+        {
+            <p class="text-muted">
+                <a asp-area="Admin" asp-controller="Account" asp-action="Login">Login</a> to comment.
+            </p>
+        }
 
-                <div class="mb-3 d-flex">
-                    @foreach (var faction in Model.Factions)
-                    {
-                        <span class="badge bg-dark me-1">@faction.DisplayName</span>
-                    }
-                </div>
-
-                <img src="@Model.FeaturedImageUrl" class="d-block img-fluid mb-3" />
-
-                <div class="mb-3 mission-details-content">
-                    @Html.Raw(Model.Content)
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Mission Comments</h5>
-
-                        @if (signInManager.IsSignedIn(User))
-                        {
-                            <form method="post">
-                                <div class="mb-3">
-                                    <label class="form-label">Comment</label>
-                                    <input type="text" class="form-control" asp-for="CommentDescription" />
-                                </div>
-                                <div class="mb-3">
-                                    <button type="submit" class="btn btn-dark">Submit</button>
-                                    <input type="hidden" asp-for="Id" />
-                                    <input type="hidden" asp-for="UrlHandle" />
-                                </div>
-                            </form>
-                        }
-                    </div>
-                    <div class="card-body">
-                        @if (Model.Comments != null && Model.Comments.Any())
-                        {
-                            @foreach (var comment in Model.Comments)
-                            {
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <div>@comment.Description</div>
-                                        <div class="d-flex justify-content-between mt-2">
-                                            <span class="text-secondary">@comment.Hunter</span>
-                                            <span class="text-secondary">@comment.DateAdded.ToShortDateString()</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <p class="text-muted">No comments yet.</p>
-                        }
-                    </div>
-                </div>
-            }
-            else
-            {
-                <p>Mission not found!</p>
-            }
-        </div>
+        @if (Model.Comments != null && Model.Comments.Any())
+        {
+            <ul class="list-group mt-3">
+                @foreach (var comment in Model.Comments)
+                {
+                    <li class="list-group-item">
+                        <strong>@comment.UserName</strong>
+                        <span class="text-muted">on @comment.DateAdded.ToString("dd MMM yyyy")</span><br />
+                        @comment.Description
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="text-muted mt-2">No comments yet.</p>
+        }
     </div>
 </div>
-
-@section Scripts {
-    @if (signInManager.IsSignedIn(User))
-    {
-        <script>
-            const btnLikeElement = document.getElementById('btnLike');
-            const totalLikeElement = document.getElementById('totalLikes');
-
-            async function getTotalLikes() {
-                const response = await fetch('/api/MissionLike/@Model.Id/totalLikes');
-                const result = await response.json();
-                totalLikeElement.innerHTML = result;
-            }
-
-            async function addLikeForMission() {
-                await fetch('/api/MissionLike/Add', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': '*/*'
-                    },
-                    body: JSON.stringify({
-                        MissionPostId: '@Model.Id',
-                        HunterId: '@HunterManager.GetUserId(User)'
-                    })
-                });
-
-                btnLikeElement.innerHTML = '<i class="bi bi-hand-thumbs-up-fill"></i>';
-                btnLikeElement.removeEventListener('click', addLikeForMission);
-                getTotalLikes();
-            }
-
-            btnLikeElement?.addEventListener('click', addLikeForMission);
-        </script>
-    }
-}

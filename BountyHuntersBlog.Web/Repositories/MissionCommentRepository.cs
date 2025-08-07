@@ -32,7 +32,9 @@ namespace BountyHuntersBlog.Repositories
         {
             return await dbContext.MissionComments
                 .Where(x => x.MissionPostId == missionPostId)
+                .Include(x => x.Hunter) 
                 .ToListAsync();
         }
+
     }
 }

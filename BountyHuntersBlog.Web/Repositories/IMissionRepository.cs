@@ -5,6 +5,7 @@ namespace BountyHuntersBlog.Repositories
     public interface IMissionPostRepository
     {
         Task<MissionPost?> GetByUrlHandleAsync(string urlHandle);
+        Task<MissionPost?> GetByIdAsync(Guid id);
 
         Task<List<MissionPost>> GetAllAsync();
         Task<MissionPost?> GetAsync(Guid id);

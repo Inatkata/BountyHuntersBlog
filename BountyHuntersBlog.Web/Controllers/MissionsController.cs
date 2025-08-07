@@ -1,14 +1,17 @@
-﻿using BountyHuntersBlog.Models.Domain;
+﻿using BountyHuntersBlog.Data;
+using BountyHuntersBlog.Models.Domain;
 using BountyHuntersBlog.Models.ViewModels;
 using BountyHuntersBlog.Repositories;
-using BountyHuntersBlog.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Controllers
 {
     public class MissionsController : Controller
     {
+        private readonly BountyHuntersDbContext dbContext;
         private readonly IMissionPostRepository missionPostRepository;
         private readonly IMissionLikeRepository missionLikeRepository;
         private readonly SignInManager<Hunter> signInManager;
@@ -16,12 +19,14 @@ namespace BountyHuntersBlog.Controllers
         private readonly IMissionCommentRepository missionCommentRepository;
 
         public MissionsController(
+            BountyHuntersDbContext dbContext,
             IMissionPostRepository missionPostRepository,
             IMissionLikeRepository missionLikeRepository,
             SignInManager<Hunter> signInManager,
             UserManager<Hunter> userManager,
             IMissionCommentRepository missionCommentRepository)
         {
+            this.dbContext = dbContext;
             this.missionPostRepository = missionPostRepository;
             this.missionLikeRepository = missionLikeRepository;
             this.signInManager = signInManager;
@@ -30,83 +35,105 @@ namespace BountyHuntersBlog.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string urlHandle)
+        public async Task<IActionResult> Index()
         {
-            var liked = false;
-            var missionPost = await missionPostRepository.GetByUrlHandleAsync(urlHandle);
-            var missionDetailsViewModel = new MissionDetailsViewModel();
-
-            if (missionPost != null)
-            {
-                var totalLikes = await missionLikeRepository.GetTotalLikesAsync(missionPost.Id);
-
-                if (signInManager.IsSignedIn(User))
-                {
-                    var likes = await missionLikeRepository.GetLikesByMissionIdAsync(missionPost.Id);
-                    var userId = userManager.GetUserId(User);
-
-                    if (userId != null)
-                    {
-                        liked = likes.Any(x => x.HunterId == userId);
-                    }
-                }
-
-                // Get comments
-                var missionComments = await missionCommentRepository.GetCommentsByMissionIdAsync(missionPost.Id);
-
-                var viewComments = new List<MissionCommentViewModel>();
-                foreach (var comment in missionComments)
-                {
-                    var username = (await userManager.FindByIdAsync(comment.UserId))?.UserName ?? "Unknown";
-                    viewComments.Add(new MissionCommentViewModel
-                    {
-                        Description = comment.Description,
-                        DateAdded = comment.DateAdded,
-                        Hunter = comment.Hunter
-                    });
-                }
-
-                missionDetailsViewModel = new MissionDetailsViewModel
-                {
-                    Id = missionPost.Id,
-                    Title = missionPost.Title,
-                    PageTitle = missionPost.PageTitle,
-                    Content = missionPost.Content,
-                    ShortDescription = missionPost.ShortDescription,
-                    UrlHandle = missionPost.UrlHandle,
-                    FeaturedImageUrl = missionPost.FeaturedImageUrl,
-                    MissionDate = missionPost.MissionDate,
-                    Author = missionPost.Author,
-                    Visible = missionPost.Visible,
-                    Factions = missionPost.Factions.ToList(),
-                    TotalLikes = totalLikes,
-                    Liked = liked,
-                    Comments = viewComments
-                };
-            }
-
-            return View("Details");
+            var missions = await missionPostRepository.GetAllAsync();
+            return View("Index", missions);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Index(MissionDetailsViewModel model)
+        [Authorize]
+        public async Task<IActionResult> Like(Guid id)
         {
-            if (signInManager.IsSignedIn(User))
+            var userId = userManager.GetUserId(User);
+            var hunterGuid = Guid.Parse(userId);
+
+            var alreadyLiked = await dbContext.MissionLikes
+                .AnyAsync(x => x.MissionPostId == id && x.HunterId == userId);
+
+            if (!alreadyLiked)
             {
-                var comment = new MissionComment
+                await dbContext.MissionLikes.AddAsync(new MissionLike
                 {
-                    MissionPostId = model.Id,
-                    Description = model.CommentDescription,
-                    UserId = userManager.GetUserId(User),
-                    DateAdded = DateTime.Now
-                };
+                    MissionPostId = id,
+                    HunterId = userId
+                });
 
-                await missionCommentRepository.AddAsync(comment);
+                await dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                var existingLike = await dbContext.MissionLikes
+                    .FirstOrDefaultAsync(x => x.MissionPostId == id && x.HunterId == userId);
 
-                return RedirectToAction("Index", "Missions", new { urlHandle = model.UrlHandle });
+                if (existingLike != null)
+                {
+                    dbContext.MissionLikes.Remove(existingLike);
+                    await dbContext.SaveChangesAsync();
+                }
             }
 
-            return View("Details");
+            var mission = await missionPostRepository.GetByIdAsync(id);
+            return RedirectToAction("Details", new { urlHandle = mission.UrlHandle });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(string urlHandle)
+        {
+            var liked = false;
+            var missionPost = await missionPostRepository.GetByUrlHandleAsync(urlHandle);
+
+            if (missionPost == null) return View("Details", null);
+
+            var comments = await missionCommentRepository.GetCommentsByMissionIdAsync(missionPost.Id);
+
+            if (signInManager.IsSignedIn(User))
+            {
+                var userId = userManager.GetUserId(User);
+                liked = await missionLikeRepository.AlreadyLiked(missionPost.Id, userId);
+            }
+
+            var viewModel = new MissionDetailsViewModel
+            {
+                Id = missionPost.Id,
+                Title = missionPost.Title,
+                PageTitle = missionPost.PageTitle,
+                Content = missionPost.Content,
+                FeaturedImageUrl = missionPost.FeaturedImageUrl,
+                ShortDescription = missionPost.ShortDescription,
+                MissionDate = missionPost.MissionDate,
+                UrlHandle = missionPost.UrlHandle,
+                Author = missionPost.Author,
+                Visible = missionPost.Visible,
+                Liked = liked,
+                Comments = comments.Select(x => new MissionCommentViewModel
+                {
+                    Description = x.Description,
+                    DateAdded = x.DateAdded,
+                    UserName = x.Hunter?.DisplayName ?? "Unknown"
+                }).ToList()
+            };
+
+            return View("Details", viewModel);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Details(MissionDetailsViewModel model)
+        {
+            var userId = userManager.GetUserId(User);
+
+            var comment = new MissionComment
+            {
+                MissionPostId = model.Id,
+                Description = model.CommentDescription,
+                DateAdded = DateTime.UtcNow,
+                HunterId = userId
+            };
+
+            await missionCommentRepository.AddAsync(comment);
+
+            return RedirectToAction("Details", new { urlHandle = model.UrlHandle });
         }
     }
 }

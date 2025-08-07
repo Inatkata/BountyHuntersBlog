@@ -14,6 +14,13 @@ namespace BountyHuntersBlog.Repositories
         {
             this.dbContext = dbContext;
         }
+        public async Task<MissionPost?> GetByIdAsync(Guid id)
+        {
+            return await dbContext.MissionPosts
+                .Include(m => m.Factions)
+                .Include(m => m.Author) 
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
 
         public async Task<List<MissionPost>> GetAllAsync()
         {

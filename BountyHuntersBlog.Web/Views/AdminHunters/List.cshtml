@@ -1,31 +1,31 @@
 ﻿@model BountyHuntersBlog.Models.ViewModels.AdminHunterListViewModel
 
 @{
-    ViewData["Title"] = "Hunters - Admin Functionality";
+    ViewData["Title"] = "Hunters - Admin";
 }
 
 <div class="bg-secondary bg-opacity-10 py-2">
     <div class="container">
-        <h1>Hunters - Admin Functionality</h1>
+        <h1>Hunters - Admin Panel</h1>
     </div>
 </div>
 
-<div class="container py-5">
+<div class="container py-4">
     <div class="mb-3 d-flex justify-content-end">
         <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalCreateHunter">
-            Create Hunter
+            Create New Hunter
         </button>
     </div>
 
     @if (Model != null && Model.Hunters.Any())
     {
-        <table class="table">
+        <table class="table table-hover">
             <thead>
                 <tr>
                     <th>Id</th>
-                    <th>Hunter</th>
+                    <th>Username</th>
                     <th>Email</th>
-                    <th></th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,13 +36,10 @@
                         <td>@hunter.DisplayName</td>
                         <td>@hunter.Email</td>
                         <td>
-                            <form method="post" asp-action="Delete" asp-route-id="@hunter.Id">
-                                <button class="btn btn-danger" type="submit">Delete</button>
+                            <form method="post" asp-action="Delete" asp-route-id="@hunter.Id" class="d-inline">
+                                <button class="btn btn-danger btn-sm" type="submit">Delete</button>
                             </form>
-                        </td>
-                        <td>
-                            <a class="btn btn-dark" asp-action="Edit" asp-route-id="@hunter.Id">Edit</a>
-
+                            <a class="btn btn-primary btn-sm ms-1" asp-action="Edit" asp-route-id="@hunter.Id">Edit</a>
                         </td>
                     </tr>
                 }
@@ -51,18 +48,17 @@
     }
     else
     {
-        <p>No hunters found!</p>
+        <p>No hunters found.</p>
     }
 </div>
 
-<!-- Modal -->
 <form method="post" asp-action="List">
-    <div class="modal fade" id="modalCreateHunter" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="modalCreateHunter" tabindex="-1" aria-labelledby="modalCreateHunterLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Create New Hunter</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="modalCreateHunterLabel">Create New Hunter</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
 
@@ -72,7 +68,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Email Address</label>
+                        <label class="form-label">Email</label>
                         <input type="text" class="form-control" asp-for="CreateHunter.Email" />
                     </div>
 
@@ -81,25 +77,14 @@
                         <input type="password" class="form-control" asp-for="CreateHunter.Password" />
                     </div>
 
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input type="checkbox" id="chkHunterRole" class="form-check-input" value="Hunter" checked disabled />
-                            <label class="form-check-label" for="chkHunterRole">Hunter Role</label>
-                        </div>
-
-                        @if (User.IsInRole("SuperAdmin"))
-                        {
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" asp-for="CreateHunter.IsAdmin" />
-                                <label class="form-check-label" asp-for="CreateHunter.IsAdmin">Admin Role</label>
-                            </div>
-                        }
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" asp-for="CreateHunter.IsAdmin" />
+                        <label class="form-check-label" asp-for="CreateHunter.IsAdmin">Admin Role</label>
                     </div>
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
                 </div>
             </div>
         </div>
