@@ -9,5 +9,7 @@ namespace BountyHuntersBlog.Repositories
         Task<Faction> AddAsync(Faction faction);
         Task<Faction?> UpdateAsync(Faction faction);
         Task<Faction?> DeleteAsync(Guid id);
+        Task<Faction?> GetByIdAsync(Guid id);
+
     }
 }

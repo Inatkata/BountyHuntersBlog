@@ -68,7 +68,8 @@ namespace BountyHuntersBlog.Controllers
                 Factions = selectedFactions
             };
 
-            await missionPostRepository.AddAsync(post);
+            await missionPostRepository.AddAsync(post, request.SelectedFactions.ToList());
+
             return RedirectToAction("List");
         }
 
@@ -128,7 +129,8 @@ namespace BountyHuntersBlog.Controllers
             post.Visible = request.Visible;
             post.Factions = selectedFactions;
 
-            await missionPostRepository.UpdateAsync(post);
+            await missionPostRepository.UpdateAsync(post, request.SelectedFactions.ToList());
+
             return RedirectToAction("List");
         }
 

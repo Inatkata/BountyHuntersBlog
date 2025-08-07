@@ -1,6 +1,7 @@
 ﻿using BountyHuntersBlog.Models.ViewModels;
 using BountyHuntersBlog.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BountyHuntersBlog.Controllers
 {
@@ -16,13 +17,18 @@ namespace BountyHuntersBlog.Controllers
             this.missionPostRepository = missionPostRepository;
             this.factionRepository = factionRepository;
         }
+       
+
 
         [HttpGet]
         public async Task<IActionResult> Index(string? searchTerm, Guid? factionId)
         {
+            ;
+
             var allPosts = await missionPostRepository.GetAllAsync();
             var allFactions = await factionRepository.GetAllAsync();
-
+            
+            
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 allPosts = allPosts.Where(p =>
@@ -42,6 +48,14 @@ namespace BountyHuntersBlog.Controllers
                 SearchTerm = searchTerm,
                 FactionFilterId = factionId
             };
+
+            // ViewBag трябва да използва model, който вече съществува
+            ViewBag.Factions = allFactions.Select(f => new SelectListItem
+            {
+                Value = f.Id.ToString(),
+                Text = f.Name,
+                Selected = (f.Id == model.FactionFilterId)
+            });
 
             return View(model);
         }

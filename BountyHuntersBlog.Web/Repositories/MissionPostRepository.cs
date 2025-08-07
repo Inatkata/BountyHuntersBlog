@@ -13,12 +13,19 @@ namespace BountyHuntersBlog.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<MissionPost> AddAsync(MissionPost post)
+        public async Task<MissionPost> AddAsync(MissionPost post, List<Guid> selectedFactions)
         {
+            var factions = await dbContext.Factions
+                .Where(f => selectedFactions.Contains(f.Id))
+                .ToListAsync();
+
+            post.Factions = factions;
+
             await dbContext.MissionPosts.AddAsync(post);
             await dbContext.SaveChangesAsync();
             return post;
         }
+
 
         public async Task<MissionPost> DeleteAsync(Guid id)
         {
@@ -48,7 +55,7 @@ namespace BountyHuntersBlog.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<MissionPost> UpdateAsync(MissionPost post)
+        public async Task<MissionPost> UpdateAsync(MissionPost post, List<Guid> selectedFactions)
         {
             var existing = await dbContext.MissionPosts
                 .Include(p => p.Factions)
@@ -57,12 +64,19 @@ namespace BountyHuntersBlog.Repositories
             if (existing != null)
             {
                 existing.Title = post.Title;
+                existing.ShortDescription = post.ShortDescription;
                 existing.Content = post.Content;
-                existing.UrlHandle = post.UrlHandle;
                 existing.FeaturedImageUrl = post.FeaturedImageUrl;
+                existing.UrlHandle = post.UrlHandle;
                 existing.MissionDate = post.MissionDate;
                 existing.Visible = post.Visible;
-                existing.Factions = post.Factions;
+
+                // Update factions
+                var factions = await dbContext.Factions
+                    .Where(f => selectedFactions.Contains(f.Id))
+                    .ToListAsync();
+
+                existing.Factions = factions;
 
                 await dbContext.SaveChangesAsync();
                 return existing;
@@ -70,5 +84,6 @@ namespace BountyHuntersBlog.Repositories
 
             return null;
         }
+
     }
 }

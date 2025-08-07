@@ -15,8 +15,9 @@ namespace BountyHuntersBlog.Services
 
         public async Task<IEnumerable<Faction>> GetAllAsync()
         {
-            return await _factionRepo.GetAllAsync(null, null, null, 1, 100);
+            return await _factionRepo.GetAllAsync(); 
         }
+
 
         public async Task<Faction?> GetByIdAsync(Guid id)
         {

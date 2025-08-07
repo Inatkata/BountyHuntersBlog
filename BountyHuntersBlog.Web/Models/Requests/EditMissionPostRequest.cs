@@ -6,7 +6,6 @@ namespace BountyHuntersBlog.Models.Requests
     public class EditMissionPostRequest
     {
         public Guid Id { get; set; }
-        public string? UserId { get; set; }
 
 
         public string Title { get; set; }
@@ -23,10 +22,9 @@ namespace BountyHuntersBlog.Models.Requests
         public MissionStatus Status { get; set; }
         public bool Visible { get; set; }
 
-        public List<string> SelectedFactions { get; set; } = new();
+        public List<Guid> SelectedFactions { get; set; } = new();
         public List<SelectListItem> Factions { get; set; } = new();
 
-        public string ApplicationUser { get; set; } // Assuming ApplicationUser is a string, adjust as necessary
 
     }
 }

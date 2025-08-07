@@ -3,6 +3,7 @@ using BountyHuntersBlog.Models.Requests;
 using BountyHuntersBlog.Repositories;
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.Models.Requests;
+using BountyHuntersBlog.Models.ViewModels;
 
 
 namespace BountyHuntersBlog.Services
@@ -34,10 +35,11 @@ namespace BountyHuntersBlog.Services
                 UrlHandle = request.UrlHandle,
                 Visible = request.Visible,
                 MissionDate = request.MissionDate,
-                PostedByUserId = UserId.ToString()
+                AuthorId = UserId.ToString()
             };
 
-            await _missionRepo.AddAsync(mission, request.SelectedFactions.Select(Guid.Parse).ToList());
+            await _missionRepo.AddAsync(mission, request.SelectedFactions.ToList());
+
         }
 
         public async Task UpdateAsync(EditMissionPostRequest request)
@@ -53,7 +55,8 @@ namespace BountyHuntersBlog.Services
             existing.MissionDate = request.MissionDate;
             existing.Visible = request.Visible;
 
-            await _missionRepo.UpdateAsync(existing, request.SelectedFactions.Select(Guid.Parse).ToList());
+            await _missionRepo.UpdateAsync(existing, request.SelectedFactions.ToList());
+
         }
 
 

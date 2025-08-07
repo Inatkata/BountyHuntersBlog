@@ -13,13 +13,12 @@
     <div class="col-md-5">
         <select name="factionId" class="form-select">
             <option value="">-- Filter by Faction --</option>
-            @foreach (var faction in Model.Factions)
+            @foreach (var faction in ViewBag.Factions as List<SelectListItem>)
             {
-                <option value="@faction.Id" @(Model.FactionFilterId == faction.Id ? "selected" : "")>
-                    @faction.Name
-                </option>
+                <option value="@faction.Value" selected="@faction.Selected">@faction.Text</option>
             }
         </select>
+
     </div>
     <div class="col-md-2">
         <button type="submit" class="btn btn-primary w-100">Filter</button>

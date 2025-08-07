@@ -3,6 +3,7 @@
     public class AddLikeRequest
     {
         public Guid MissionPostId { get; set; }
-        public string ApplicationUserId { get; set; }
+        public string AuthorId { get; set; }
+
     }
 }

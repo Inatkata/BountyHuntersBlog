@@ -36,6 +36,10 @@ namespace BountyHuntersBlog.Repositories
         {
             return await dbContext.Factions.ToListAsync();
         }
+        public async Task<Faction?> GetByIdAsync(Guid id)
+        {
+            return await dbContext.Factions.FirstOrDefaultAsync(f => f.Id == id);
+        }
 
         public async Task<Faction?> GetAsync(Guid id)
         {

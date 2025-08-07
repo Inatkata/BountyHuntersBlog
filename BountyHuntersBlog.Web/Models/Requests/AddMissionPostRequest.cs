@@ -12,6 +12,7 @@ namespace BountyHuntersBlog.Models.ViewModels
         public string UrlHandle { get; set; }
 
         public string FeaturedImageUrl { get; set; }
+        public string ShortDescription { get; set; }
 
         public DateTime MissionDate { get; set; }
 

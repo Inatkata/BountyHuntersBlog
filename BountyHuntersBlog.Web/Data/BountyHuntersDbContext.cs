@@ -21,11 +21,7 @@ namespace BountyHuntersBlog.Data
         {
             base.OnModelCreating(builder);
 
-            // Много-към-много: MissionPost <-> Faction
-            builder.Entity<MissionPost>()
-                .HasMany(m => m.Factions)
-                .WithMany(f => f.MissionPosts);
-
+            
             // Едно-към-много: MissionPost -> Comments
             builder.Entity<MissionComment>()
                 .HasOne(mc => mc.MissionPost)
@@ -54,7 +50,8 @@ namespace BountyHuntersBlog.Data
             builder.Entity<MissionPost>()
                 .HasOne(mp => mp.Author)
                 .WithMany()
-                .HasForeignKey(mp => mp.AuthorId);
+                .HasForeignKey(mp => mp.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BountyHuntersBlog.Models.Domain
 {
@@ -16,12 +17,15 @@ namespace BountyHuntersBlog.Models.Domain
         public string FeaturedImageUrl { get; set; }
 
         public DateTime MissionDate { get; set; }
+        public string? ShortDescription { get; set; }
 
         public bool Visible { get; set; }
-
         public string AuthorId { get; set; }
 
+        [ForeignKey(nameof(AuthorId))]
         public ApplicationUser Author { get; set; }
+
+
 
         public ICollection<Faction> Factions { get; set; }
 
