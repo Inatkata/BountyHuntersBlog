@@ -79,7 +79,7 @@ namespace BountyHuntersBlog.Controllers
 
             await factionService.UpdateAsync(faction);
 
-            return RedirectToAction("Edit", new { id = faction.Id });
+            return RedirectToAction("List");
         }
 
         [HttpPost]

@@ -33,6 +33,7 @@ builder.Services.AddScoped<IMissionPostRepository, MissionPostRepository>();
 builder.Services.AddScoped<IMissionCommentRepository, MissionCommentRepository>();
 builder.Services.AddScoped<IMissionLikeRepository, MissionLikeRepository>();
 builder.Services.AddScoped<IFactionRepository, FactionRepository>();
+builder.Services.AddScoped<IHunterRepository, HunterRepository>();
 builder.Services.AddScoped<IImageRepository, CloudinaryImageRepository>();
 builder.Services.AddScoped<IMissionService, MissionService>();
 builder.Services.AddScoped<IFactionService, FactionService>();
