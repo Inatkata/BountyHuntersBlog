@@ -10,7 +10,7 @@ namespace BountyHuntersBlog.Data
             UserManager<ApplicationUser> userManager)
         {
             // 1. Създай ролите, ако не съществуват
-            string[] roles = { "Admin", "ApplicationUser" };
+            string[] roles = { "Admin", "User" };
 
             foreach (var role in roles)
             {

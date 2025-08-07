@@ -52,8 +52,8 @@ namespace BountyHuntersBlog.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(AddMissionPostRequest request)
         {
-            var UserId = userManager.GetUserId(User);
-            await missionService.AddAsync(request, Guid.Parse(UserId));
+            var userId = userManager.GetUserId(User);
+            await missionService.AddAsync(request, Guid.Parse(userId));
             return RedirectToAction("Add");
         }
 

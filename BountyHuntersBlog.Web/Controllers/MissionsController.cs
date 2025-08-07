@@ -46,7 +46,6 @@ namespace BountyHuntersBlog.Controllers
         public async Task<IActionResult> Like(Guid id)
         {
             var userId = userManager.GetUserId(User);
-            var ApplicationUserGuid = Guid.Parse(userId);
 
             var alreadyLiked = await dbContext.MissionLikes
                 .AnyAsync(x => x.MissionPostId == id && x.ApplicationUserId == userId);
