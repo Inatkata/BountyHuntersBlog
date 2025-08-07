@@ -14,7 +14,7 @@ namespace BountyHuntersBlog.Models.ViewModels
         public DateTime MissionDate { get; set; }
         public string UrlHandle { get; set; }
 
-        public Hunter Author { get; set; }
+        public ApplicationUser User { get; set; }
 
         public int TotalLikes { get; set; }
         public bool Liked { get; set; }

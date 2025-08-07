@@ -14,16 +14,16 @@ namespace BountyHuntersBlog.Controllers
         private readonly BountyHuntersDbContext dbContext;
         private readonly IMissionPostRepository missionPostRepository;
         private readonly IMissionLikeRepository missionLikeRepository;
-        private readonly SignInManager<Hunter> signInManager;
-        private readonly UserManager<Hunter> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly IMissionCommentRepository missionCommentRepository;
 
         public MissionsController(
             BountyHuntersDbContext dbContext,
             IMissionPostRepository missionPostRepository,
             IMissionLikeRepository missionLikeRepository,
-            SignInManager<Hunter> signInManager,
-            UserManager<Hunter> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
             IMissionCommentRepository missionCommentRepository)
         {
             this.dbContext = dbContext;
@@ -46,17 +46,17 @@ namespace BountyHuntersBlog.Controllers
         public async Task<IActionResult> Like(Guid id)
         {
             var userId = userManager.GetUserId(User);
-            var hunterGuid = Guid.Parse(userId);
+            var ApplicationUserGuid = Guid.Parse(userId);
 
             var alreadyLiked = await dbContext.MissionLikes
-                .AnyAsync(x => x.MissionPostId == id && x.HunterId == userId);
+                .AnyAsync(x => x.MissionPostId == id && x.ApplicationUserId == userId);
 
             if (!alreadyLiked)
             {
                 await dbContext.MissionLikes.AddAsync(new MissionLike
                 {
                     MissionPostId = id,
-                    HunterId = userId
+                    ApplicationUserId = userId
                 });
 
                 await dbContext.SaveChangesAsync();
@@ -64,7 +64,7 @@ namespace BountyHuntersBlog.Controllers
             else
             {
                 var existingLike = await dbContext.MissionLikes
-                    .FirstOrDefaultAsync(x => x.MissionPostId == id && x.HunterId == userId);
+                    .FirstOrDefaultAsync(x => x.MissionPostId == id && x.ApplicationUserId == userId);
 
                 if (existingLike != null)
                 {
@@ -103,14 +103,14 @@ namespace BountyHuntersBlog.Controllers
                 ShortDescription = missionPost.ShortDescription,
                 MissionDate = missionPost.MissionDate,
                 UrlHandle = missionPost.UrlHandle,
-                Author = missionPost.Author,
+                User = missionPost.PostedByUser,
                 Visible = missionPost.Visible,
                 Liked = liked,
                 Comments = comments.Select(x => new MissionCommentViewModel
                 {
                     Description = x.Description,
                     DateAdded = x.DateAdded,
-                    UserName = x.Hunter?.DisplayName ?? "Unknown"
+                    UserName = x.ApplicationUser?.DisplayName ?? "Unknown"
                 }).ToList()
             };
 
@@ -128,7 +128,7 @@ namespace BountyHuntersBlog.Controllers
                 MissionPostId = model.Id,
                 Description = model.CommentDescription,
                 DateAdded = DateTime.UtcNow,
-                HunterId = userId
+                ApplicationUserId = userId
             };
 
             await missionCommentRepository.AddAsync(comment);

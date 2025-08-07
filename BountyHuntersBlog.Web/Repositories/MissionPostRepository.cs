@@ -18,7 +18,7 @@ namespace BountyHuntersBlog.Repositories
         {
             return await dbContext.MissionPosts
                 .Include(m => m.Factions)
-                .Include(m => m.Author) 
+                .Include(m => m.PostedByUser) 
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 

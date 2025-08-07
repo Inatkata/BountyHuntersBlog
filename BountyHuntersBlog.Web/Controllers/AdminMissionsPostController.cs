@@ -14,12 +14,12 @@ namespace BountyHuntersBlog.Controllers
     public class AdminMissionPostsController : Controller
     {
         private readonly IFactionRepository factionRepository;
-        private readonly UserManager<Hunter> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly IMissionService missionService;
 
         public AdminMissionPostsController(
             IFactionRepository factionRepository,
-            UserManager<Hunter> userManager,
+            UserManager<ApplicationUser> userManager,
             IMissionService missionService)
         {
             this.factionRepository = factionRepository;
@@ -52,8 +52,8 @@ namespace BountyHuntersBlog.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(AddMissionPostRequest request)
         {
-            var authorId = userManager.GetUserId(User);
-            await missionService.AddAsync(request, Guid.Parse(authorId));
+            var UserId = userManager.GetUserId(User);
+            await missionService.AddAsync(request, Guid.Parse(UserId));
             return RedirectToAction("Add");
         }
 
@@ -85,7 +85,7 @@ namespace BountyHuntersBlog.Controllers
                 FeaturedImageUrl = mission.FeaturedImageUrl,
                 UrlHandle = mission.UrlHandle,
                 MissionDate = mission.MissionDate,
-                AuthorId = mission.AuthorId,
+                UserId = mission.PostedByUserId,
                 Visible = mission.Visible,
                 Status = mission.Status,
                 Factions = factions

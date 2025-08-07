@@ -7,7 +7,7 @@
             public const int NameMaxLength = 100;
             public const int DisplayNameMaxLength = 100;
         }
-        public static class Hunter
+        public static class ApplicationUser
         {
             public const int DisplayNameMaxLength = 100;
             

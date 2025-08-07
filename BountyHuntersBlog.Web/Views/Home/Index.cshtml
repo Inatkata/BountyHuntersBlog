@@ -1,9 +1,87 @@
 ﻿@model BountyHuntersBlog.Models.ViewModels.HomeViewModel
 
 @{
-    ViewData["Title"] = "Bounty Hunters Missions";
+    ViewData["Title"] = "Bounty ApplicationUsers Missions";
 }
 
+
+<div class="container col-xxl-8 px-4 py-5">
+    <div class="row align-items-center g-5 py-5">
+        <div class="col-12 col-lg-6">
+            <h1 class="display-5 fw-bold lh-1 mb-3">
+                BountyHuntersBlog - The Galactic Mission Hub
+            </h1>
+            <p class="lead">
+                BountyHuntersBlog is the go-to place for bounty ApplicationUsers across the galaxy.
+                Browse available missions, join factions, and build your legend.
+                Want to stay informed? Register now and receive mission updates weekly.
+            </p>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <img src="https://images.pexels.com/photos/57690/pexels-photo-57690.jpeg?auto=compress&cs=tinysrgb&w=600"
+                 alt="BountyHuntersBlog - Mission posts"
+                 class="d-block mx-lg-auto img-fluid" width="300" />
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-6 d-flex">
+            @if (Model != null && Model.Factions.Any())
+            {
+                foreach (var faction in Model.Factions)
+                {
+                    <span class="badge bg-dark me-1">
+                        @faction.Name
+                    </span>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-6">
+            @if (Model != null && Model.MissionPosts.Any())
+            {
+                foreach (var missionPost in Model.MissionPosts)
+                {
+                    <div class="mb-5 bg-light box-shadow p-5">
+                        <img src="@missionPost.FeaturedImageUrl" alt="@missionPost.Title"
+                             class="mb-2 d-block img-fluid" />
+
+                        <h2 class="mb-4">@missionPost.Title</h2>
+                        <p class="mb-4">
+                            User: @missionPost.PostedByUserId
+                            <br />
+                            Mission Date: @missionPost.MissionDate.ToShortDateString()
+                        </p>
+
+                        <p class="mb-4">
+                            @foreach (var faction in missionPost.Factions)
+                            {
+                                <span class="badge bg-secondary me-1">@faction.Name</span>
+                            }
+                        </p>
+
+                        <p class="mb-4">@missionPost.ShortDescription</p>
+
+                        <a class="btn btn-dark"
+                           asp-area=""
+                           asp-controller="Missions"
+                           asp-action="Details"
+                           asp-route-urlHandle="@missionPost.UrlHandle">
+                            View Mission
+                        </a>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
 <div class="container py-5">
     <h1 class="mb-4">Explore Missions</h1>
 

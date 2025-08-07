@@ -22,7 +22,7 @@ namespace BountyHuntersBlog.Services
         public async Task<MissionPost?> GetByIdAsync(Guid id)
             => await _missionRepo.GetAsync(id);
 
-        public async Task AddAsync(AddMissionPostRequest request, Guid authorId)
+        public async Task AddAsync(AddMissionPostRequest request, Guid UserId)
         {
             var mission = new MissionPost
             {
@@ -34,7 +34,7 @@ namespace BountyHuntersBlog.Services
                 UrlHandle = request.UrlHandle,
                 Visible = request.Visible,
                 MissionDate = request.MissionDate,
-                AuthorId = authorId.ToString()
+                PostedByUserId = UserId.ToString()
             };
 
             await _missionRepo.AddAsync(mission, request.SelectedFactions.Select(Guid.Parse).ToList());

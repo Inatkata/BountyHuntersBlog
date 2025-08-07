@@ -5,29 +5,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Repositories
 {
-    public class HunterRepository : IHunterRepository
+    public class ApplicationUserRepository : IApplicationUserRepository
     {
-        private readonly BountyHuntersDbContext bountyHuntersDbContext;
+        private readonly BountyHuntersDbContext BountyHuntersDbContext;
 
-        public HunterRepository(BountyHuntersDbContext bountyHuntersDbContext)
+        public ApplicationUserRepository(BountyHuntersDbContext BountyHuntersDbContext)
         {
-            this.bountyHuntersDbContext = bountyHuntersDbContext;
+            this.BountyHuntersDbContext = BountyHuntersDbContext;
         }
 
 
-        public async Task<IEnumerable<Hunter>> GetAll()
+        public async Task<IEnumerable<ApplicationUser>> GetAll()
         {
-            var hunters = await bountyHuntersDbContext.Users.ToListAsync(); // .Users, не .Hunters
+            var ApplicationUsers = await BountyHuntersDbContext.Users.ToListAsync(); // .Users, не .ApplicationUsers
 
-            var superAdminHunter = await bountyHuntersDbContext.Users
+            var superAdminApplicationUser = await BountyHuntersDbContext.Users
                 .FirstOrDefaultAsync(x => x.Email == "superadmin@bloggie.com");
 
-            if (superAdminHunter is not null)
+            if (superAdminApplicationUser is not null)
             {
-                hunters.Remove(superAdminHunter);
+                ApplicationUsers.Remove(superAdminApplicationUser);
             }
 
-            return hunters;
+            return ApplicationUsers;
         }
 
     }

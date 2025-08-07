@@ -183,15 +183,15 @@ namespace BountyHuntersBlog.Migrations
                     UrlHandle = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     MissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Visible = table.Column<bool>(type: "bit", nullable: false),
-                    AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MissionPosts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MissionPosts_AspNetUsers_AuthorId",
-                        column: x => x.AuthorId,
+                        name: "FK_MissionPosts_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
@@ -229,15 +229,15 @@ namespace BountyHuntersBlog.Migrations
                     MissionPostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    HunterId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MissionComments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MissionComments_AspNetUsers_HunterId",
-                        column: x => x.HunterId,
+                        name: "FK_MissionComments_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -253,15 +253,15 @@ namespace BountyHuntersBlog.Migrations
                 columns: table => new
                 {
                     MissionPostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    HunterId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MissionLikes", x => new { x.MissionPostId, x.HunterId });
+                    table.PrimaryKey("PK_MissionLikes", x => new { x.MissionPostId, x.ApplicationUserId });
                     table.ForeignKey(
-                        name: "FK_MissionLikes_AspNetUsers_HunterId",
-                        column: x => x.HunterId,
+                        name: "FK_MissionLikes_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -318,9 +318,9 @@ namespace BountyHuntersBlog.Migrations
                 column: "MissionPostsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MissionComments_HunterId",
+                name: "IX_MissionComments_ApplicationUserId",
                 table: "MissionComments",
-                column: "HunterId");
+                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MissionComments_MissionPostId",
@@ -328,14 +328,14 @@ namespace BountyHuntersBlog.Migrations
                 column: "MissionPostId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MissionLikes_HunterId",
+                name: "IX_MissionLikes_ApplicationUserId",
                 table: "MissionLikes",
-                column: "HunterId");
+                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MissionPosts_AuthorId",
+                name: "IX_MissionPosts_UserId",
                 table: "MissionPosts",
-                column: "AuthorId");
+                column: "UserId");
         }
 
         /// <inheritdoc />

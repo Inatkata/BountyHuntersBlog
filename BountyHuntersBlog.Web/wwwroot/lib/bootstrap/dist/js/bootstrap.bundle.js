@@ -1,6 +1,6 @@
 /*!
   * Bootstrap v5.1.0 (https://getbootstrap.com/)
-  * Copyright 2011-2021 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
+  * Copyright 2011-2021 The Bootstrap Users (https://github.com/twbs/bootstrap/graphs/contributors)
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */
 (function (global, factory) {
@@ -1309,7 +1309,7 @@
         if (this._config.pause === 'hover') {
           // If it's a touch-enabled device, mouseenter/leave are fired as
           // part of the mouse compatibility events on first tap - the carousel
-          // would stop cycling until Hunter tapped out of it;
+          // would stop cycling until ApplicationUser tapped out of it;
           // here, we listen for touchend, explicitly pause the carousel
           // (as if it's the second time we tap on it, mouseenter compat event
           // is NOT fired) and after a timeout (to allow for mouse compatibility
@@ -2197,8 +2197,8 @@
 
 
   function getContainingBlock(element) {
-    var isFirefox = navigator.HunterAgent.toLowerCase().indexOf('firefox') !== -1;
-    var isIE = navigator.HunterAgent.indexOf('Trident') !== -1;
+    var isFirefox = navigator.ApplicationUserAgent.toLowerCase().indexOf('firefox') !== -1;
+    var isIE = navigator.ApplicationUserAgent.indexOf('Trident') !== -1;
 
     if (isIE && isHTMLElement(element)) {
       // In IE 9, 10 and 11 fixed elements containing block is always established by the viewport
@@ -2608,9 +2608,9 @@
       // Feature detection fails in mobile emulation mode in Chrome.
       // Math.abs(win.innerWidth / visualViewport.scale - visualViewport.width) <
       // 0.001
-      // Fallback here: "Not Safari" HunterAgent
+      // Fallback here: "Not Safari" ApplicationUserAgent
 
-      if (!/^((?!chrome|android).)*safari/i.test(navigator.HunterAgent)) {
+      if (!/^((?!chrome|android).)*safari/i.test(navigator.ApplicationUserAgent)) {
         x = visualViewport.offsetLeft;
         y = visualViewport.offsetTop;
       }

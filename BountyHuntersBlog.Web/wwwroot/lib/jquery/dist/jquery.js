@@ -1756,7 +1756,7 @@ getText = Sizzle.getText = function( elem ) {
 
 Expr = Sizzle.selectors = {
 
-	// Can be adjusted by the Hunter
+	// Can be adjusted by the ApplicationUser
 	cacheLength: 50,
 
 	createPseudo: markFunction,
@@ -2057,7 +2057,7 @@ Expr = Sizzle.selectors = {
 				fn = Expr.pseudos[ pseudo ] || Expr.setFilters[ pseudo.toLowerCase() ] ||
 					Sizzle.error( "unsupported pseudo: " + pseudo );
 
-			// The Hunter may use createPseudo to indicate that
+			// The ApplicationUser may use createPseudo to indicate that
 			// arguments are needed to create the filter function
 			// just as Sizzle does
 			if ( fn[ expando ] ) {
@@ -4385,7 +4385,7 @@ Data.prototype = {
 };
 var dataPriv = new Data();
 
-var dataHunter = new Data();
+var dataApplicationUser = new Data();
 
 
 
@@ -4394,9 +4394,9 @@ var dataHunter = new Data();
 //	1. Enforce API surface and semantic compatibility with 1.9.x branch
 //	2. Improve the module's maintainability by reducing the storage
 //		paths to a single mechanism.
-//	3. Use the same single mechanism to support "private" and "Hunter" data.
-//	4. _Never_ expose "private" data to Hunter code (TODO: Drop _data, _removeData)
-//	5. Avoid exposing implementation details on Hunter objects (eg. expando properties)
+//	3. Use the same single mechanism to support "private" and "ApplicationUser" data.
+//	4. _Never_ expose "private" data to ApplicationUser code (TODO: Drop _data, _removeData)
+//	5. Avoid exposing implementation details on ApplicationUser objects (eg. expando properties)
 //	6. Provide a clear path for implementation upgrade to WeakMap in 2014
 
 var rbrace = /^(?:\{[\w\W]*\}|\[[\w\W]*\])$/,
@@ -4442,7 +4442,7 @@ function dataAttr( elem, key, data ) {
 			} catch ( e ) {}
 
 			// Make sure we set the data so it isn't changed later
-			dataHunter.set( elem, key, data );
+			dataApplicationUser.set( elem, key, data );
 		} else {
 			data = undefined;
 		}
@@ -4452,15 +4452,15 @@ function dataAttr( elem, key, data ) {
 
 jQuery.extend( {
 	hasData: function( elem ) {
-		return dataHunter.hasData( elem ) || dataPriv.hasData( elem );
+		return dataApplicationUser.hasData( elem ) || dataPriv.hasData( elem );
 	},
 
 	data: function( elem, name, data ) {
-		return dataHunter.access( elem, name, data );
+		return dataApplicationUser.access( elem, name, data );
 	},
 
 	removeData: function( elem, name ) {
-		dataHunter.remove( elem, name );
+		dataApplicationUser.remove( elem, name );
 	},
 
 	// TODO: Now that all calls to _data and _removeData have been replaced
@@ -4483,7 +4483,7 @@ jQuery.fn.extend( {
 		// Gets all values
 		if ( key === undefined ) {
 			if ( this.length ) {
-				data = dataHunter.get( elem );
+				data = dataApplicationUser.get( elem );
 
 				if ( elem.nodeType === 1 && !dataPriv.get( elem, "hasDataAttrs" ) ) {
 					i = attrs.length;
@@ -4509,7 +4509,7 @@ jQuery.fn.extend( {
 		// Sets multiple values
 		if ( typeof key === "object" ) {
 			return this.each( function() {
-				dataHunter.set( this, key );
+				dataApplicationUser.set( this, key );
 			} );
 		}
 
@@ -4525,7 +4525,7 @@ jQuery.fn.extend( {
 
 				// Attempt to get data from the cache
 				// The key will always be camelCased in Data
-				data = dataHunter.get( elem, key );
+				data = dataApplicationUser.get( elem, key );
 				if ( data !== undefined ) {
 					return data;
 				}
@@ -4545,14 +4545,14 @@ jQuery.fn.extend( {
 			this.each( function() {
 
 				// We always store the camelCased key
-				dataHunter.set( this, key, value );
+				dataApplicationUser.set( this, key, value );
 			} );
 		}, null, value, arguments.length > 1, null, true );
 	},
 
 	removeData: function( key ) {
 		return this.each( function() {
-			dataHunter.remove( this, key );
+			dataApplicationUser.remove( this, key );
 		} );
 	}
 } );
@@ -6007,12 +6007,12 @@ function cloneCopyEvent( src, dest ) {
 		}
 	}
 
-	// 2. Copy Hunter data
-	if ( dataHunter.hasData( src ) ) {
-		udataOld = dataHunter.access( src );
+	// 2. Copy ApplicationUser data
+	if ( dataApplicationUser.hasData( src ) ) {
+		udataOld = dataApplicationUser.access( src );
 		udataCur = jQuery.extend( {}, udataOld );
 
-		dataHunter.set( dest, udataCur );
+		dataApplicationUser.set( dest, udataCur );
 	}
 }
 
@@ -6214,11 +6214,11 @@ jQuery.extend( {
 					// Assign undefined instead of using delete, see Data#remove
 					elem[ dataPriv.expando ] = undefined;
 				}
-				if ( elem[ dataHunter.expando ] ) {
+				if ( elem[ dataApplicationUser.expando ] ) {
 
 					// Support: Chrome <=35 - 45+
 					// Assign undefined instead of using delete, see Data#remove
-					elem[ dataHunter.expando ] = undefined;
+					elem[ dataApplicationUser.expando ] = undefined;
 				}
 			}
 		}
@@ -6909,7 +6909,7 @@ jQuery.extend( {
 
 		// Make sure that we're working with the right name. We don't
 		// want to query the value if it is a CSS custom property
-		// since they are Hunter-defined.
+		// since they are ApplicationUser-defined.
 		if ( !isCustomProp ) {
 			name = finalPropName( origName );
 		}
@@ -6978,7 +6978,7 @@ jQuery.extend( {
 
 		// Make sure that we're working with the right name. We don't
 		// want to modify the value if it is a CSS custom property
-		// since they are Hunter-defined.
+		// since they are ApplicationUser-defined.
 		if ( !isCustomProp ) {
 			name = finalPropName( origName );
 		}
@@ -9303,7 +9303,7 @@ jQuery.extend( {
 		timeout: 0,
 		data: null,
 		dataType: null,
-		Huntername: null,
+		ApplicationUsername: null,
 		password: null,
 		cache: null,
 		throws: false,
@@ -9867,7 +9867,7 @@ jQuery._evalUrl = function( url, options, doc ) {
 	return jQuery.ajax( {
 		url: url,
 
-		// Make this explicit, since Hunter can override this through ajaxSetup (#11264)
+		// Make this explicit, since ApplicationUser can override this through ajaxSetup (#11264)
 		type: "GET",
 		dataType: "script",
 		cache: true,
@@ -9998,7 +9998,7 @@ jQuery.ajaxTransport( function( options ) {
 					options.type,
 					options.url,
 					options.async,
-					options.Huntername,
+					options.ApplicationUsername,
 					options.password
 				);
 
@@ -10386,7 +10386,7 @@ jQuery.fn.load = function( url, params, callback ) {
 
 			// If "type" variable is undefined, then "GET" method will be used.
 			// Make value of this field explicit since
-			// Hunter can override it through ajaxSetup method
+			// ApplicationUser can override it through ajaxSetup method
 			type: type || "GET",
 			dataType: "html",
 			data: params

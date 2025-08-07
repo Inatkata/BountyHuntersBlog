@@ -5,13 +5,13 @@
 namespace BountyHuntersBlog.Migrations
 {
     /// <inheritdoc />
-    public partial class HunterId : Migration
+    public partial class ApplicationUserId : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_MissionComments_AspNetUsers_HunterId",
+                name: "FK_MissionComments_AspNetUsers_ApplicationUserId",
                 table: "MissionComments");
 
             migrationBuilder.DropColumn(
@@ -19,7 +19,7 @@ namespace BountyHuntersBlog.Migrations
                 table: "MissionComments");
 
             migrationBuilder.AlterColumn<string>(
-                name: "HunterId",
+                name: "ApplicationUserId",
                 table: "MissionComments",
                 type: "nvarchar(450)",
                 nullable: false,
@@ -29,9 +29,9 @@ namespace BountyHuntersBlog.Migrations
                 oldNullable: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_MissionComments_AspNetUsers_HunterId",
+                name: "FK_MissionComments_AspNetUsers_ApplicationUserId",
                 table: "MissionComments",
-                column: "HunterId",
+                column: "ApplicationUserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
@@ -41,11 +41,11 @@ namespace BountyHuntersBlog.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_MissionComments_AspNetUsers_HunterId",
+                name: "FK_MissionComments_AspNetUsers_ApplicationUserId",
                 table: "MissionComments");
 
             migrationBuilder.AlterColumn<string>(
-                name: "HunterId",
+                name: "ApplicationUserId",
                 table: "MissionComments",
                 type: "nvarchar(450)",
                 nullable: true,
@@ -60,9 +60,9 @@ namespace BountyHuntersBlog.Migrations
                 defaultValue: "");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_MissionComments_AspNetUsers_HunterId",
+                name: "FK_MissionComments_AspNetUsers_ApplicationUserId",
                 table: "MissionComments",
-                column: "HunterId",
+                column: "ApplicationUserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id");
         }

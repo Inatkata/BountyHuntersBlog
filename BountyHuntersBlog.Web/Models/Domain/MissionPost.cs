@@ -25,11 +25,16 @@ namespace BountyHuntersBlog.Models.Domain
         public string UrlHandle { get; set; } = null!;
         public DateTime MissionDate { get; set; }
         public bool Visible { get; set; }
-        public string AuthorId { get; set; } = null!;
-        public MissionStatus Status { get; set; }
-
         
-        public Hunter Author { get; set; } = null!;
+        public MissionStatus Status { get; set; }
+        public string PostedByUserId { get; set; }
+        public ApplicationUser PostedByUser { get; set; }
+
+        public string? TakenByApplicationUserId { get; set; }
+        public ApplicationUser? TakenByApplicationUser { get; set; }
+
+
+
         public ICollection<MissionLike> Likes { get; set; } = new List<MissionLike>();
         public ICollection<MissionComment> Comments { get; set; } = new List<MissionComment>();
         public ICollection<Faction> Factions { get; set; } = new List<Faction>();

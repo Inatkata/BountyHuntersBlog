@@ -22,7 +22,7 @@ namespace BountyHuntersBlog.Controllers
             var model = new MissionLike
             {
                 MissionPostId = addLikeRequest.MissionPostId,
-                HunterId = addLikeRequest.HunterId
+                ApplicationUserId = addLikeRequest.ApplicationUserId
             };
 
             await missionLikeRepository.AddLike(model);

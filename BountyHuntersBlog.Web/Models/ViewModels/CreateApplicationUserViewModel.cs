@@ -2,11 +2,11 @@
 
 namespace BountyHuntersBlog.Models.ViewModels
 {
-    public class CreateHunterViewModel
+    public class CreateApplicationUserViewModel
     {
         public Guid? Id { get; set; }
         [Required]
-        public string Hunter { get; set; }
+        public string Username { get; set; }
 
         [Required]
         [EmailAddress]

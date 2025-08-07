@@ -7,10 +7,10 @@ namespace BountyHuntersBlog.Data
     {
         public static async Task SeedRolesAndAdminAsync(
             RoleManager<IdentityRole> roleManager,
-            UserManager<Hunter> userManager)
+            UserManager<ApplicationUser> userManager)
         {
             // 1. Създай ролите, ако не съществуват
-            string[] roles = { "Admin", "Hunter" };
+            string[] roles = { "Admin", "ApplicationUser" };
 
             foreach (var role in roles)
             {
@@ -21,12 +21,12 @@ namespace BountyHuntersBlog.Data
             }
 
             // 2. Дефинирай SuperAdmin потребител
-            var adminEmail = "admin@bountyhunters.com";
+            var adminEmail = "admin@bountyApplicationUsers.com";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
             if (adminUser == null)
             {
-                adminUser = new Hunter
+                adminUser = new ApplicationUser
                 {
                     UserName = adminEmail,
                     Email = adminEmail,

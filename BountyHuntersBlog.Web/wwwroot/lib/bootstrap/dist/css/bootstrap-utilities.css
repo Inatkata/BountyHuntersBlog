@@ -1,6 +1,6 @@
 /*!
  * Bootstrap Utilities v5.1.0 (https://getbootstrap.com/)
- * Copyright 2011-2021 The Bootstrap Authors
+ * Copyright 2011-2021 The Bootstrap Users
  * Copyright 2011-2021 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
@@ -1467,22 +1467,22 @@
   background-image: var(--bs-gradient) !important;
 }
 
-.Hunter-select-all {
-  -webkit-Hunter-select: all !important;
-  -moz-Hunter-select: all !important;
-  Hunter-select: all !important;
+.ApplicationUser-select-all {
+  -webkit-ApplicationUser-select: all !important;
+  -moz-ApplicationUser-select: all !important;
+  ApplicationUser-select: all !important;
 }
 
-.Hunter-select-auto {
-  -webkit-Hunter-select: auto !important;
-  -moz-Hunter-select: auto !important;
-  Hunter-select: auto !important;
+.ApplicationUser-select-auto {
+  -webkit-ApplicationUser-select: auto !important;
+  -moz-ApplicationUser-select: auto !important;
+  ApplicationUser-select: auto !important;
 }
 
-.Hunter-select-none {
-  -webkit-Hunter-select: none !important;
-  -moz-Hunter-select: none !important;
-  Hunter-select: none !important;
+.ApplicationUser-select-none {
+  -webkit-ApplicationUser-select: none !important;
+  -moz-ApplicationUser-select: none !important;
+  ApplicationUser-select: none !important;
 }
 
 .pe-none {

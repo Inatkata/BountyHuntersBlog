@@ -20,10 +20,10 @@ namespace BountyHuntersBlog.Models.Domain
         public string Description { get; set; } = null!;
 
         [Required]
-        public string HunterId { get; set; } = null!; 
+        public string ApplicationUserId { get; set; } = null!; 
 
-        [ForeignKey(nameof(HunterId))]
-        public Hunter Hunter { get; set; } = null!;
+        [ForeignKey(nameof(ApplicationUserId))]
+        public ApplicationUser ApplicationUser { get; set; } = null!;
 
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
     }

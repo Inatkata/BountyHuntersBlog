@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BountyHuntersBlog.Repositories
 {
-    public interface IHunterRepository
+    public interface IApplicationUserRepository
     {
-        Task<IEnumerable<Hunter>> GetAll();
+        Task<IEnumerable<ApplicationUser>> GetAll();
 
     }
 }

@@ -14,7 +14,7 @@ builder.Services.AddRazorPages(); // <-- Това добави
 builder.Services.AddDbContext<BountyHuntersDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<Hunter, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<BountyHuntersDbContext>()
     .AddDefaultTokenProviders();
 
@@ -33,7 +33,7 @@ builder.Services.AddScoped<IMissionPostRepository, MissionPostRepository>();
 builder.Services.AddScoped<IMissionCommentRepository, MissionCommentRepository>();
 builder.Services.AddScoped<IMissionLikeRepository, MissionLikeRepository>();
 builder.Services.AddScoped<IFactionRepository, FactionRepository>();
-builder.Services.AddScoped<IHunterRepository, HunterRepository>();
+builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
 builder.Services.AddScoped<IImageRepository, CloudinaryImageRepository>();
 builder.Services.AddScoped<IMissionService, MissionService>();
 builder.Services.AddScoped<IFactionService, FactionService>();
@@ -69,7 +69,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
 
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<Hunter>>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     await DbSeeder.SeedRolesAndAdminAsync(roleManager, userManager);
 }

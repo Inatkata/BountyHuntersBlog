@@ -5,40 +5,41 @@ using BountyHuntersBlog.Models.Domain;
 
 namespace BountyHuntersBlog.Data
 {
-    public class BountyHuntersDbContext : IdentityDbContext<Hunter, IdentityRole, string>
+    public class BountyHuntersDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
     {
         public BountyHuntersDbContext(DbContextOptions<BountyHuntersDbContext> options)
             : base(options)
         {
         }
-
+        public DbSet<ApplicationUser> Users { get; set; }
         public DbSet<MissionPost> MissionPosts { get; set; }
-        public DbSet<Faction> Factions { get; set; }
         public DbSet<MissionLike> MissionLikes { get; set; }
         public DbSet<MissionComment> MissionComments { get; set; }
-        public DbSet<Hunter> Hunters { get; set; }
+        public DbSet<Faction> Factions { get; set; }
+
+
 
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // Ясно казваме, че ще използваме Hunter като юзър
-            builder.Entity<Hunter>().ToTable("AspNetUsers");
 
             builder.Entity<MissionPost>()
-                .HasOne(mp => mp.Author)
-                .WithMany(h => h.MissionPosts)
-                .HasForeignKey(mp => mp.AuthorId)
-                .IsRequired(false)
+                .HasOne(mp => mp.PostedByUser)
+                .WithMany(u => u.PostedMissions)
+                .HasForeignKey(mp => mp.PostedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<MissionPost>()
+                .HasOne(mp => mp.TakenByApplicationUser)
+                .WithMany(u => u.TakenMissions)
+                .HasForeignKey(mp => mp.TakenByApplicationUserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            builder.Entity<MissionPost>()
-                .HasMany(m => m.Factions)
-                .WithMany(f => f.MissionPosts);
 
             builder.Entity<MissionLike>()
-                .HasKey(l => new { l.MissionPostId, l.HunterId });
+                .HasKey(l => new { l.MissionPostId, l.ApplicationUserId });
 
             builder.Entity<MissionComment>()
                 .HasOne(c => c.MissionPost)

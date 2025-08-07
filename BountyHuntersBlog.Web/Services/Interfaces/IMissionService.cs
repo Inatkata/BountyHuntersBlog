@@ -7,7 +7,7 @@ namespace BountyHuntersBlog.Services.Interfaces
     {
         Task<IEnumerable<MissionPost>> GetAllAsync();
         Task<MissionPost?> GetByIdAsync(Guid id);
-        Task AddAsync(AddMissionPostRequest request, Guid authorId);
+        Task AddAsync(AddMissionPostRequest request, Guid UserId);
         Task UpdateAsync(EditMissionPostRequest request);
         Task DeleteAsync(Guid id);
     }

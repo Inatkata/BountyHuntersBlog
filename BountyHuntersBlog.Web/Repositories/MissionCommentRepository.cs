@@ -15,7 +15,7 @@ namespace BountyHuntersBlog.Repositories
         public async Task<IEnumerable<MissionComment>> GetAllAsync()
         {
             return await dbContext.MissionComments
-                .Include(x => x.Hunter)
+                .Include(x => x.ApplicationUser)
                 .Include(x => x.MissionPost)
                 .ToListAsync();
         }
@@ -32,7 +32,7 @@ namespace BountyHuntersBlog.Repositories
         {
             return await dbContext.MissionComments
                 .Where(x => x.MissionPostId == missionPostId)
-                .Include(x => x.Hunter) 
+                .Include(x => x.ApplicationUser) 
                 .ToListAsync();
         }
 
