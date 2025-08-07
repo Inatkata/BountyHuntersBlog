@@ -1,43 +1,33 @@
+@* Views/AdminApplicationUser/Edit.cshtml *@
 @model BountyHuntersBlog.Models.ViewModels.CreateApplicationUserViewModel
 
 @{
     ViewData["Title"] = "Edit ApplicationUser";
 }
 
-<div class="bg-secondary bg-opacity-10 py-2">
-    <div class="container">
-        <h1>Edit ApplicationUser</h1>
+<h2>Edit ApplicationUser</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="Username" class="form-label"></label>
+        <input asp-for="Username" class="form-control" />
+        <span asp-validation-for="Username" class="text-danger"></span>
     </div>
-</div>
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="IsAdmin" class="form-check-input" type="checkbox" />
+        <label asp-for="IsAdmin" class="form-check-label"></label>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
 
-<div class="container py-4">
-    @if (Model != null)
-    {
-        <form method="post">
-            <input type="hidden" asp-for="Id" />
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
 
-            <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" asp-for="ApplicationUser" class="form-control" />
-                <span asp-validation-for="ApplicationUser" class="text-danger"></span>
-            </div>
 
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="form-check mb-3">
-                <input type="checkbox" class="form-check-input" asp-for="IsAdmin" />
-                <label class="form-check-label" asp-for="IsAdmin">Admin Role</label>
-            </div>
-
-            <button type="submit" class="btn btn-dark">Update</button>
-        </form>
-    }
-    else
-    {
-        <p class="text-danger">ApplicationUser not found!</p>
-    }
-</div>

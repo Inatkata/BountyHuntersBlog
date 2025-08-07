@@ -1,42 +1,43 @@
 ﻿using BountyHuntersBlog.Models.Domain;
+using BountyHuntersBlog.Models.ViewModels;
 using BountyHuntersBlog.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BountyHuntersBlog.Web.Controllers
+namespace BountyHuntersBlog.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class MissionCommentController : ControllerBase
     {
-        private readonly IMissionCommentRepository commentRepository;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly IMissionCommentRepository missionCommentRepository;
 
-        public MissionCommentController(IMissionCommentRepository commentRepository)
+        public MissionCommentController(
+            UserManager<ApplicationUser> userManager,
+            IMissionCommentRepository missionCommentRepository)
         {
-            this.commentRepository = commentRepository;
+            this.userManager = userManager;
+            this.missionCommentRepository = missionCommentRepository;
         }
 
-        [HttpPost("Add")]
-        [Authorize]
-        public async Task<IActionResult> AddComment([FromBody] MissionComment request)
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] AddCommentRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Description))
+            var userId = userManager.GetUserId(User);
+
+            var comment = new MissionComment
             {
-                return BadRequest("Empty comment");
-            }
+                MissionPostId = request.MissionPostId,
+                Description = request.Description,
+                DateAdded = DateTime.UtcNow,
+                ApplicationUserId = userId
+            };
 
-            request.DateAdded = DateTime.UtcNow;
-
-            await commentRepository.AddAsync(request);
+            await missionCommentRepository.AddAsync(comment);
             return Ok();
         }
-
-        [HttpGet("{missionPostId}")]
-        public async Task<IActionResult> GetCommentsForMission([FromRoute] Guid missionPostId)
-        {
-            List<MissionComment> comments = await commentRepository.GetCommentsByMissionIdAsync(missionPostId);
-            return Ok(comments);
-        }
-
     }
 }

@@ -1,42 +1,40 @@
 ﻿using BountyHuntersBlog.Models.Domain;
 using BountyHuntersBlog.Models.Requests;
+using BountyHuntersBlog.Models.ViewModels;
 using BountyHuntersBlog.Repositories;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Controllers
 {
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class MissionLikeController : ControllerBase
     {
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly IMissionLikeRepository missionLikeRepository;
 
-        public MissionLikeController(IMissionLikeRepository missionLikeRepository)
+        public MissionLikeController(
+            UserManager<ApplicationUser> userManager,
+            IMissionLikeRepository missionLikeRepository)
         {
+            this.userManager = userManager;
             this.missionLikeRepository = missionLikeRepository;
         }
+
         [HttpPost]
-        [Route("Add")]
-        public async Task<IActionResult> AddLike([FromBody] AddLikeRequest addLikeRequest)
+        public async Task<IActionResult> Like([FromBody] AddLikeRequest request)
         {
-            var model = new MissionLike
-            {
-                MissionPostId = addLikeRequest.MissionPostId,
-                ApplicationUserId = addLikeRequest.ApplicationUserId
-            };
+            var userId = userManager.GetUserId(User);
 
-            await missionLikeRepository.AddLike(model);
+            var result = await missionLikeRepository.AddLike(request.MissionPostId, userId);
 
-            return Ok();
-        }
+            if (result)
+                return Ok();
 
-
-        [HttpGet]
-        [Route("{missionPostId:Guid}/totalLikes")]
-        public async Task<IActionResult> GetTotalLikes([FromRoute] Guid missionPostId)
-        {
-            var totalLikes = await missionLikeRepository.GetTotalLikesAsync(missionPostId);
-            return Ok(totalLikes);
+            return BadRequest();
         }
     }
 }

@@ -4,7 +4,8 @@ namespace BountyHuntersBlog.Models.ViewModels
 {
     public class CreateApplicationUserViewModel
     {
-        public Guid? Id { get; set; }
+        public Guid Id { get; set; }
+
         [Required]
         public string Username { get; set; }
 
@@ -18,4 +19,5 @@ namespace BountyHuntersBlog.Models.ViewModels
 
         public bool IsAdmin { get; set; }
     }
+
 }

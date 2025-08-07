@@ -8,34 +8,44 @@ namespace BountyHuntersBlog.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IMissionPostRepository missionPostRepository;
         private readonly IFactionRepository factionRepository;
 
         public HomeController(
-            ILogger<HomeController> logger,
             IMissionPostRepository missionPostRepository,
             IFactionRepository factionRepository)
         {
-            _logger = logger;
             this.missionPostRepository = missionPostRepository;
             this.factionRepository = factionRepository;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<IActionResult> Index(string? searchTerm, Guid? factionId)
         {
-            var missions = await missionPostRepository.GetAllAsync();
-            var factions = await factionRepository.GetAllAsync(null, null, null, 1, 100);
+            var posts = await missionPostRepository.GetAllAsync();
+            var factions = await factionRepository.GetAllAsync();
 
-            var model = new HomeViewModel
+            if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                MissionPosts = missions,
-                Factions = factions
+                posts = posts.Where(p => p.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    || p.Content.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (factionId.HasValue)
+            {
+                posts = posts.Where(p => p.FactionId == factionId).ToList();
+            }
+
+            var viewModel = new HomeViewModel
+            {
+                MissionPosts = posts,
+                Factions = factions,
+                SearchTerm = searchTerm,
+                FactionId = factionId
             };
 
-            return View(model);
+            return View(viewModel);
         }
-
 
         public IActionResult Privacy()
         {

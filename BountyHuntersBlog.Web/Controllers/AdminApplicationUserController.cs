@@ -1,6 +1,5 @@
-﻿using BountyHuntersBlog.Models.ViewModels;
-using BountyHuntersBlog.Repositories;
-using BountyHuntersBlog.Models.Domain;
+﻿using BountyHuntersBlog.Models.Domain;
+using BountyHuntersBlog.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,49 +10,45 @@ namespace BountyHuntersBlog.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminApplicationUsersController : Controller
     {
-        private readonly IApplicationUserRepository ApplicationUserRepository;
         private readonly UserManager<ApplicationUser> userManager;
 
-        public AdminApplicationUsersController(IApplicationUserRepository ApplicationUserRepository,
-            UserManager<ApplicationUser> userManager)
+        public AdminApplicationUsersController(UserManager<ApplicationUser> userManager)
         {
-            this.ApplicationUserRepository = ApplicationUserRepository;
             this.userManager = userManager;
         }
 
         [HttpGet]
         public async Task<IActionResult> List()
         {
-            var ApplicationUsers = await userManager.Users.ToListAsync();
+            var applicationUsers = await userManager.Users.ToListAsync();
 
             var viewModel = new AdminApplicationUserListViewModel
             {
-                ApplicationUsers = ApplicationUsers,
+                ApplicationUsers = applicationUsers,
                 CreateApplicationUser = new CreateApplicationUserViewModel()
             };
 
             return View(viewModel);
         }
 
-
         [HttpPost]
         public async Task<IActionResult> List(AdminApplicationUserListViewModel request)
         {
-            var ApplicationUserVm = request.CreateApplicationUser;
+            var model = request.CreateApplicationUser;
 
-            var ApplicationUser = new ApplicationUser
+            var user = new ApplicationUser
             {
-                UserName = ApplicationUserVm.Username,
-                Email = ApplicationUserVm.Email,
-                DisplayName = ApplicationUserVm.Username
+                UserName = model.Username,
+                Email = model.Email,
+                DisplayName = model.Username
             };
 
-            var result = await userManager.CreateAsync(ApplicationUser, ApplicationUserVm.Password);
+            var result = await userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                var role = ApplicationUserVm.IsAdmin ? "Admin" : "User";
-                await userManager.AddToRoleAsync(ApplicationUser, role);
+                var role = model.IsAdmin ? "Admin" : "User";
+                await userManager.AddToRoleAsync(user, role);
                 return RedirectToAction("List");
             }
 
@@ -63,54 +58,53 @@ namespace BountyHuntersBlog.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var ApplicationUser = await userManager.FindByIdAsync(id.ToString());
+            var user = await userManager.FindByIdAsync(id.ToString());
 
-            if (ApplicationUser == null)
-                return NotFound();
+            if (user == null) return NotFound();
 
-            var roles = await userManager.GetRolesAsync(ApplicationUser);
+            var roles = await userManager.GetRolesAsync(user);
 
             var viewModel = new CreateApplicationUserViewModel
             {
-                Id = Guid.Parse(ApplicationUser.Id),
-                Username = ApplicationUser.UserName,
-                Email = ApplicationUser.Email,
+                Id = Guid.Parse(user.Id),
+                Username = user.UserName,
+                Email = user.Email,
                 IsAdmin = roles.Contains("Admin")
             };
 
-            return View("Edit", viewModel); 
+            return View("Edit", viewModel);
         }
+
         [HttpPost]
         public async Task<IActionResult> Edit(CreateApplicationUserViewModel model)
         {
-            var ApplicationUser = await userManager.FindByIdAsync(model.Id.ToString());
+            var user = await userManager.FindByIdAsync(model.Id.ToString());
 
-            if (ApplicationUser == null)
-                return NotFound();
+            if (user == null) return NotFound();
 
-            ApplicationUser.UserName = model.Username;
-            ApplicationUser.Email = model.Email;
-            ApplicationUser.DisplayName = model.Username;
+            user.UserName = model.Username;
+            user.Email = model.Email;
+            user.DisplayName = model.Username;
 
-            var result = await userManager.UpdateAsync(ApplicationUser);
+            var result = await userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, "Failed to update ApplicationUser.");
+                ModelState.AddModelError(string.Empty, "Failed to update user.");
                 return View("Edit", model);
             }
 
-            var roles = await userManager.GetRolesAsync(ApplicationUser);
+            var roles = await userManager.GetRolesAsync(user);
 
             if (model.IsAdmin && !roles.Contains("Admin"))
             {
-                await userManager.AddToRoleAsync(ApplicationUser, "Admin");
-                await userManager.RemoveFromRoleAsync(ApplicationUser, "User");
+                await userManager.AddToRoleAsync(user, "Admin");
+                await userManager.RemoveFromRoleAsync(user, "User");
             }
             else if (!model.IsAdmin && !roles.Contains("User"))
             {
-                await userManager.AddToRoleAsync(ApplicationUser, "User");
-                await userManager.RemoveFromRoleAsync(ApplicationUser, "Admin");
+                await userManager.AddToRoleAsync(user, "User");
+                await userManager.RemoveFromRoleAsync(user, "Admin");
             }
 
             return RedirectToAction("List");
@@ -119,15 +113,15 @@ namespace BountyHuntersBlog.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var ApplicationUser = await userManager.FindByIdAsync(id.ToString());
+            var user = await userManager.FindByIdAsync(id.ToString());
 
-            if (ApplicationUser is not null)
+            if (user != null)
             {
-                var result = await userManager.DeleteAsync(ApplicationUser);
+                var result = await userManager.DeleteAsync(user);
 
-                if (result is not null && result.Succeeded)
+                if (result.Succeeded)
                 {
-                    return RedirectToAction("List", "AdminApplicationUsers");
+                    return RedirectToAction("List");
                 }
             }
 

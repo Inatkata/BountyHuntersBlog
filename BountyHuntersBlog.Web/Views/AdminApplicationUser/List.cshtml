@@ -1,92 +1,65 @@
 ﻿@model BountyHuntersBlog.Models.ViewModels.AdminApplicationUserListViewModel
 
 @{
-    ViewData["Title"] = "ApplicationUsers - Admin";
+    ViewData["Title"] = "Manage Users";
 }
 
-<div class="bg-secondary bg-opacity-10 py-2">
-    <div class="container">
-        <h1>ApplicationUsers - Admin Panel</h1>
-    </div>
-</div>
-
 <div class="container py-4">
-    <div class="mb-3 d-flex justify-content-end">
-        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalCreateApplicationUser">
-            Create New ApplicationUser
-        </button>
-    </div>
+    <h1>Manage Users</h1>
 
-    @if (Model != null && Model.ApplicationUsers.Any())
-    {
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var ApplicationUser in Model.ApplicationUsers)
-                {
-                    <tr>
-                        <td>@ApplicationUser.Id</td>
-                        <td>@ApplicationUser.DisplayName</td>
-                        <td>@ApplicationUser.Email</td>
-                        <td>
-                            <form method="post" asp-action="Delete" asp-route-id="@ApplicationUser.Id" class="d-inline">
-                                <button class="btn btn-danger btn-sm" type="submit">Delete</button>
-                            </form>
-                            <a class="btn btn-primary btn-sm ms-1" asp-action="Edit" asp-route-id="@ApplicationUser.Id">Edit</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <p>No ApplicationUsers found.</p>
-    }
-</div>
+    <form asp-action="List" method="post">
+        <input type="hidden" asp-for="CreateApplicationUser.Id" />
 
-<form method="post" asp-action="List">
-    <div class="modal fade" id="modalCreateApplicationUser" tabindex="-1" aria-labelledby="modalCreateApplicationUserLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalCreateApplicationUserLabel">Create New ApplicationUser</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-control" asp-for="CreateApplicationUser.ApplicationUser" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="text" class="form-control" asp-for="CreateApplicationUser.Email" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" class="form-control" asp-for="CreateApplicationUser.Password" />
-                    </div>
-
-                    <div class="form-check mb-3">
-                        <input type="checkbox" class="form-check-input" asp-for="CreateApplicationUser.IsAdmin" />
-                        <label class="form-check-label" asp-for="CreateApplicationUser.IsAdmin">Admin Role</label>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Create</button>
-                </div>
-            </div>
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" asp-for="CreateApplicationUser.Username" class="form-control" />
+            <span asp-validation-for="CreateApplicationUser.Username" class="text-danger"></span>
         </div>
-    </div>
-</form>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" asp-for="CreateApplicationUser.Email" class="form-control" />
+            <span asp-validation-for="CreateApplicationUser.Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" asp-for="CreateApplicationUser.Password" class="form-control" />
+            <span asp-validation-for="CreateApplicationUser.Password" class="text-danger"></span>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" asp-for="CreateApplicationUser.IsAdmin" class="form-check-input" />
+            <label asp-for="CreateApplicationUser.IsAdmin" class="form-check-label">Admin</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create User</button>
+    </form>
+
+    <hr />
+
+    <table class="table table-bordered table-striped mt-4">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.ApplicationUsers)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-warning">Edit</a>
+                        <form asp-action="Delete" asp-route-id="@user.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
