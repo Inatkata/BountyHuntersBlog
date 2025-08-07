@@ -34,8 +34,9 @@ namespace BountyHuntersBlog.Web.Controllers
         [HttpGet("{missionPostId}")]
         public async Task<IActionResult> GetCommentsForMission([FromRoute] Guid missionPostId)
         {
-            var comments = await commentRepository.GetAllAsync(missionPostId);
+            List<MissionComment> comments = await commentRepository.GetCommentsByMissionIdAsync(missionPostId);
             return Ok(comments);
         }
+
     }
 }

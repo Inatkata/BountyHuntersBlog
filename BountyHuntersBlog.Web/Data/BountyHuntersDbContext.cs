@@ -1,10 +1,11 @@
-﻿using BountyHuntersBlog.Models.Domain;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using BountyHuntersBlog.Models.Domain;
 
 namespace BountyHuntersBlog.Data
 {
-    public class BountyHuntersDbContext : IdentityDbContext<Hunter>
+    public class BountyHuntersDbContext : IdentityDbContext<Hunter, IdentityRole, string>
     {
         public BountyHuntersDbContext(DbContextOptions<BountyHuntersDbContext> options)
             : base(options)
@@ -19,6 +20,9 @@ namespace BountyHuntersBlog.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // Ясно казваме, че ще използваме Hunter като юзър
+            builder.Entity<Hunter>().ToTable("AspNetUsers");
 
             builder.Entity<MissionPost>()
                 .HasOne(mp => mp.Author)
@@ -39,5 +43,6 @@ namespace BountyHuntersBlog.Data
                 .WithMany(m => m.Comments)
                 .HasForeignKey(c => c.MissionPostId);
         }
+
     }
 }

@@ -62,7 +62,7 @@ namespace BountyHuntersBlog.Controllers
                     {
                         Description = comment.Description,
                         DateAdded = comment.DateAdded,
-                        Hunter = username
+                        Hunter = comment.Hunter
                     });
                 }
 

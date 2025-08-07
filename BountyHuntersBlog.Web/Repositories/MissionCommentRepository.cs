@@ -12,6 +12,13 @@ namespace BountyHuntersBlog.Repositories
         {
             this.dbContext = dbContext;
         }
+        public async Task<IEnumerable<MissionComment>> GetAllAsync()
+        {
+            return await dbContext.MissionComments
+                .Include(x => x.Hunter)
+                .Include(x => x.MissionPost)
+                .ToListAsync();
+        }
 
         public async Task<MissionComment> AddAsync(MissionComment comment)
         {

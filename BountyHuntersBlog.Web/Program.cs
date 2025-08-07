@@ -1,4 +1,4 @@
-using BountyHuntersBlog.Data;
+﻿using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Models.Domain;
 using BountyHuntersBlog.Repositories;
 using BountyHuntersBlog.Services;
@@ -8,21 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages(); // <-- Това добави
 
 builder.Services.AddDbContext<BountyHuntersDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
 builder.Services.AddIdentity<Hunter, IdentityRole>()
-    .AddEntityFrameworkStores<BountyHuntersDbContext>();
- 
-
+    .AddEntityFrameworkStores<BountyHuntersDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    // Default password settings
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -44,7 +41,6 @@ builder.Services.AddScoped<IFactionService, FactionService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -53,7 +49,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseAuthentication();
@@ -62,6 +57,11 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Admin}/{action=Index}/{id?}");
+
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 using (var scope = app.Services.CreateScope())
 {
@@ -72,9 +72,7 @@ using (var scope = app.Services.CreateScope())
 
     await DbSeeder.SeedRolesAndAdminAsync(roleManager, userManager);
 }
-
-
-
+app.MapRazorPages();
 
 
 app.Run();

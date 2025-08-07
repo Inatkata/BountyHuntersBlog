@@ -25,7 +25,8 @@ namespace BountyHuntersBlog.Models.ViewModels
 
         public bool Liked { get; set; }
 
-        public List<MissionCommentViewModel> Comments { get; set; }
+        public List<MissionCommentViewModel> Comments { get; set; } = new();
+
 
         public bool Visible { get; set; }
         public string CommentDescription { get; set; }

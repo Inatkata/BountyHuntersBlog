@@ -11,7 +11,7 @@ using BountyHuntersBlog.Models.Domain;
 
             public Guid MissionPostId { get; set; }
             public MissionPost MissionPost { get; set; } = null!;
-
+        [Required]
             public string HunterId { get; set; } = null!;
             public Hunter Hunter { get; set; } = null!;
         }

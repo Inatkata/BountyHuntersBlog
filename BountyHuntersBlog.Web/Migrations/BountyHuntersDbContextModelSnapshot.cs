@@ -30,44 +30,87 @@ namespace BountyHuntersBlog.Migrations
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Factions");
                 });
 
-            modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionComment", b =>
+            modelBuilder.Entity("BountyHuntersBlog.Models.Domain.Hunter", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("MissionPostId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("HunterId")
+                    b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MissionPostId");
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
 
-                    b.HasIndex("HunterId");
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("MissionComments");
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionLike", b =>
@@ -78,7 +121,12 @@ namespace BountyHuntersBlog.Migrations
                     b.Property<string>("HunterId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("MissionPostId", "HunterId");
+
+                    b.HasIndex("HunterId");
 
                     b.ToTable("MissionLikes");
                 });
@@ -92,14 +140,9 @@ namespace BountyHuntersBlog.Migrations
                     b.Property<string>("AuthorId")
                         .HasColumnType("nvarchar(450)");
 
-
-                    b.Property<string>("AuthorId1")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-
                     b.Property<string>("Content")
                         .IsRequired()
+                        .HasMaxLength(10000)
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FeaturedImageUrl")
@@ -111,10 +154,12 @@ namespace BountyHuntersBlog.Migrations
 
                     b.Property<string>("PageTitle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("ShortDescription")
                         .IsRequired()
+                        .HasMaxLength(5000)
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
@@ -122,11 +167,13 @@ namespace BountyHuntersBlog.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("UrlHandle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("Visible")
                         .HasColumnType("bit");
@@ -134,9 +181,6 @@ namespace BountyHuntersBlog.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
-
-
-                    b.HasIndex("AuthorId1");
 
                     b.ToTable("MissionPosts");
                 });
@@ -208,81 +252,7 @@ namespace BountyHuntersBlog.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityHunter", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("nvarchar(13)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUsername")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Username")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUsername")
-                        .IsUnique()
-                        .HasDatabaseName("UsernameIndex")
-                        .HasFilter("[NormalizedUsername] IS NOT NULL");
-
-                    b.ToTable("AspNetHunters", (string)null);
-
-                    b.HasDiscriminator().HasValue("IdentityHunter");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityHunterClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -296,18 +266,18 @@ namespace BountyHuntersBlog.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("HunterId")
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HunterId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("AspNetHunterClaims", (string)null);
+                    b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityHunterLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -318,35 +288,35 @@ namespace BountyHuntersBlog.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("HunterId")
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
-                    b.HasIndex("HunterId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("AspNetHunterLogins", (string)null);
+                    b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityHunterRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.Property<string>("HunterId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("RoleId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("HunterId", "RoleId");
+                    b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetHunterRoles", (string)null);
+                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityHunterToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.Property<string>("HunterId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
@@ -358,70 +328,69 @@ namespace BountyHuntersBlog.Migrations
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("HunterId", "LoginProvider", "Name");
+                    b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AspNetHunterTokens", (string)null);
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BountyHuntersBlog.Models.Domain.Hunter", b =>
+            modelBuilder.Entity("MissionComment", b =>
                 {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityHunter");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("DisplayName")
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("HunterId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("MissionPostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue("Hunter");
-                });
+                    b.HasKey("Id");
 
-            modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionComment", b =>
-                {
-                    b.HasOne("BountyHuntersBlog.Models.Domain.MissionPost", "MissionPost")
-                        .WithMany("Comments")
-                        .HasForeignKey("MissionPostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasIndex("HunterId");
 
-                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Hunter")
-                        .WithMany()
-                        .HasForeignKey("HunterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasIndex("MissionPostId");
 
-                    b.Navigation("MissionPost");
-
-                    b.Navigation("Hunter");
+                    b.ToTable("MissionComments");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionLike", b =>
                 {
+                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Hunter")
+                        .WithMany("Likes")
+                        .HasForeignKey("HunterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BountyHuntersBlog.Models.Domain.MissionPost", "MissionPost")
                         .WithMany("Likes")
                         .HasForeignKey("MissionPostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Hunter");
+
                     b.Navigation("MissionPost");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionPost", b =>
-            {
-
-                b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Author");
-
-                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", null)
-
-                        .WithMany("Missions")
+                {
+                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Author")
+                        .WithMany("MissionPosts")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-
-                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
 
                     b.Navigation("Author");
                 });
@@ -450,25 +419,25 @@ namespace BountyHuntersBlog.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityHunterClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityHunter", null)
+                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", null)
                         .WithMany()
-                        .HasForeignKey("HunterId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityHunterLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityHunter", null)
+                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", null)
                         .WithMany()
-                        .HasForeignKey("HunterId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityHunterRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
@@ -476,20 +445,46 @@ namespace BountyHuntersBlog.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityHunter", null)
+                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", null)
                         .WithMany()
-                        .HasForeignKey("HunterId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityHunterToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityHunter", null)
+                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", null)
                         .WithMany()
-                        .HasForeignKey("HunterId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MissionComment", b =>
+                {
+                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Hunter")
+                        .WithMany("Comments")
+                        .HasForeignKey("HunterId");
+
+                    b.HasOne("BountyHuntersBlog.Models.Domain.MissionPost", "MissionPost")
+                        .WithMany("Comments")
+                        .HasForeignKey("MissionPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hunter");
+
+                    b.Navigation("MissionPost");
+                });
+
+            modelBuilder.Entity("BountyHuntersBlog.Models.Domain.Hunter", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Likes");
+
+                    b.Navigation("MissionPosts");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionPost", b =>
@@ -497,11 +492,6 @@ namespace BountyHuntersBlog.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Likes");
-                });
-
-            modelBuilder.Entity("BountyHuntersBlog.Models.Domain.Hunter", b =>
-                {
-                    b.Navigation("Missions");
                 });
 #pragma warning restore 612, 618
         }
