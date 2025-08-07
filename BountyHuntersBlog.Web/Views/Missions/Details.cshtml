@@ -1,11 +1,15 @@
 ﻿@model BountyHuntersBlog.Models.ViewModels.MissionDetailsViewModel
+
+
 @{
     ViewData["Title"] = Model.Title;
 }
 
 <div class="container mt-4">
     <h2>@Model.Title</h2>
-    <p class="text-muted">by @Model.Author.DisplayName on @Model.MissionDate.ToString("dd MMM yyyy")</p>
+    <p class="text-muted">
+        by @Model.Author?.DisplayName on @Model.MissionDate.ToString("dd MMM yyyy")
+    </p>
 
     <img src="@Model.FeaturedImageUrl" class="img-fluid mb-3" alt="Image">
 
@@ -17,13 +21,14 @@
                 @(Model.Liked ? "Unlike" : "Like")
             </button>
         </form>
-        <span class="text-muted">@Model.TotalLikes likes</span>
+
+        <span class="text-muted">@Model.TotalLikes Likes</span>
     </div>
 
     <hr />
 
     <div class="mt-4">
-        <h4>Comments</h4>
+        <h4 class="mt-5">Comments</h4>
 
         @if (User.Identity?.IsAuthenticated ?? false)
         {
@@ -31,15 +36,15 @@
                 <input type="hidden" name="Id" value="@Model.Id" />
                 <input type="hidden" name="UrlHandle" value="@Model.UrlHandle" />
                 <div class="mb-3">
-                    <textarea class="form-control" name="CommentDescription" rows="3" placeholder="Leave a comment..." required></textarea>
+                    <textarea class="form-control" name="CommentDescription" rows="3" placeholder="Leave a comment..."></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Post Comment</button>
             </form>
         }
         else
         {
-            <p class="text-muted">
-                <a asp-area="Admin" asp-controller="Account" asp-action="Login">Login</a> to comment.
+            <p>
+                <a asp-controller="Account" asp-action="Login">Login</a> to comment.
             </p>
         }
 
@@ -49,8 +54,7 @@
                 @foreach (var comment in Model.Comments)
                 {
                     <li class="list-group-item">
-                        <strong>@comment.UserName</strong>
-                        <span class="text-muted">on @comment.DateAdded.ToString("dd MMM yyyy")</span><br />
+                        <strong>@comment.UserName</strong> on @comment.DateAdded.ToString("dd MMM yyyy")<br />
                         @comment.Description
                     </li>
                 }
@@ -58,7 +62,7 @@
         }
         else
         {
-            <p class="text-muted mt-2">No comments yet.</p>
+            <p class="text-muted mt-3">No comments yet.</p>
         }
     </div>
 </div>
