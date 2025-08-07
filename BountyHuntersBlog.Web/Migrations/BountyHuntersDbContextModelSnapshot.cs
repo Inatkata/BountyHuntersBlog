@@ -113,6 +113,36 @@ namespace BountyHuntersBlog.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("HunterId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("MissionPostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HunterId");
+
+                    b.HasIndex("MissionPostId");
+
+                    b.ToTable("MissionComments");
+                });
+
             modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionLike", b =>
                 {
                     b.Property<Guid>("MissionPostId")
@@ -333,37 +363,23 @@ namespace BountyHuntersBlog.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("MissionComment", b =>
+            modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionComment", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Hunter")
+                        .WithMany("Comments")
+                        .HasForeignKey("HunterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("datetime2");
+                    b.HasOne("BountyHuntersBlog.Models.Domain.MissionPost", "MissionPost")
+                        .WithMany("Comments")
+                        .HasForeignKey("MissionPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                    b.Navigation("Hunter");
 
-                    b.Property<string>("HunterId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<Guid>("MissionPostId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HunterId");
-
-                    b.HasIndex("MissionPostId");
-
-                    b.ToTable("MissionComments");
+                    b.Navigation("MissionPost");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Models.Domain.MissionLike", b =>
@@ -459,23 +475,6 @@ namespace BountyHuntersBlog.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("MissionComment", b =>
-                {
-                    b.HasOne("BountyHuntersBlog.Models.Domain.Hunter", "Hunter")
-                        .WithMany("Comments")
-                        .HasForeignKey("HunterId");
-
-                    b.HasOne("BountyHuntersBlog.Models.Domain.MissionPost", "MissionPost")
-                        .WithMany("Comments")
-                        .HasForeignKey("MissionPostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Hunter");
-
-                    b.Navigation("MissionPost");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Models.Domain.Hunter", b =>

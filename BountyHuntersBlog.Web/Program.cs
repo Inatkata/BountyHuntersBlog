@@ -73,6 +73,8 @@ using (var scope = app.Services.CreateScope())
 
     await DbSeeder.SeedRolesAndAdminAsync(roleManager, userManager);
 }
+
+
 app.MapRazorPages();
 
 

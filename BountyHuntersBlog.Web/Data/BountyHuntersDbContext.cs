@@ -16,6 +16,8 @@ namespace BountyHuntersBlog.Data
         public DbSet<Faction> Factions { get; set; }
         public DbSet<MissionLike> MissionLikes { get; set; }
         public DbSet<MissionComment> MissionComments { get; set; }
+        public DbSet<Hunter> Hunters { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

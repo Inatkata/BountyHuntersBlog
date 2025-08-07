@@ -20,7 +20,7 @@ namespace BountyHuntersBlog.Models.Domain
         public string Description { get; set; } = null!;
 
         [Required]
-        public string HunterId { get; set; } = null!; // Важно: string, ако използваш IdentityUser с string ID
+        public string HunterId { get; set; } = null!; 
 
         [ForeignKey(nameof(HunterId))]
         public Hunter Hunter { get; set; } = null!;

@@ -3,9 +3,11 @@
     public enum MissionStatus
     {
         Draft,
-        Published,
-        Archived
+        Active,
+        Completed,
+        Cancelled
     }
+
 
 
 }
