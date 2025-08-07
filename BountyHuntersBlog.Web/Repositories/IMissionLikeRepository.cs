@@ -4,8 +4,8 @@ namespace BountyHuntersBlog.Repositories
 {
     public interface IMissionLikeRepository
     {
-        Task AddLike(MissionLike like);
-        Task<bool> AlreadyLiked(Guid missionPostId, string ApplicationUserId);
-        Task<int> GetTotalLikesAsync(Guid missionPostId);
+        Task<int> GetTotalLikes(Guid missionPostId);
+        Task<MissionLike?> AddLikeAsync(Guid missionPostId, Guid hunterId);
+        Task<bool> HasUserLiked(Guid missionPostId, Guid hunterId);
     }
 }

@@ -12,29 +12,21 @@ namespace BountyHuntersBlog.Repositories
         {
             this.dbContext = dbContext;
         }
-        public async Task<IEnumerable<MissionComment>> GetAllAsync()
-        {
-            return await dbContext.MissionComments
-                .Include(x => x.ApplicationUser)
-                .Include(x => x.MissionPost)
-                .ToListAsync();
-        }
 
         public async Task<MissionComment> AddAsync(MissionComment comment)
         {
             await dbContext.MissionComments.AddAsync(comment);
             await dbContext.SaveChangesAsync();
-
             return comment;
         }
 
-        public async Task<List<MissionComment>> GetCommentsByMissionIdAsync(Guid missionPostId)
+        public async Task<IEnumerable<MissionComment>> GetAllByPostIdAsync(Guid missionPostId)
         {
             return await dbContext.MissionComments
-                .Where(x => x.MissionPostId == missionPostId)
-                .Include(x => x.ApplicationUser) 
+                .Include(c => c.Hunter)
+                .Where(c => c.MissionPostId == missionPostId)
+                .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
         }
-
     }
 }

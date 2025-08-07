@@ -2,42 +2,38 @@
 using BountyHuntersBlog.Models.ViewModels;
 using BountyHuntersBlog.Repositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Controllers
 {
     [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class MissionCommentController : ControllerBase
+    public class MissionCommentController : Controller
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly IMissionCommentRepository missionCommentRepository;
+        private readonly IMissionCommentRepository commentRepository;
 
-        public MissionCommentController(
-            UserManager<ApplicationUser> userManager,
-            IMissionCommentRepository missionCommentRepository)
+        public MissionCommentController(IMissionCommentRepository commentRepository)
         {
-            this.userManager = userManager;
-            this.missionCommentRepository = missionCommentRepository;
+            this.commentRepository = commentRepository;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] AddCommentRequest request)
+        public async Task<IActionResult> Add(AddMissionCommentRequest request)
         {
-            var userId = userManager.GetUserId(User);
-
-            var comment = new MissionComment
+            if (ModelState.IsValid)
             {
-                MissionPostId = request.MissionPostId,
-                Description = request.Description,
-                DateAdded = DateTime.UtcNow,
-                ApplicationUserId = userId
-            };
+                var comment = new MissionComment
+                {
+                    Id = Guid.NewGuid(),
+                    Content = request.Content,
+                    CreatedAt = DateTime.UtcNow,
+                    MissionPostId = request.MissionPostId,
+                    HunterId = request.HunterId
+                };
 
-            await missionCommentRepository.AddAsync(comment);
-            return Ok();
+                await commentRepository.AddAsync(comment);
+            }
+
+            return RedirectToAction("Details", "Mission", new { id = request.MissionPostId });
         }
     }
 }

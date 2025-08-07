@@ -1,7 +1,5 @@
-﻿
-using BountyHuntersBlog.Data;
+﻿using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Models.Domain;
-using BountyHuntersBlog.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Repositories
@@ -14,95 +12,60 @@ namespace BountyHuntersBlog.Repositories
         {
             this.dbContext = dbContext;
         }
-        public async Task<MissionPost?> GetByIdAsync(Guid id)
-        {
-            return await dbContext.MissionPosts
-                .Include(m => m.Factions)
-                .Include(m => m.PostedByUser) 
-                .FirstOrDefaultAsync(x => x.Id == id);
-        }
 
-        public async Task<List<MissionPost>> GetAllAsync()
+        public async Task<MissionPost> AddAsync(MissionPost post)
         {
-            return await dbContext.MissionPosts
-                .Include(m => m.Factions)
-                .ToListAsync();
-        }
-
-        public async Task<MissionPost?> GetAsync(Guid id)
-        {
-            return await dbContext.MissionPosts
-                .Include(m => m.Factions)
-                .FirstOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<MissionPost> AddAsync(MissionPost mission, List<Guid> factionIds)
-        {
-            mission.Factions = new List<Faction>();
-            foreach (var factionId in factionIds)
-            {
-                var faction = await dbContext.Factions.FindAsync(factionId);
-                if (faction != null)
-                {
-                    mission.Factions.Add(faction);
-                }
-            }
-
-            await dbContext.MissionPosts.AddAsync(mission);
+            await dbContext.MissionPosts.AddAsync(post);
             await dbContext.SaveChangesAsync();
-
-            return mission;
-        }
-        public async Task<MissionPost?> GetByUrlHandleAsync(string urlHandle)
-        {
-            return await dbContext.MissionPosts
-                .FirstOrDefaultAsync(x => x.UrlHandle == urlHandle);
+            return post;
         }
 
-        public async Task<MissionPost?> UpdateAsync(MissionPost mission, List<Guid> factionIds)
+        public async Task<MissionPost> DeleteAsync(Guid id)
         {
-            var existing = await dbContext.MissionPosts
-                .Include(m => m.Factions)
-                .FirstOrDefaultAsync(x => x.Id == mission.Id);
-
+            var existing = await dbContext.MissionPosts.FindAsync(id);
             if (existing != null)
             {
-                existing.Title = mission.Title;
-                existing.PageTitle = mission.PageTitle;
-                existing.Content = mission.Content;
-                existing.ShortDescription = mission.ShortDescription;
-                existing.UrlHandle = mission.UrlHandle;
-                existing.FeaturedImageUrl = mission.FeaturedImageUrl;
-                existing.MissionDate = mission.MissionDate;
-                existing.Status = mission.Status;
-                existing.Visible = mission.Visible;
-
-                // Update factions
-                existing.Factions.Clear();
-                foreach (var factionId in factionIds)
-                {
-                    var faction = await dbContext.Factions.FindAsync(factionId);
-                    if (faction != null)
-                    {
-                        existing.Factions.Add(faction);
-                    }
-                }
-
+                dbContext.MissionPosts.Remove(existing);
                 await dbContext.SaveChangesAsync();
                 return existing;
             }
-
             return null;
         }
 
-        public async Task<MissionPost?> DeleteAsync(Guid id)
+        public async Task<IEnumerable<MissionPost>> GetAllAsync()
         {
-            var mission = await dbContext.MissionPosts.FindAsync(id);
-            if (mission != null)
+            return await dbContext.MissionPosts
+                .Include(p => p.Factions)
+                .Include(p => p.Author)
+                .ToListAsync();
+        }
+
+        public async Task<MissionPost> GetAsync(Guid id)
+        {
+            return await dbContext.MissionPosts
+                .Include(p => p.Factions)
+                .Include(p => p.Author)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<MissionPost> UpdateAsync(MissionPost post)
+        {
+            var existing = await dbContext.MissionPosts
+                .Include(p => p.Factions)
+                .FirstOrDefaultAsync(p => p.Id == post.Id);
+
+            if (existing != null)
             {
-                dbContext.MissionPosts.Remove(mission);
+                existing.Title = post.Title;
+                existing.Content = post.Content;
+                existing.UrlHandle = post.UrlHandle;
+                existing.FeaturedImageUrl = post.FeaturedImageUrl;
+                existing.MissionDate = post.MissionDate;
+                existing.Visible = post.Visible;
+                existing.Factions = post.Factions;
+
                 await dbContext.SaveChangesAsync();
-                return mission;
+                return existing;
             }
 
             return null;

@@ -5,8 +5,6 @@ namespace BountyHuntersBlog.Repositories
     public interface IMissionCommentRepository
     {
         Task<MissionComment> AddAsync(MissionComment comment);
-        Task<List<MissionComment>> GetCommentsByMissionIdAsync(Guid missionPostId);
-        Task<IEnumerable<MissionComment>> GetAllAsync();
-
+        Task<IEnumerable<MissionComment>> GetAllByPostIdAsync(Guid missionPostId);
     }
 }
