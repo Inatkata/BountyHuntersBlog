@@ -2,11 +2,12 @@
 {
     public enum MissionStatus
     {
-        Draft,
-        Active,
-        Completed,
-        Cancelled
+        Pending = 0,
+        InProgress = 1,
+        Completed = 2,
+        Failed = 3
     }
+
 
 
 

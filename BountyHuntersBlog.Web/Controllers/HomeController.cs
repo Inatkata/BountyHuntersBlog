@@ -55,7 +55,7 @@ namespace BountyHuntersBlog.Controllers
                 Value = f.Id.ToString(),
                 Text = f.Name,
                 Selected = (f.Id == model.FactionFilterId)
-            });
+            }).ToList(); ;
 
             return View(model);
         }

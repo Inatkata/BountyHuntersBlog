@@ -46,12 +46,18 @@ namespace BountyHuntersBlog.Data
                 .WithMany()
                 .HasForeignKey(ml => ml.HunterId);
 
-            // Едно-към-много: ApplicationUser -> MissionPost
             builder.Entity<MissionPost>()
                 .HasOne(mp => mp.Author)
-                .WithMany()
+                .WithMany(u => u.PostedMissions)
                 .HasForeignKey(mp => mp.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<MissionPost>()
+                .HasOne(mp => mp.Taker)
+                .WithMany(u => u.TakenMissions)
+                .HasForeignKey(mp => mp.TakerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

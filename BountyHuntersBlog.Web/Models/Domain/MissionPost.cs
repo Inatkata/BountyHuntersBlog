@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using BountyHuntersBlog.Models.Domain;
+
 
 namespace BountyHuntersBlog.Models.Domain
 {
@@ -26,11 +28,17 @@ namespace BountyHuntersBlog.Models.Domain
         public ApplicationUser Author { get; set; }
 
 
+        public string? TakerId { get; set; }
+
+        [ForeignKey(nameof(TakerId))]
+        public ApplicationUser? Taker { get; set; }
 
         public ICollection<Faction> Factions { get; set; }
 
         public ICollection<MissionLike> Likes { get; set; }
 
         public ICollection<MissionComment> Comments { get; set; }
+        public MissionStatus Status { get; set; } = MissionStatus.Pending;
+
     }
 }
