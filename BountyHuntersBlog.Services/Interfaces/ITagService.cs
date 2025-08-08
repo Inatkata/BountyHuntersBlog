@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using BountyHuntersBlog.Services.DTOs;
 
 namespace BountyHuntersBlog.Services.Interfaces
 {
-    internal class ITagService
+    public interface ITagService 
     {
+        Task<IEnumerable<TagDto>> GetAllAsync(int page, int pageSize);
+        Task<TagDto?> GetByIdAsync(int id);
+        Task CreateAsync(TagDto dto);
+        Task UpdateAsync(int id, TagDto dto);
+        Task DeleteAsync(int id);
+        Task<bool> ExistsAsync(int id);
     }
 }

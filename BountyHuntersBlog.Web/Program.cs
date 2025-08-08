@@ -1,43 +1,61 @@
+﻿using BountyHuntersBlog.Data;
+using BountyHuntersBlog.Data.Models;
+using BountyHuntersBlog.Repositories.Extensions;
 using BountyHuntersBlog.Services.Extensions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
-namespace BountyHuntersBlog.Web
-{
-    public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+// 1. Регистрация на DbContext
+builder.Services.AddDbContext<BountyHuntersDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 2. Настройка на Identity
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<BountyHuntersDbContext>()
+    .AddDefaultTokenProviders();
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews();
-            builder.Services.AddRepositories();
-            builder.Services.AddApplicationServices();
-            builder.Services.AddAutoMapper(typeof(Program));
+// 3. Регистрация на репозитории и услуги
+builder.Services.AddRepositories();          // от Repositories.Extensions
+builder.Services.AddApplicationServices();   // от Services.Extensions
 
+// 4. AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
 
-            var app = builder.Build();
+// 5. MVC + Razor Pages
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+var app = builder.Build();
 
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            app.Run();
-        }
-    }
+// Middleware pipeline
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseStatusCodePagesWithReExecute("/Home/StatusCode", "?code={0}");
 }
+app.UseStaticFiles();
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+);
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
+app.MapRazorPages();
+
+app.Run();

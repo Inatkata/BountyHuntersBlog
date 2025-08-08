@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BountyHuntersBlog.Data;
+using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Base;
 using BountyHuntersBlog.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Repositories.Implementations
 {
@@ -16,13 +19,14 @@ namespace BountyHuntersBlog.Repositories.Implementations
             => await Context.Likes
                 .Where(l => l.MissionId == missionId)
                 .ToListAsync();
-        public async Task<IEnumerable<Like>> GetLikesByUserIdAsync(int userId)
+        public async Task<IEnumerable<Like>> GetLikesByUserIdAsync(string userId)
             => await Context.Likes
                 .Where(l => l.UserId == userId)
                 .ToListAsync();
-        public async Task<bool> ExistsAsync(int missionId, int userId)
+
+        public async Task<bool> ExistsAsync(int missionId, string userId)
             => await Context.Likes.AnyAsync(l => l.MissionId == missionId && l.UserId == userId);
-        public async Task RemoveByMissionAndUserIdAsync(int missionId, int userId)
+        public async Task RemoveByMissionAndUserIdAsync(int missionId, string userId)
         {
             var like = await Context.Likes
                 .FirstOrDefaultAsync(l => l.MissionId == missionId && l.UserId == userId);
@@ -34,7 +38,7 @@ namespace BountyHuntersBlog.Repositories.Implementations
         }
         public async Task<int> CountLikesByMissionIdAsync(int missionId)
             => await Context.Likes.CountAsync(l => l.MissionId == missionId);
-        public async Task<int> CountLikesByUserIdAsync(int userId)
+        public async Task<int> CountLikesByUserIdAsync(string userId)
             => await Context.Likes.CountAsync(l => l.UserId == userId);
     }
 }

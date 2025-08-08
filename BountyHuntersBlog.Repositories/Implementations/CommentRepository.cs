@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BountyHuntersBlog.Data;
+using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Base;
 using BountyHuntersBlog.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Repositories.Implementations
 {
@@ -16,10 +19,11 @@ namespace BountyHuntersBlog.Repositories.Implementations
             => await Context.Comments
                 .Where(c => c.MissionId == missionId)
                 .ToListAsync();
-        public async Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(int userId)
+        public async Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(string authorId)
             => await Context.Comments
-                .Where(c => c.UserId == userId)
+                .Where(c => c.AuthorId == authorId)
                 .ToListAsync();
+
         public async Task<Comment?> GetCommentByIdAsync(int commentId)
             => await DbSet.FindAsync(commentId);
         public async Task<bool> ExistsAsync(int commentId)
@@ -34,8 +38,10 @@ namespace BountyHuntersBlog.Repositories.Implementations
             }
         }
         public async Task<int> CountCommentsByMissionIdAsync(int missionId)
-            => await Context.Comments.CountAsync(c => c.MissionId == missionId);
-        public async Task<int> CountCommentsByUserIdAsync(int userId)
-            => await Context.Comments.CountAsync(c => c.UserId == userId);
+            => await DbSet.CountAsync(c => c.MissionId == missionId);
+
+
+        public async Task<int> CountCommentsByUserIdAsync(string userId)
+            => await Context.Comments.CountAsync(c=>c.AuthorId == userId);
     }
 }

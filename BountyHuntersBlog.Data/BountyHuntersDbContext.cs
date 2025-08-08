@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Data.Configurations;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Data
 {

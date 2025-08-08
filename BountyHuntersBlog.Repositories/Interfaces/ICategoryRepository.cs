@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BountyHuntersBlog.Data.Models;
+using BountyHuntersBlog.Repositories.Interfaces;
 
-namespace BountyHuntersBlog.Repositories.Interfaces
+public interface ICategoryRepository : IRepository<Category>
 {
-    public interface ICategoryRepository : IRepository<Category>
-    {
-        Task<Category?> GetByNameAsync(string name);
-        
-        Task<IEnumerable<Category>> GetCategoriesByMissionIdAsync(int missionId);
-        
-        Task<IEnumerable<Category>> GetCategoriesByUserIdAsync(int userId);
-        
-        Task<bool> ExistsAsync(int categoryId);
-    }
+    Task<Category?> GetByNameAsync(string name);
+    Task<IEnumerable<Category>> GetCategoriesByMissionIdAsync(int missionId);
+    // смени типа тук!
+    Task<IEnumerable<Category>> GetCategoriesByUserIdAsync(string userId);
+    Task<bool> ExistsAsync(int categoryId);
 }

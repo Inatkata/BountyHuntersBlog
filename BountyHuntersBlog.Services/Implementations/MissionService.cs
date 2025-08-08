@@ -3,8 +3,6 @@ using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace BountyHuntersBlog.Services.Implementations
 {

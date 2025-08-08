@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace BountyHuntersBlog.Services.Interfaces
 {
-    internal class IRepositoryService
+    public interface IRepositoryService<TDto>
+        where TDto : class
     {
+        Task<IEnumerable<TDto>> GetAllAsync(int page, int pageSize);
+        Task<TDto?> GetByIdAsync(int id);
+        Task CreateAsync(TDto dto);
+        Task UpdateAsync(int id, TDto dto);
+        Task DeleteAsync(int id);
+        Task<bool> ExistsAsync(int id);
     }
 }

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BountyHuntersBlog.Services.DTOs;
 
-namespace BountyHuntersBlog.Services.Interfaces
+public interface ILikeService
 {
-    internal class ILikeService
-    {
-    }
+
+    Task<IEnumerable<LikeDto>> GetLikesByMissionIdAsync(int missionId);
+    Task<IEnumerable<LikeDto>> GetLikesByUserIdAsync(string userId);
+    Task<int> CountLikesByMissionIdAsync(int missionId);
+    Task<int> CountLikesByUserIdAsync(string userId);
+    Task<bool> IsLikedByUserAsync(int missionId, string userId);
 }

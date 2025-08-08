@@ -8,12 +8,13 @@ namespace BountyHuntersBlog.Services.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.AddScoped<IMissionService, MissionService>();
+            
+            services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<ILikeService, LikeService>();
-            services.AddScoped<ICategoryService, CategoryService>();
-            services.AddScoped<ITagService, TagService>();
             services.AddScoped<IMissionTagService, MissionTagService>();
+            services.AddScoped<ITagService, TagService>();
+
             return services;
         }
     }

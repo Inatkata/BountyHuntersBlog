@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace BountyHuntersBlog.Services.DTOs
 {
-    internal class LikeDto
+    public class LikeDto
     {
+        public int Id { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public string UserId { get; set; } = null!;
+        public int? MissionId { get; set; }
+        public int? CommentId { get; set; }
     }
 }
