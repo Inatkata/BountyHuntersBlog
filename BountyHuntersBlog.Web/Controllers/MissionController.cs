@@ -26,10 +26,8 @@ namespace BountyHuntersBlog.Controllers
             var mission = await missionPostRepository.GetAsync(id);
             if (mission == null) return NotFound();
 
-            var comments = await commentRepository.GetAllByPostIdAsync(id);
             var likeCount = await likeRepository.GetTotalLikes(id);
 
-            // тук може да извлечеш hunterId от логнат потребител или от ViewBag
             var model = new MissionDetailsViewModel
             {
                 Id = mission.Id,
@@ -38,12 +36,13 @@ namespace BountyHuntersBlog.Controllers
                 MissionDate = mission.MissionDate,
                 FeaturedImageUrl = mission.FeaturedImageUrl,
                 AuthorUsername = mission.Author?.UserName,
-                Comments = comments,
+                Comments = mission.Comments.ToList(),
                 LikeCount = likeCount,
-                CurrentHunterId = Guid.Empty // ще го сетнеш реално в проекта
+                CurrentHunterId = Guid.Empty
             };
 
             return View(model);
         }
+
     }
 }

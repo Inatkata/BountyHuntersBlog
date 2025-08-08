@@ -22,7 +22,11 @@ namespace BountyHuntersBlog.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register() => View();
+        public IActionResult Register()
+        {
+            return View();
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -32,8 +36,10 @@ namespace BountyHuntersBlog.Controllers
                 var user = new ApplicationUser
                 {
                     UserName = model.Username,
-                    Email = model.Email
+                    Email = model.Email,
+                    DisplayName = model.Username 
                 };
+
 
                 var result = await userManager.CreateAsync(user, model.Password);
 
@@ -51,32 +57,42 @@ namespace BountyHuntersBlog.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string returnUrl)
         {
-            return View(new LoginViewModel { ReturnUrl = returnUrl });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model)
-        {
-            if (ModelState.IsValid)
+            var model = new LoginViewModel
             {
-                var result = await signInManager.PasswordSignInAsync(
-                    model.Username, model.Password, false, false);
-
-                if (result.Succeeded)
-                {
-                    if (!string.IsNullOrWhiteSpace(model.ReturnUrl))
-                        return Redirect(model.ReturnUrl);
-
-                    return RedirectToAction("Index", "Home");
-                }
-
-                ModelState.AddModelError(string.Empty, "Invalid login");
-            }
+                ReturnUrl = returnUrl
+            };
 
             return View(model);
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel loginViewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var result = await signInManager.PasswordSignInAsync(loginViewModel.Username,
+                loginViewModel.Password,
+                false, false);
+
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrWhiteSpace(loginViewModel.ReturnUrl))
+                {
+                    return Redirect(loginViewModel.ReturnUrl);
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View();
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Logout()
@@ -86,6 +102,10 @@ namespace BountyHuntersBlog.Controllers
         }
 
         [HttpGet]
-        public IActionResult AccessDenied() => View();
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
     }
 }

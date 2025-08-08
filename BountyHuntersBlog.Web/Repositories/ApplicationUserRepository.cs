@@ -17,7 +17,7 @@ namespace BountyHuntersBlog.Repositories
 
         public async Task<IEnumerable<ApplicationUser>> GetAll()
         {
-            var ApplicationUsers = await BountyHuntersDbContext.Users.ToListAsync(); // .Users, не .ApplicationUsers
+            var ApplicationUsers = await BountyHuntersDbContext.Users.ToListAsync(); 
 
             var superAdminApplicationUser = await BountyHuntersDbContext.Users
                 .FirstOrDefaultAsync(x => x.Email == "superadmin@bloggie.com");

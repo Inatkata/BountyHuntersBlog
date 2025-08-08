@@ -49,7 +49,6 @@ namespace BountyHuntersBlog.Controllers
                 FactionFilterId = factionId
             };
 
-            // ViewBag трябва да използва model, който вече съществува
             ViewBag.Factions = allFactions.Select(f => new SelectListItem
             {
                 Value = f.Id.ToString(),
@@ -59,5 +58,8 @@ namespace BountyHuntersBlog.Controllers
 
             return View(model);
         }
+        
+
+
     }
 }

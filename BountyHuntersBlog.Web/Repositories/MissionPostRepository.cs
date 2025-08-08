@@ -52,8 +52,11 @@ namespace BountyHuntersBlog.Repositories
             return await dbContext.MissionPosts
                 .Include(p => p.Factions)
                 .Include(p => p.Author)
+                .Include(p => p.Comments) 
+                .ThenInclude(c => c.Hunter)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+
 
         public async Task<MissionPost> UpdateAsync(MissionPost post, List<Guid> selectedFactions)
         {
