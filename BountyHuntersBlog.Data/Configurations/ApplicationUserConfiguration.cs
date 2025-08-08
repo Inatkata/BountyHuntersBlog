@@ -22,7 +22,7 @@ namespace BountyHuntersBlog.Data.Configurations
             builder.HasMany(u => u.Likes)
                 .WithOne(l => l.User)
                 .HasForeignKey(l => l.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

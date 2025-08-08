@@ -14,7 +14,10 @@ namespace BountyHuntersBlog.Data.Configurations
                 .IsRequired();
 
             builder.Property(c => c.CreatedOn)
-                .HasDefaultValueSql("GETDATE()");
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            builder.ToTable(t => t.HasCheckConstraint("CK_Likes_Target",
+                "([MissionId] IS NOT NULL AND [CommentId] IS NULL) OR ([MissionId] IS NULL AND [CommentId] IS NOT NULL)"));
 
             builder.HasOne(c => c.Mission)
                 .WithMany(m => m.Comments)
@@ -30,6 +33,7 @@ namespace BountyHuntersBlog.Data.Configurations
                 .WithOne(l => l.Comment)
                 .HasForeignKey(l => l.CommentId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
         }
     }
 }

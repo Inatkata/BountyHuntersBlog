@@ -8,14 +8,14 @@ namespace BountyHuntersBlog.Services.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            
-            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IMissionService, MissionService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<ILikeService, LikeService>();
-            services.AddScoped<IMissionTagService, MissionTagService>();
+            services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ITagService, TagService>();
-
+            services.AddScoped<IMissionTagService, MissionTagService>();
             return services;
         }
+
     }
 }

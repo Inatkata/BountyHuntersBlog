@@ -25,6 +25,8 @@ namespace BountyHuntersBlog.Data
         {
             base.OnModelCreating(builder);
 
+
+            builder.ApplyConfigurationsFromAssembly(typeof(BountyHuntersDbContext).Assembly);
             builder.ApplyConfiguration(new ApplicationUserConfiguration());
             builder.ApplyConfiguration(new MissionConfiguration());
             builder.ApplyConfiguration(new CommentConfiguration());

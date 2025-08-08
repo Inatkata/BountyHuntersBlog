@@ -2,29 +2,41 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using BountyHuntersBlog.Data.Models;
 
-namespace BountyHuntersBlog.Data.Configurations
+public class LikeConfiguration : IEntityTypeConfiguration<Like>
 {
-    public class LikeConfiguration : IEntityTypeConfiguration<Like>
+    public void Configure(EntityTypeBuilder<Like> b)
     {
-        public void Configure(EntityTypeBuilder<Like> builder)
-        {
-            builder.HasKey(l => l.Id);
+        
+        b.Property(x => x.CreatedOn).HasDefaultValueSql("GETUTCDATE()");
 
-            builder.Property(l => l.CreatedOn)
-                .HasDefaultValueSql("GETDATE()");
 
-            builder.HasOne(l => l.User)
-                .WithMany(u => u.Likes)
-                .HasForeignKey(l => l.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+        b.HasOne(l => l.Mission)
+            .WithMany(m => m.Likes)
+            .HasForeignKey(l => l.MissionId)
+            .OnDelete(DeleteBehavior.NoAction);   
 
-            builder.HasOne(l => l.Mission)
-                .WithMany(m => m.Likes)
-                .HasForeignKey(l => l.MissionId);
+        b.HasOne(l => l.Comment)
+            .WithMany(c => c.Likes)
+            .HasForeignKey(l => l.CommentId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(l => l.Comment)
-                .WithMany(c => c.Likes)
-                .HasForeignKey(l => l.CommentId);
-        }
+        b.HasOne(l => l.User)
+            .WithMany(u => u.Likes)
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Един лайк на потребител към конкретен таргет
+        b.HasIndex(x => new { x.UserId, x.MissionId })
+            .IsUnique()
+            .HasFilter("[MissionId] IS NOT NULL");
+
+        b.HasIndex(x => new { x.UserId, x.CommentId })
+            .IsUnique()
+            .HasFilter("[CommentId] IS NOT NULL");
+
+        // XOR: към Mission ИЛИ към Comment
+        b.ToTable(t => t.HasCheckConstraint("CK_Likes_Target",
+            "([MissionId] IS NOT NULL AND [CommentId] IS NULL) OR " +
+            "([MissionId] IS NULL AND [CommentId] IS NOT NULL)"));
     }
 }

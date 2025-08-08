@@ -7,9 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 // 1. Регистрация на DbContext
-builder.Services.AddDbContext<BountyHuntersDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<BountyHuntersDbContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        sql => sql.EnableRetryOnFailure()));
+
 
 // 2. Настройка на Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -28,7 +31,9 @@ builder.Services.AddRepositories();          // от Repositories.Extensions
 builder.Services.AddApplicationServices();   // от Services.Extensions
 
 // 4. AutoMapper
-builder.Services.AddAutoMapper(typeof(Program));
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
 // 5. MVC + Razor Pages
 builder.Services.AddControllersWithViews();

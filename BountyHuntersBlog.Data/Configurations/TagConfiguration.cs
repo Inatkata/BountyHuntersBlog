@@ -8,6 +8,7 @@ namespace BountyHuntersBlog.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Tag> builder)
         {
+            builder.HasIndex(t => t.Name).IsUnique();
             builder.HasKey(t => t.Id);
 
             builder.Property(t => t.Name)
