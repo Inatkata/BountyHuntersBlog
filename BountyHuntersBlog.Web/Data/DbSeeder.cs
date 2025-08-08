@@ -3,52 +3,38 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BountyHuntersBlog.Data
 {
-    public static class DbSeeder
+    public class DbSeeder
     {
-        public static async Task SeedRolesAndAdminAsync(
-            RoleManager<IdentityRole> roleManager,
-            UserManager<ApplicationUser> userManager)
+        public static async Task SeedRolesAndAdminAsync(IServiceProvider serviceProvider)
         {
-            // 1. Създай ролите, ако не съществуват
-            string[] roles = { "Admin", "User" };
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<Hunter>>();
+
+            string[] roles = { "Admin", "Hunter" };
 
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
-                {
                     await roleManager.CreateAsync(new IdentityRole(role));
-                }
             }
 
-            // 2. Дефинирай SuperAdmin потребител
-            var adminEmail = "admin@bountyApplicationUsers.com";
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-            if (adminUser == null)
+            // Създаване на Admin потребител, ако няма такъв
+            var adminEmail = "admin@bounty.com";
+            var admin = await userManager.FindByEmailAsync(adminEmail);
+            if (admin == null)
             {
-                adminUser = new ApplicationUser
+                var newAdmin = new Hunter
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
-                    DisplayName = "Super Admin",
-                    EmailConfirmed = true
+                    DisplayName = "Administrator"
                 };
 
-                // Може да смениш паролата
-                var result = await userManager.CreateAsync(adminUser, "Admin123!");
+                var result = await userManager.CreateAsync(newAdmin, "Admin123!");
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                    await userManager.AddToRoleAsync(adminUser, "User");
-                }
-                else
-                {
-                    // Логване на грешките
-                    foreach (var error in result.Errors)
-                    {
-                        Console.WriteLine($"Error creating admin user: {error.Description}");
-                    }
+                    await userManager.AddToRoleAsync(newAdmin, "Admin");
                 }
             }
         }

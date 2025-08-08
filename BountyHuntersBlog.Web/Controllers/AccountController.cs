@@ -1,24 +1,19 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using BountyHuntersBlog.Models.Domain;
 using BountyHuntersBlog.Models.ViewModels;
-using BountyHuntersBlog.Models.Domain;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly UserManager<Hunter> userManager;
+        private readonly SignInManager<Hunter> signInManager;
 
-        public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+        public AccountController(UserManager<Hunter> userManager, SignInManager<Hunter> signInManager)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
-            this.roleManager = roleManager;
         }
 
         [HttpGet]
@@ -27,72 +22,64 @@ namespace BountyHuntersBlog.Controllers
             return View();
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = new Hunter
             {
-                var user = new ApplicationUser
-                {
-                    UserName = model.Username,
-                    Email = model.Email,
-                    DisplayName = model.Username 
-                };
+                UserName = model.Email,
+                Email = model.Email,
+                DisplayName = model.DisplayName
+            };
 
+            var result = await userManager.CreateAsync(user, model.Password);
 
-                var result = await userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(user, "User");
-                    return RedirectToAction("Login", "Account");
-                }
-
-                foreach (var error in result.Errors)
-                    ModelState.AddModelError(string.Empty, error.Description);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, "Hunter");
+                return RedirectToAction("Login", "Account");
             }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
 
             return View(model);
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl)
+        public IActionResult Login(string? returnUrl = null)
         {
-            var model = new LoginViewModel
-            {
-                ReturnUrl = returnUrl
-            };
-
+            var model = new LoginViewModel { ReturnUrl = returnUrl };
             return View(model);
         }
 
-
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel loginViewModel)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
-            {
-                return View();
-            }
+                return View(model);
 
-            var result = await signInManager.PasswordSignInAsync(loginViewModel.Username,
-                loginViewModel.Password,
-                false, false);
+            var user = await userManager.FindByEmailAsync(model.Email);
 
-            if (result.Succeeded)
+            if (user != null)
             {
-                if (!string.IsNullOrWhiteSpace(loginViewModel.ReturnUrl))
+                var result = await signInManager.PasswordSignInAsync(user, model.Password, false, false);
+
+                if (result.Succeeded)
                 {
-                    return Redirect(loginViewModel.ReturnUrl);
-                }
+                    if (!string.IsNullOrWhiteSpace(model.ReturnUrl))
+                        return Redirect(model.ReturnUrl);
 
-                return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
-            return View();
+            ModelState.AddModelError(string.Empty, "Invalid login attempt");
+            return View(model);
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Logout()
@@ -100,12 +87,5 @@ namespace BountyHuntersBlog.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
-
-        [HttpGet]
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
-
     }
 }

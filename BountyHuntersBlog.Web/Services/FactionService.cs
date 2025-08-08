@@ -21,7 +21,7 @@ namespace BountyHuntersBlog.Services
 
         public async Task<Faction?> GetByIdAsync(Guid id)
         {
-            return await _factionRepo.GetAsync(id);
+            return await _factionRepo.GetByIdAsync(id);
         }
 
         public async Task AddAsync(Faction faction)

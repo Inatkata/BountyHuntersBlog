@@ -1,6 +1,9 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+﻿@using BountyHuntersBlog.Models.Domain
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@inject SignInManager<Hunter> SignInManager
+@inject UserManager<Hunter> UserManager
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -35,15 +38,11 @@
 
                             @if (User.IsInRole("Admin"))
                             {
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Admin</a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" asp-controller="AdminMissionPosts" asp-action="List">Missions</a></li>
-                                        <li><a class="dropdown-item" asp-controller="AdminFactions" asp-action="List">Factions</a></li>
-                                        <li><a class="dropdown-item" asp-controller="AdminApplicationUsers" asp-action="List">ApplicationUsers</a></li>
-                                    </ul>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-area="Admin" asp-controller="Admin" asp-action="Index">Admin</a>
                                 </li>
                             }
+
                         }
                     </ul>
 
@@ -69,6 +68,7 @@
                             </li>
                         }
                     </ul>
+                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>

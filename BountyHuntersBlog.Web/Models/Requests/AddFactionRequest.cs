@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BountyHuntersBlog.Models.ViewModels
+namespace BountyHuntersBlog.Models.Requests
 {
     public class AddFactionRequest
     {

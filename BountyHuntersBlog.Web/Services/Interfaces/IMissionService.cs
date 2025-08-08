@@ -1,6 +1,5 @@
 ﻿using BountyHuntersBlog.Models.Domain;
 using BountyHuntersBlog.Models.Requests;
-using BountyHuntersBlog.Models.ViewModels;
 
 namespace BountyHuntersBlog.Services.Interfaces
 {

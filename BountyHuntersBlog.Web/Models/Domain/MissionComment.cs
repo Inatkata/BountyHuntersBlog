@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BountyHuntersBlog.Models.Domain
 {
@@ -8,15 +9,16 @@ namespace BountyHuntersBlog.Models.Domain
         public Guid Id { get; set; }
 
         [Required]
-        public string Content { get; set; }
+        public string Description { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime DateAdded { get; set; } = DateTime.Now;
 
-        // Foreign Keys
         public Guid MissionPostId { get; set; }
         public MissionPost MissionPost { get; set; }
 
-        public Guid HunterId { get; set; }
+        [Required]
+        public string HunterId { get; set; }
         public Hunter Hunter { get; set; }
     }
+
 }

@@ -13,73 +13,79 @@ namespace BountyHuntersBlog.Repositories
             this.dbContext = dbContext;
         }
 
-        public async Task<MissionPost> AddAsync(MissionPost post, List<Guid> selectedFactions)
+        public async Task<MissionPost> AddAsync(MissionPost missionPost)
         {
-            var factions = await dbContext.Factions
-                .Where(f => selectedFactions.Contains(f.Id))
-                .ToListAsync();
-
-            post.Factions = factions;
-
-            await dbContext.MissionPosts.AddAsync(post);
+            await dbContext.MissionPosts.AddAsync(missionPost);
             await dbContext.SaveChangesAsync();
-            return post;
+            return missionPost;
         }
 
-
-        public async Task<MissionPost> DeleteAsync(Guid id)
+        public async Task<MissionPost?> DeleteAsync(Guid id)
         {
             var existing = await dbContext.MissionPosts.FindAsync(id);
+
             if (existing != null)
             {
                 dbContext.MissionPosts.Remove(existing);
                 await dbContext.SaveChangesAsync();
                 return existing;
             }
+
             return null;
         }
-
         public async Task<IEnumerable<MissionPost>> GetAllAsync()
         {
             return await dbContext.MissionPosts
-                .Include(p => p.Factions)
-                .Include(p => p.Author)
+                .Where(x => x.AuthorId != null) // <– филтър само за валидни автори
+                .Include(x => x.Author)
+                .Include(x => x.Factions)
+                .Include(x => x.MissionLikes)
+                .Include(x => x.MissionComments)
                 .ToListAsync();
         }
 
-        public async Task<MissionPost> GetAsync(Guid id)
+
+
+
+
+
+        public async Task<MissionPost?> GetAsync(Guid id)
         {
             return await dbContext.MissionPosts
-                .Include(p => p.Factions)
-                .Include(p => p.Author)
-                .Include(p => p.Comments) 
-                .ThenInclude(c => c.Hunter)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .Include(x => x.Author)
+                .Include(x => x.Factions)
+                .Include(x => x.MissionLikes)
+                .Include(x => x.MissionComments)
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<MissionPost?> GetByUrlHandleAsync(string urlHandle)
+        {
+            return await dbContext.MissionPosts
+                .Include(x => x.Author)
+                .Include(x => x.Factions)
+                .Include(x => x.MissionLikes)
+                .Include(x => x.MissionComments)
+                .FirstOrDefaultAsync(x => x.UrlHandle == urlHandle);
+        }
 
-        public async Task<MissionPost> UpdateAsync(MissionPost post, List<Guid> selectedFactions)
+        public async Task<MissionPost?> UpdateAsync(MissionPost missionPost)
         {
             var existing = await dbContext.MissionPosts
-                .Include(p => p.Factions)
-                .FirstOrDefaultAsync(p => p.Id == post.Id);
+                .Include(x => x.Factions)
+                .FirstOrDefaultAsync(x => x.Id == missionPost.Id);
 
             if (existing != null)
             {
-                existing.Title = post.Title;
-                existing.ShortDescription = post.ShortDescription;
-                existing.Content = post.Content;
-                existing.FeaturedImageUrl = post.FeaturedImageUrl;
-                existing.UrlHandle = post.UrlHandle;
-                existing.MissionDate = post.MissionDate;
-                existing.Visible = post.Visible;
-
-                // Update factions
-                var factions = await dbContext.Factions
-                    .Where(f => selectedFactions.Contains(f.Id))
-                    .ToListAsync();
-
-                existing.Factions = factions;
+                existing.Title = missionPost.Title;
+                existing.Content = missionPost.Content;
+                existing.ShortDescription = missionPost.ShortDescription;
+                existing.FeaturedImageUrl = missionPost.FeaturedImageUrl;
+                existing.UrlHandle = missionPost.UrlHandle;
+                existing.MissionDate = missionPost.MissionDate;
+                existing.Visible = missionPost.Visible;
+                existing.Factions = missionPost.Factions;
+                existing.AuthorId = missionPost.AuthorId;
 
                 await dbContext.SaveChangesAsync();
                 return existing;
@@ -87,6 +93,5 @@ namespace BountyHuntersBlog.Repositories
 
             return null;
         }
-
     }
 }

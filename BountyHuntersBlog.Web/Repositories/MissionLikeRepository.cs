@@ -23,7 +23,7 @@ namespace BountyHuntersBlog.Repositories
         {
             return await dbContext.MissionLikes.AnyAsync(x =>
                 x.MissionPostId == missionPostId &&
-                x.HunterId == hunterId);
+                x.HunterId == hunterId.ToString());
         }
 
         public async Task<MissionLike?> AddLikeAsync(Guid missionPostId, Guid hunterId)
@@ -33,9 +33,9 @@ namespace BountyHuntersBlog.Repositories
 
             var like = new MissionLike
             {
-                Id = Guid.NewGuid(),
+               
                 MissionPostId = missionPostId,
-                HunterId = hunterId
+                HunterId = hunterId.ToString()
             };
 
             await dbContext.MissionLikes.AddAsync(like);

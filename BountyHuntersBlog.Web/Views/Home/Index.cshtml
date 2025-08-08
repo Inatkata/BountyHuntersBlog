@@ -4,7 +4,7 @@
     ViewData["Title"] = "Missions";
 }
 
-<h2 class="mt-3">Available Missions</h2>
+<h2 class="mt-4 mb-3">Available Missions</h2>
 
 <form method="get" class="row g-3 mb-4">
     <div class="col-md-5">
@@ -12,10 +12,14 @@
     </div>
     <div class="col-md-5">
         <select name="factionId" class="form-select">
-            <option value="">-- Filter by Faction --</option>
-            @foreach (var faction in ViewBag.Factions as List<SelectListItem>)
+            <option value="">All Factions</option>
+            @foreach (var faction in Model.Factions)
             {
-                <option value="@faction.Value" selected="@faction.Selected">@faction.Text</option>
+                <option value="@faction.Id" selected="@(Model.FactionId == faction.Id ? "selected" : null)">
+                    @faction.Name
+                </option>
+
+
             }
         </select>
     </div>
@@ -31,15 +35,19 @@
 else
 {
     <div class="row row-cols-1 row-cols-md-2 g-4">
-        @foreach (var post in Model.MissionPosts)
+        @foreach (var mission in Model.MissionPosts)
         {
             <div class="col">
                 <div class="card h-100">
-                    <img src="@post.FeaturedImageUrl" class="card-img-top" alt="Mission image" />
+                    <img src="@mission.FeaturedImageUrl" class="card-img-top" alt="Image" />
                     <div class="card-body">
-                        <h5 class="card-title">@post.Title</h5>
-                        <p class="card-text text-muted">@post.MissionDate.ToShortDateString()</p>
-                        <a asp-controller="Mission" asp-action="Details" asp-route-id="@post.Id" class="btn btn-outline-dark">View Details</a>
+                        <h5 class="card-title">@mission.Title</h5>
+                        <p class="card-text">@mission.ShortDescription</p>
+                        <a href="/missions/@mission.UrlHandle" class="btn btn-outline-primary">View Details</a>
+                    </div>
+                    <div class="card-footer text-muted small">
+                        <span>By @mission.Author.DisplayName</span> |
+                        <span>@mission.MissionDate.ToShortDateString()</span>
                     </div>
                 </div>
             </div>

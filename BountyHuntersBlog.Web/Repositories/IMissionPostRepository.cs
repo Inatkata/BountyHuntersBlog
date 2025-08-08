@@ -5,10 +5,10 @@ namespace BountyHuntersBlog.Repositories
     public interface IMissionPostRepository
     {
         Task<IEnumerable<MissionPost>> GetAllAsync();
-        Task<MissionPost> GetAsync(Guid id);
-        Task<MissionPost> AddAsync(MissionPost post, List<Guid> selectedFactions);
-        Task<MissionPost> UpdateAsync(MissionPost post, List<Guid> selectedFactions);
-
-        Task<MissionPost> DeleteAsync(Guid id);
+        Task<MissionPost?> GetAsync(Guid id);
+        Task<MissionPost?> GetByUrlHandleAsync(string urlHandle);
+        Task<MissionPost> AddAsync(MissionPost missionPost);
+        Task<MissionPost?> UpdateAsync(MissionPost missionPost);
+        Task<MissionPost?> DeleteAsync(Guid id);
     }
 }

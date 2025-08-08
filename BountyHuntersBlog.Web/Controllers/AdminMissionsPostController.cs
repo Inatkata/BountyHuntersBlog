@@ -1,7 +1,8 @@
 ﻿using BountyHuntersBlog.Models.Domain;
-using BountyHuntersBlog.Models.ViewModels;
+using BountyHuntersBlog.Models.Requests;
 using BountyHuntersBlog.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -12,11 +13,16 @@ namespace BountyHuntersBlog.Controllers
     {
         private readonly IMissionPostRepository missionPostRepository;
         private readonly IFactionRepository factionRepository;
+        private readonly UserManager<Hunter> userManager;
 
-        public AdminMissionPostsController(IMissionPostRepository missionPostRepository, IFactionRepository factionRepository)
+        public AdminMissionPostsController(
+            IMissionPostRepository missionPostRepository,
+            IFactionRepository factionRepository,
+            UserManager<Hunter> userManager)
         {
             this.missionPostRepository = missionPostRepository;
             this.factionRepository = factionRepository;
+            this.userManager = userManager;
         }
 
         [HttpGet]
@@ -25,50 +31,42 @@ namespace BountyHuntersBlog.Controllers
             var factions = await factionRepository.GetAllAsync();
             var model = new AddMissionPostRequest
             {
-                MissionDate = DateTime.Now,
-                SelectedFactions = new List<Guid>(),
+                FactionList = factions.Select(x => new SelectListItem
+                {
+                    Text = x.Name,
+                    Value = x.Id.ToString()
+                })
             };
-
-            ViewBag.Factions = factions.Select(f => new SelectListItem
-            {
-                Text = f.Name,
-                Value = f.Id.ToString()
-            });
 
             return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(AddMissionPostRequest request)
+        public async Task<IActionResult> Add(AddMissionPostRequest model)
         {
-            var factions = await factionRepository.GetAllAsync();
-
             if (!ModelState.IsValid)
             {
-                ViewBag.Factions = factions.Select(f => new SelectListItem
-                {
-                    Text = f.Name,
-                    Value = f.Id.ToString()
-                });
-                return View(request);
+                return View(model);
             }
 
-            var selectedFactions = factions.Where(f => request.SelectedFactions.Contains(f.Id)).ToList();
+            var selectedFactions = await factionRepository.GetSelectedFactionsAsync(model.SelectedFactions);
 
-            var post = new MissionPost
+            var currentUser = await userManager.GetUserAsync(User);
+
+            var mission = new MissionPost
             {
-                Id = Guid.NewGuid(),
-                Title = request.Title,
-                Content = request.Content,
-                UrlHandle = request.UrlHandle,
-                FeaturedImageUrl = request.FeaturedImageUrl,
-                MissionDate = request.MissionDate,
-                Visible = request.Visible,
-                AuthorId = request.AuthorId,
-                Factions = selectedFactions
+                Title = model.Title,
+                ShortDescription = model.ShortDescription,
+                Content = model.Content,
+                FeaturedImageUrl = model.FeaturedImageUrl,
+                UrlHandle = model.UrlHandle,
+                MissionDate = model.MissionDate,
+                Visible = model.Visible,
+                Factions = selectedFactions.ToList(),
+                AuthorId = currentUser.Id
             };
 
-            await missionPostRepository.AddAsync(post, request.SelectedFactions.ToList());
+            await missionPostRepository.AddAsync(mission);
 
             return RedirectToAction("List");
         }
@@ -76,69 +74,99 @@ namespace BountyHuntersBlog.Controllers
         [HttpGet]
         public async Task<IActionResult> List()
         {
-            var posts = await missionPostRepository.GetAllAsync();
-            return View(posts);
+            var missions = await missionPostRepository.GetAllAsync();
+            return View(missions);
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var post = await missionPostRepository.GetAsync(id);
-            if (post == null) return NotFound();
+            var mission = await missionPostRepository.GetAsync(id);
+            var allFactions = await factionRepository.GetAllAsync();
 
-            var factions = await factionRepository.GetAllAsync();
+            if (mission == null)
+                return RedirectToAction("List");
 
-            var model = new AddMissionPostRequest
+            var model = new EditMissionPostRequest
             {
-                Title = post.Title,
-                Content = post.Content,
-                UrlHandle = post.UrlHandle,
-                FeaturedImageUrl = post.FeaturedImageUrl,
-                MissionDate = post.MissionDate,
-                Visible = post.Visible,
-                AuthorId = post.AuthorId,
-                SelectedFactions = post.Factions.Select(f => f.Id).ToList()
+                Id = mission.Id,
+                AuthorId = mission.AuthorId,
+                Title = mission.Title,
+                ShortDescription = mission.ShortDescription,
+                Content = mission.Content,
+                FeaturedImageUrl = mission.FeaturedImageUrl,
+                UrlHandle = mission.UrlHandle,
+                MissionDate = mission.MissionDate,
+                Visible = mission.Visible,
+                SelectedFactions = mission.Factions.Select(f => f.Id).ToList(),
+                FactionList = allFactions.Select(f => new SelectListItem
+                {
+                    Text = f.Name,
+                    Value = f.Id.ToString()
+                })
             };
-
-            ViewBag.Factions = factions.Select(f => new SelectListItem
-            {
-                Text = f.Name,
-                Value = f.Id.ToString(),
-                Selected = model.SelectedFactions.Contains(f.Id)
-            });
-
-            ViewBag.PostId = post.Id;
 
             return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Guid id, AddMissionPostRequest request)
+        public async Task<IActionResult> Edit(EditMissionPostRequest model)
         {
-            var post = await missionPostRepository.GetAsync(id);
-            if (post == null) return NotFound();
+            if (!ModelState.IsValid)
+            {
+                model.FactionList = (await factionRepository.GetAllAsync()).Select(f => new SelectListItem
+                {
+                    Text = f.Name,
+                    Value = f.Id.ToString()
+                });
 
-            var factions = await factionRepository.GetAllAsync();
-            var selectedFactions = factions.Where(f => request.SelectedFactions.Contains(f.Id)).ToList();
+                return View(model);
+            }
 
-            post.Title = request.Title;
-            post.Content = request.Content;
-            post.UrlHandle = request.UrlHandle;
-            post.FeaturedImageUrl = request.FeaturedImageUrl;
-            post.MissionDate = request.MissionDate;
-            post.Visible = request.Visible;
-            post.Factions = selectedFactions;
+            var selectedFactions = await factionRepository.GetSelectedFactionsAsync(model.SelectedFactions);
 
-            await missionPostRepository.UpdateAsync(post, request.SelectedFactions.ToList());
+            var updated = new MissionPost
+            {
+                Id = model.Id,
+                AuthorId = model.AuthorId,
+                Title = model.Title,
+                ShortDescription = model.ShortDescription,
+                Content = model.Content,
+                FeaturedImageUrl = model.FeaturedImageUrl,
+                UrlHandle = model.UrlHandle,
+                MissionDate = model.MissionDate,
+                Visible = model.Visible,
+                Factions = selectedFactions.ToList()
+            };
+
+            var result = await missionPostRepository.UpdateAsync(updated);
+
+            if (result == null)
+                return RedirectToAction("Edit", new { id = model.Id });
 
             return RedirectToAction("List");
         }
-
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await missionPostRepository.DeleteAsync(id);
+            var mission = await missionPostRepository.GetAsync(id);
+
+            if (mission == null)
+                return RedirectToAction("List");
+
+            return View(mission);
+        }
+        [HttpPost]
+        [ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            var deleted = await missionPostRepository.DeleteAsync(id);
+
+            if (deleted == null)
+                return RedirectToAction("List");
+
             return RedirectToAction("List");
         }
+
     }
 }

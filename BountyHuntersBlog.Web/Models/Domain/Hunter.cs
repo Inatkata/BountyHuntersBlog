@@ -1,22 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace BountyHuntersBlog.Models.Domain
 {
-    public class Hunter
+    public class Hunter : IdentityUser
     {
-        [Key]
-        public Guid Id { get; set; }
-
-        [Required]
         public string DisplayName { get; set; }
 
-        public string? Bio { get; set; }
-
-        public string? ExperienceLevel { get; set; }
-
-        public DateTime JoinedOn { get; set; }
-
-
-        public ApplicationUser? ApplicationUser { get; set; }
+        // Примерни релации (добави или махни според нуждите на проекта)
+        public ICollection<MissionPost> MissionPosts { get; set; }
+        public ICollection<MissionLike> MissionLikes { get; set; }
+        public ICollection<MissionComment> MissionComments { get; set; }
     }
 }

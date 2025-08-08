@@ -25,7 +25,7 @@ namespace BountyHuntersBlog.Repositories
             return await dbContext.MissionComments
                 .Include(c => c.Hunter)
                 .Where(c => c.MissionPostId == missionPostId)
-                .OrderByDescending(c => c.CreatedAt)
+                .OrderByDescending(c => c.DateAdded)
                 .ToListAsync();
         }
     }
