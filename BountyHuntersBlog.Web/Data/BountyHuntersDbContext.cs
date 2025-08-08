@@ -16,8 +16,7 @@ namespace BountyHuntersBlog.Data
         public DbSet<MissionLike> MissionLikes { get; set; }
         public DbSet<MissionComment> MissionComments { get; set; }
 
-        // Ако има други ентитети, добави ги тук:
-        // public DbSet<SomeEntity> SomeEntities { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

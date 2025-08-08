@@ -12,7 +12,9 @@ builder.Services.AddDbContext<BountyHuntersDbContext>(options =>
 
 // Identity
 builder.Services.AddIdentity<Hunter, IdentityRole>()
-    .AddEntityFrameworkStores<BountyHuntersDbContext>();
+    .AddEntityFrameworkStores<BountyHuntersDbContext>()
+    .AddDefaultTokenProviders();
+
 
 builder.Services.AddScoped<UserManager<Hunter>>();
 builder.Services.AddScoped<IFactionRepository, FactionRepository>();

@@ -30,9 +30,8 @@ namespace BountyHuntersBlog.Controllers
 
             var user = new Hunter
             {
-                UserName = model.Email,
-                Email = model.Email,
-                DisplayName = model.DisplayName
+                UserName = model.Username,
+                Email = model.Email
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
@@ -62,11 +61,11 @@ namespace BountyHuntersBlog.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await userManager.FindByEmailAsync(model.Email);
+            var user = await userManager.FindByNameAsync(model.Username);
 
             if (user != null)
             {
-                var result = await signInManager.PasswordSignInAsync(user, model.Password, false, false);
+                var result = await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
 
                 if (result.Succeeded)
                 {
@@ -80,6 +79,7 @@ namespace BountyHuntersBlog.Controllers
             ModelState.AddModelError(string.Empty, "Invalid login attempt");
             return View(model);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Logout()
