@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BountyHuntersBlog", "BountyHuntersBlog.Web\BountyHuntersBlog.csproj", "{DBF32560-328F-4B27-847E-174F7FA7B644}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BountyHuntersBlog.Web", "BountyHuntersBlog.Web\BountyHuntersBlog.Web.csproj", "{816E8DCE-FA02-49F2-97DC-D4F1302B1911}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BountyHuntersBlog.Data", "BountyHuntersBlog.Data\BountyHuntersBlog.Data.csproj", "{FF78969B-6184-41BE-94B6-4B560C4EAA45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BountyHuntersBlog.Repositories", "BountyHuntersBlog.Repositories\BountyHuntersBlog.Repositories.csproj", "{B8A2482C-5D85-4A77-AB81-F5BB3C8D1A70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BountyHuntersBlog.Services", "BountyHuntersBlog.Services\BountyHuntersBlog.Services.csproj", "{82EF9237-E867-44EA-A30C-0CF25352AD0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BountyHuntersBlog.ViewModels", "BountyHuntersBlog.ViewModels\BountyHuntersBlog.ViewModels.csproj", "{3F2C9C27-D0BC-45B6-B54E-AE822BE1AEC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +19,26 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DBF32560-328F-4B27-847E-174F7FA7B644}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBF32560-328F-4B27-847E-174F7FA7B644}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBF32560-328F-4B27-847E-174F7FA7B644}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBF32560-328F-4B27-847E-174F7FA7B644}.Release|Any CPU.Build.0 = Release|Any CPU
+		{816E8DCE-FA02-49F2-97DC-D4F1302B1911}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{816E8DCE-FA02-49F2-97DC-D4F1302B1911}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{816E8DCE-FA02-49F2-97DC-D4F1302B1911}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{816E8DCE-FA02-49F2-97DC-D4F1302B1911}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF78969B-6184-41BE-94B6-4B560C4EAA45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF78969B-6184-41BE-94B6-4B560C4EAA45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF78969B-6184-41BE-94B6-4B560C4EAA45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF78969B-6184-41BE-94B6-4B560C4EAA45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8A2482C-5D85-4A77-AB81-F5BB3C8D1A70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8A2482C-5D85-4A77-AB81-F5BB3C8D1A70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8A2482C-5D85-4A77-AB81-F5BB3C8D1A70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8A2482C-5D85-4A77-AB81-F5BB3C8D1A70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82EF9237-E867-44EA-A30C-0CF25352AD0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82EF9237-E867-44EA-A30C-0CF25352AD0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82EF9237-E867-44EA-A30C-0CF25352AD0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82EF9237-E867-44EA-A30C-0CF25352AD0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F2C9C27-D0BC-45B6-B54E-AE822BE1AEC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F2C9C27-D0BC-45B6-B54E-AE822BE1AEC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F2C9C27-D0BC-45B6-B54E-AE822BE1AEC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F2C9C27-D0BC-45B6-B54E-AE822BE1AEC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
