@@ -1,0 +1,35 @@
+﻿@model IEnumerable<BountyHuntersBlog.Models.Domain.Hunter>
+@{
+    ViewData["Title"] = "Hunters";
+}
+
+<h2 class="mt-3">Hunters</h2>
+
+<a asp-controller="AdminHunter" asp-action="Add" class="btn btn-primary mb-3">Add New Hunter</a>
+
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>Display Name</th>
+        <th>Experience Level</th>
+        <th>Joined On</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var hunter in Model)
+    {
+        <tr>
+            <td>@hunter.DisplayName</td>
+            <td>@hunter.ExperienceLevel</td>
+            <td>@hunter.JoinedOn.ToShortDateString()</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@hunter.Id" class="btn btn-sm btn-warning">Edit</a>
+                <form asp-action="Delete" asp-route-id="@hunter.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,31 @@
+﻿@model BountyHuntersBlog.Models.ViewModels.AddHunterRequest
+@{
+    ViewData["Title"] = "Edit Hunter";
+    var hunterId = ViewBag.HunterId;
+}
+
+<h2 class="mt-3">Edit Hunter</h2>
+
+<form method="post" asp-action="Edit" asp-route-id="@hunterId">
+    <div class="mb-3">
+        <label class="form-label">Display Name</label>
+        <input asp-for="DisplayName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Bio</label>
+        <textarea asp-for="Bio" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Experience Level</label>
+        <input asp-for="ExperienceLevel" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Joined On</label>
+        <input asp-for="JoinedOn" type="date" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+</form>
