@@ -16,9 +16,7 @@ namespace BountyHuntersBlog.Data.Configurations
             builder.Property(c => c.CreatedOn)
                 .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.ToTable(t => t.HasCheckConstraint("CK_Likes_Target",
-                "([MissionId] IS NOT NULL AND [CommentId] IS NULL) OR ([MissionId] IS NULL AND [CommentId] IS NOT NULL)"));
-
+           
             builder.HasOne(c => c.Mission)
                 .WithMany(m => m.Comments)
                 .HasForeignKey(c => c.MissionId)
