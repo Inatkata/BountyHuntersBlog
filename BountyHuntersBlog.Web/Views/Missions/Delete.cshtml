@@ -1,6 +1,7 @@
 ﻿@using BountyHuntersBlog.ViewModels
+@using BountyHuntersBlog.ViewModels.Missions
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model BountyHuntersBlog.ViewModels.MissionViewModel
+@model MissionViewModel
 @inject BountyHuntersBlog.Services.Interfaces.ILikeService LikeService
 @{
     var userId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;

@@ -3,6 +3,7 @@ using AutoMapper;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.ViewModels;
+using BountyHuntersBlog.ViewModels.Missions;
 
 public class MappingProfile : Profile
 {

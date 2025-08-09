@@ -1,5 +1,7 @@
 ﻿@model BountyHuntersBlog.ViewModels.CategoryViewModel
-@{ ViewData["Title"] = "Create Category"; }
+@{
+    ViewData["Title"] = "Create Category";
+}
 
 <h2>Create Category</h2>
 <form asp-action="Create" method="post">
@@ -11,4 +13,6 @@
     <button class="btn btn-primary" type="submit">Save</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

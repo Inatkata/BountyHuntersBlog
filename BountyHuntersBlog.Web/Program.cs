@@ -9,6 +9,7 @@ using BountyHuntersBlog.Services;
 using BountyHuntersBlog.Services.Extensions;
 using BountyHuntersBlog.Services.Implementations;
 using BountyHuntersBlog.Services.Interfaces;
+using BountyHuntersBlog.Web.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -90,6 +91,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}"
 );
 
-app.MapRazorPages();
 
+app.MapRazorPages();
+await IdentitySeeder.SeedAsync(app.Services);
 app.Run();

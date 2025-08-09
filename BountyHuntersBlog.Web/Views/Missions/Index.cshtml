@@ -1,15 +1,57 @@
-﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model IEnumerable<BountyHuntersBlog.ViewModels.MissionViewModel>
-<h1>Missions</h1>
-<table class="table">
-    <thead><tr><th>Title</th><th>Author</th><th></th></tr></thead>
-    <tbody>
-    @foreach(var m in Model) {
-        <tr>
-            <td>@m.Title</td>
-            <td>@m.AuthorName</td>
-            <td><a asp-action="Details" asp-route-id="@m.Id">Details</a></td>
-        </tr>
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionsIndexViewModel
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input name="q" value="@Model.Q" class="form-control" placeholder="Search..." />
+    </div>
+    <div class="col-md-3">
+        <select name="categoryId" class="form-select" asp-items="Model.Categories">
+            <option value="">-- All categories --</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="tagId" class="form-select" asp-items="Model.Tags">
+            <option value="">-- All tags --</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Filter</button>
+    </div>
+</form>
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">No missions found.</div>
+}
+else
+{
+    <ul class="list-group mb-3">
+        @foreach (var m in Model.Items)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>@m.Title</span>
+                <a asp-action="Details" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+            </li>
+        }
+    </ul>
+}
+@{
+        var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
     }
-    </tbody>
-</table>
+
+  <nav>
+    <ul class="pagination">
+        @for (int p = 1; p <= totalPages; p++)
+    {
+        <li class="page-item @(p == Model.Page ? "active" : "")">
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-q="@Model.Q"
+               asp-route-categoryId="@Model.CategoryId"
+               asp-route-tagId="@Model.TagId"
+               asp-route-page="@p"
+               asp-route-pageSize="@Model.PageSize">@p</a>
+        </li>
+    }
+    </ul>
+</nav>

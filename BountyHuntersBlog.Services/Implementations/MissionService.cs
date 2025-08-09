@@ -16,6 +16,36 @@ namespace BountyHuntersBlog.Services.Implementations
             _missionRepo = missionRepo;
             _mapper = mapper;
         }
+        public async Task<(IReadOnlyList<MissionDto> items, int totalCount)> SearchPagedAsync(
+            string? q, int? categoryId, int? tagId, int page, int pageSize)
+        {
+            var allEntities = await _missionRepo.AllAsync(); // returns IEnumerable<Mission>
+            var query = allEntities.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var qq = q.Trim().ToLower();
+                query = query.Where(m =>
+                    (m.Title ?? string.Empty).ToLower().Contains(qq) ||
+                    (m.Description ?? string.Empty).ToLower().Contains(qq));
+            }
+
+            if (categoryId.HasValue)
+                query = query.Where(m => m.CategoryId == categoryId.Value);
+
+            if (tagId.HasValue && tagId.Value > 0)
+                query = query.Where(m => m.MissionTags != null && m.MissionTags.Any(mt => mt.TagId == tagId.Value));
+
+            var total = query.Count();
+
+            var pageEntities = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var pageDtos = _mapper.Map<List<MissionDto>>(pageEntities);
+            return (pageDtos, total);
+        }
 
         public async Task<IEnumerable<MissionDto>> GetAllAsync(int page, int pageSize)
         {

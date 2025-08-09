@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
-using BountyHuntersBlog.Data.Models;
-using BountyHuntersBlog.Services;
 using BountyHuntersBlog.Services.DTOs;
-using BountyHuntersBlog.Services.Implementations;
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels;
+using BountyHuntersBlog.ViewModels.Missions;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
@@ -17,6 +16,7 @@ namespace BountyHuntersBlog.Web.Controllers
         private readonly ICategoryService _categories;
         private readonly ITagService _tags;
         private readonly ILikeService _likeService;
+
         public MissionsController(IMissionService service, IMapper mapper, ICategoryService categories, ITagService tags, ILikeService likeService)
         {
             _service = service;
@@ -26,12 +26,28 @@ namespace BountyHuntersBlog.Web.Controllers
             _likeService = likeService;
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        [HttpGet]
+        public async Task<IActionResult> Index(string? q, int? categoryId, int? tagId, int page = 1, int pageSize = 10)
         {
-            const int pageSize = 10;
-            var dtos = await _service.GetAllAsync(page, pageSize);
-            var vms = _mapper.Map<IEnumerable<MissionViewModel>>(dtos);
-            return View(vms);
+            var (items, total) = await _service.SearchPagedAsync(q, categoryId, tagId, page, pageSize);
+
+            var vm = new MissionsIndexViewModel
+            {
+                Q = q,
+                CategoryId = categoryId,
+                TagId = tagId,
+                Page = page,
+                PageSize = pageSize,
+                Items = items,
+                TotalCount = total,
+                Categories = (await _categories.GetAllAsync(1, int.MaxValue))
+                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }),
+                Tags = (await _tags.GetAllAsync(1, int.MaxValue))
+                    .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name })
+
+            };
+
+            return View(vm);
         }
 
         public async Task<IActionResult> Details(int id)

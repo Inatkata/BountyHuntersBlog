@@ -12,5 +12,7 @@ namespace BountyHuntersBlog.Services.Interfaces
         Task UpdateAsync(int id, MissionDto dto);
         Task DeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
+        Task<(IReadOnlyList<MissionDto> items, int totalCount)> SearchPagedAsync(
+            string? q, int? categoryId, int? tagId, int page, int pageSize);
     }
 }
