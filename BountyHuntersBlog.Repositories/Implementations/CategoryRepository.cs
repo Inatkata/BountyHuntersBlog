@@ -23,7 +23,6 @@ namespace BountyHuntersBlog.Repositories.Implementations
                 .ToListAsync();
 
 
-        // **Променено string вместо int**
         public async Task<IEnumerable<Category>> GetCategoriesByUserIdAsync(string userId)
             => await Context.Missions
                 .Where(m => m.AuthorId == userId)

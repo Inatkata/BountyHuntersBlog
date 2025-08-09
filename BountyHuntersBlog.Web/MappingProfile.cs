@@ -15,6 +15,17 @@ public class MappingProfile : Profile
         CreateMap<Category, CategoryDto>().ReverseMap();
         CreateMap<Tag, TagDto>().ReverseMap();
 
+        CreateMap<Category, CategoryDto>()
+            .ForMember(d => d.MissionsCount, opt => opt.MapFrom(s => s.Missions.Count))
+            .ReverseMap()
+            .ForMember(s => s.Missions, opt => opt.Ignore());
+
+        CreateMap<Tag, TagDto>()
+            .ForMember(d => d.MissionsCount, opt => opt.MapFrom(s => s.MissionTags.Count))
+            .ReverseMap()
+            .ForMember(s => s.MissionTags, opt => opt.Ignore());
+
+        CreateMap<TagDto, TagViewModel>().ReverseMap();
         // DTO → ViewModel
         CreateMap<MissionDto, MissionViewModel>()
             .ForMember(vm => vm.AuthorName, opt => opt.MapFrom(d => d.AuthorId))

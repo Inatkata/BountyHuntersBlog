@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
-using BountyHuntersBlog.Data.Models;
+﻿using AutoMapper;
 using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
+using BountyHuntersBlog.Data.Models;
 
 namespace BountyHuntersBlog.Services.Implementations
 {
@@ -21,17 +19,14 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task<IEnumerable<TagDto>> GetAllAsync(int page, int pageSize)
         {
-            var entities = await _repo.AllAsync();
-            // TODO: приложи paging
+            var entities = await _repo.AllAsync(); // TODO: добави реален paging ако искаш
             return _mapper.Map<IEnumerable<TagDto>>(entities);
         }
 
         public async Task<TagDto?> GetByIdAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
-            return entity is null
-                ? null
-                : _mapper.Map<TagDto>(entity);
+            return entity is null ? null : _mapper.Map<TagDto>(entity);
         }
 
         public async Task CreateAsync(TagDto dto)
@@ -58,7 +53,6 @@ namespace BountyHuntersBlog.Services.Implementations
             await _repo.SaveChangesAsync();
         }
 
-        public async Task<bool> ExistsAsync(int id)
-            => await _repo.GetByIdAsync(id) != null;
+        public async Task<bool> ExistsAsync(int id) => await _repo.ExistsAsync(id);
     }
 }

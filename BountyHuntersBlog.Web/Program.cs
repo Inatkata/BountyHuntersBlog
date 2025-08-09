@@ -1,5 +1,6 @@
 ﻿using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Data.Models;
+using BountyHuntersBlog.Data.Seeds;
 using BountyHuntersBlog.Repositories.Extensions;
 using BountyHuntersBlog.Services.Extensions;
 using Microsoft.AspNetCore.Identity;
@@ -40,7 +41,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
-
+using (var scope = app.Services.CreateScope())
+{
+    await DbSeeder.SeedAsync(scope.ServiceProvider);
+}
 // Middleware pipeline
 if (!app.Environment.IsDevelopment())
 {

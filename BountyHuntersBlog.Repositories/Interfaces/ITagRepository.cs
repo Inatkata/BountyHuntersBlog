@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BountyHuntersBlog.Data.Models;
+﻿using BountyHuntersBlog.Data.Models;
 
 namespace BountyHuntersBlog.Repositories.Interfaces
 {
-    public interface ITagRepository : IRepository<Tag>
+    public interface ITagRepository
     {
-        
-        Task<Tag?> GetByNameAsync(string name);
-       
-        Task<IEnumerable<Tag>> GetTagsByMissionIdAsync(int missionId);
+        Task<IReadOnlyList<Tag>> AllAsync();
+        Task<Tag?> GetByIdAsync(int id);
+        Task AddAsync(Tag entity);
+        void Update(Tag entity);
+        void Delete(Tag entity);
+        Task<int> SaveChangesAsync();
+
+        Task<bool> ExistsAsync(int id); 
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
@@ -21,29 +19,30 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task<IEnumerable<CommentDto>> GetAllAsync(int page, int pageSize)
         {
-            var entities = await _repo.AllAsync();
-            // TODO: paging
-            return _mapper.Map<IEnumerable<CommentDto>>(entities);
+            var all = await _repo.AllAsync();
+            return _mapper.Map<IEnumerable<CommentDto>>(
+                all.OrderByDescending(c => c.CreatedOn)
+                   .Skip((page - 1) * pageSize)
+                   .Take(pageSize)
+            );
         }
 
         public async Task<CommentDto?> GetByIdAsync(int id)
         {
-            var entity = await _repo.GetByIdAsync(id);
-            return entity is null
-                ? null
-                : _mapper.Map<CommentDto>(entity);
+            var entity = await _repo.GetCommentByIdAsync(id);
+            return entity is null ? null : _mapper.Map<CommentDto>(entity);
         }
 
         public async Task CreateAsync(CommentDto dto)
         {
-            var entity = _mapper.Map<Data.Models.Comment>(dto);
+            var entity = _mapper.Map<Comment>(dto);
             await _repo.AddAsync(entity);
             await _repo.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(int id, CommentDto dto)
         {
-            var entity = await _repo.GetByIdAsync(id)
+            var entity = await _repo.GetCommentByIdAsync(id)
                          ?? throw new KeyNotFoundException($"Comment {id} not found");
             _mapper.Map(dto, entity);
             _repo.Update(entity);
@@ -52,25 +51,21 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task DeleteAsync(int id)
         {
-            var entity = await _repo.GetByIdAsync(id)
-                         ?? throw new KeyNotFoundException($"Comment {id} not found");
-            _repo.Delete(entity);
-            await _repo.SaveChangesAsync();
+            await _repo.RemoveByIdAsync(id);
         }
 
-        public async Task<bool> ExistsAsync(int id)
-            => await _repo.ExistsAsync(id);
+        public Task<bool> ExistsAsync(int id) => _repo.ExistsAsync(id);
 
         public async Task<IEnumerable<CommentDto>> GetCommentsByMissionIdAsync(int missionId)
         {
-            var entities = await _repo.GetCommentsByMissionIdAsync(missionId);
-            return _mapper.Map<IEnumerable<CommentDto>>(entities);
+            var list = await _repo.GetCommentsByMissionIdAsync(missionId);
+            return _mapper.Map<IEnumerable<CommentDto>>(list);
         }
 
         public async Task<IEnumerable<CommentDto>> GetCommentsByUserIdAsync(string userId)
         {
-            var entities = await _repo.GetCommentsByUserIdAsync(userId);
-            return _mapper.Map<IEnumerable<CommentDto>>(entities);
+            var list = await _repo.GetCommentsByUserIdAsync(userId);
+            return _mapper.Map<IEnumerable<CommentDto>>(list);
         }
     }
 }

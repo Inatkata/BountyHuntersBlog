@@ -1,9 +1,8 @@
-﻿
-using BountyHuntersBlog.Services.DTOs;
+﻿using BountyHuntersBlog.Services.DTOs;
 
 namespace BountyHuntersBlog.Services.Interfaces
 {
-    public interface ITagService 
+    public interface ITagService
     {
         Task<IEnumerable<TagDto>> GetAllAsync(int page, int pageSize);
         Task<TagDto?> GetByIdAsync(int id);
