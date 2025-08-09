@@ -8,9 +8,12 @@ namespace BountyHuntersBlog.Repositories.Implementations
 {
     public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
+        private readonly BountyHuntersDbContext _db;
+
         public CategoryRepository(BountyHuntersDbContext context)
             : base(context)
         {
+            _db = context;
         }
 
         public async Task<Category?> GetByNameAsync(string name)

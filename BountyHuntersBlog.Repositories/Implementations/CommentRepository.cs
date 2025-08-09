@@ -13,8 +13,13 @@ namespace BountyHuntersBlog.Repositories.Implementations
 {
     public class CommentRepository: Repository<Comment>, ICommentRepository
     {
+        private readonly BountyHuntersDbContext _db;
+
         public CommentRepository(BountyHuntersDbContext context)
-            : base(context) { }
+            : base(context)
+        {
+            _db = context;
+        }
         public async Task<IEnumerable<Comment>> GetCommentsByMissionIdAsync(int missionId)
             => await Context.Comments
                 .Where(c => c.MissionId == missionId)

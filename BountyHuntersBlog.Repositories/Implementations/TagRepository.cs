@@ -7,7 +7,10 @@ public class TagRepository : Repository<Tag>, ITagRepository
 {
     private readonly BountyHuntersDbContext _ctx;
     public TagRepository(BountyHuntersDbContext context)
-        : base(context) { }
+        : base(context)
+    {
+        _ctx = context; 
+    }
 
     public async Task<IReadOnlyList<Tag>> AllAsync()
         => await _ctx.Tags.AsNoTracking().ToListAsync();

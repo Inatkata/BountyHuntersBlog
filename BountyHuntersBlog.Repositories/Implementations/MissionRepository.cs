@@ -11,8 +11,13 @@ namespace BountyHuntersBlog.Repositories.Implementations
     public class MissionRepository
         : Repository<Mission>, IMissionRepository
     {
+        private readonly BountyHuntersDbContext _db;
+
         public MissionRepository(BountyHuntersDbContext context)
-            : base(context) { }
+            : base(context)
+        {
+            _db = context;
+        }
 
         public async Task<IEnumerable<Mission>> GetByAuthorAsync(string authorId)
             => await Context.Missions

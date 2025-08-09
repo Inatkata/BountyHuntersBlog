@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using BountyHuntersBlog.Data.Models;
+using BountyHuntersBlog.Services;
 using BountyHuntersBlog.Services.DTOs;
+using BountyHuntersBlog.Services.Implementations;
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
@@ -13,12 +16,14 @@ namespace BountyHuntersBlog.Web.Controllers
         private readonly IMapper _mapper;
         private readonly ICategoryService _categories;
         private readonly ITagService _tags;
-        public MissionsController(IMissionService service, IMapper mapper, ICategoryService categories, ITagService tags)
+        private readonly ILikeService _likeService;
+        public MissionsController(IMissionService service, IMapper mapper, ICategoryService categories, ITagService tags, ILikeService likeService)
         {
             _service = service;
             _mapper = mapper;
             _categories = categories;
             _tags = tags;
+            _likeService = likeService;
         }
 
         public async Task<IActionResult> Index(int page = 1)
@@ -31,9 +36,28 @@ namespace BountyHuntersBlog.Web.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var dto = await _service.GetByIdAsync(id);
+            MissionDto? dto = await _service.GetByIdAsync(id);
             if (dto == null) return NotFound();
-            return View(_mapper.Map<MissionViewModel>(dto));
+
+            var vm = _mapper.Map<MissionViewModel>(dto);
+
+            var userId = User.Identity?.IsAuthenticated == true
+                ? User.FindFirstValue(ClaimTypes.NameIdentifier)!
+                : null;
+
+            var isLiked = userId != null && await _likeService.IsMissionLikedByUserAsync(id, userId);
+            var total = await _likeService.CountMissionLikesAsync(id);
+
+            ViewBag.MissionLike = new LikeButtonViewModel
+            {
+                TargetType = LikeTargetType.Mission,
+                TargetId = id,
+                IsLikedByCurrentUser = isLiked,
+                TotalCount = total,
+                IsAuthenticated = User.Identity?.IsAuthenticated == true
+            };
+
+            return View(vm);
         }
 
         [HttpGet]

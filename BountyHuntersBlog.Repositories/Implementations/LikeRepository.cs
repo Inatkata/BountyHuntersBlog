@@ -11,8 +11,10 @@ namespace BountyHuntersBlog.Repositories
         private readonly BountyHuntersDbContext _db;
 
         public LikeRepository(BountyHuntersDbContext context)
-            : base(context) { }
-
+            : base(context)
+        {
+            _db = context;
+        }
         public Task<Like?> FindMissionLikeAsync(int missionId, string userId) =>
             _db.Likes.FirstOrDefaultAsync(l => l.MissionId == missionId && l.UserId == userId);
 

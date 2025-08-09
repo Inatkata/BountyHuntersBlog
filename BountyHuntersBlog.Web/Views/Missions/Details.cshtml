@@ -1,4 +1,7 @@
-﻿@model BountyHuntersBlog.ViewModels.MissionViewModel
+﻿@using BountyHuntersBlog.ViewModels
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@await Html.PartialAsync("_LikeButton", (LikeButtonViewModel)ViewBag.MissionLike)
+
 <h1>@Model.Title</h1>
 <p>@Model.Description</p>
 <p>Author: @Model.AuthorName</p>

@@ -12,8 +12,13 @@ namespace BountyHuntersBlog.Repositories
     public class MissionTagRepository : Repository<MissionTag>, IMissionTagRepository
     {
         private readonly BountyHuntersDbContext _db;
+        
+
         public MissionTagRepository(BountyHuntersDbContext context)
-            : base(context) { }
+            : base(context)
+        {
+            _db = context;
+        }
 
         public Task<List<MissionTag>> AllAsync() =>
             _db.MissionTags.AsNoTracking().ToListAsync();

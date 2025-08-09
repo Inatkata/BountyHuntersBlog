@@ -1,49 +1,22 @@
 ﻿@model BountyHuntersBlog.ViewModels.LikeButtonViewModel
-@using Microsoft.AspNetCore.Antiforgery
-@inject IAntiforgery Anti
-
 @{
-    var token = Anti.GetAndStoreTokens(Context).RequestToken;
-    var isMission = Model.TargetType == BountyHuntersBlog.ViewModels.LikeTargetType.Mission;
-    var actionUrl = isMission ? Url.Action("ToggleMission", "Likes", new { id = Model.TargetId }) 
+    var formId = $"like-{Model.TargetType.ToString().ToLower()}-{Model.TargetId}";
+    var action = Model.TargetType == BountyHuntersBlog.ViewModels.LikeTargetType.Mission
+        ? Url.Action("ToggleMission", "Likes", new { id = Model.TargetId })
         : Url.Action("ToggleComment", "Likes", new { id = Model.TargetId });
 }
-
-<button type="button"
-        class="btn btn-sm @(Model.IsLikedByCurrentUser ? "btn-primary" : "btn-outline-primary") like-btn"
-        data-url="@actionUrl"
-        data-targetid="@Model.TargetId"
-        data-targettype="@(isMission ? "mission" : "comment")"
-        @(Model.IsAuthenticated ? "" : "disabled")
->
-    <span class="like-icon">♥</span>
-    <span class="like-text">@((Model.IsLikedByCurrentUser) ? "Liked" : "Like")</span>
-    <span class="like-count">(@Model.TotalCount)</span>
-</button>
-
-<script>
-(() => {
-  const btn = document.currentScript.previousElementSibling;
-  if (!btn) return;
-
-  btn.addEventListener('click', async () => {
-    const url = btn.dataset.url;
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'RequestVerificationToken': '@token'
-        },
-        body: '' // we only need the token in header
-      });
-      if (!res.ok) return;
-      const data = await res.json();
-      btn.classList.toggle('btn-primary', data.liked);
-      btn.classList.toggle('btn-outline-primary', !data.liked);
-      btn.querySelector('.like-text').textContent = data.liked ? 'Liked' : 'Like';
-      btn.querySelector('.like-count').textContent = `(${data.count})`;
-    } catch { /* no-op */ }
-  });
-})();
-</script>
+<form id="@formId" method="post" action="@action" class="d-inline">
+    @Html.AntiForgeryToken()
+    <button type="submit"
+            class="btn btn-sm @(Model.IsLikedByCurrentUser ? "btn-primary" : "btn-outline-primary")"
+            data-like-btn
+            data-target="@Model.TargetType"
+            data-id="@Model.TargetId"
+            @(Model.IsAuthenticated ? "" : "disabled")
+            title="@(Model.IsAuthenticated ? "Like/Unlike" : "Login required")">
+        <span class="me-1" data-like-icon>
+            @(Model.IsLikedByCurrentUser ? "♥" : "♡")
+        </span>
+        <span data-like-count>@Model.TotalCount</span>
+    </button>
+</form>

@@ -2,7 +2,7 @@
 
 namespace BountyHuntersBlog.Services.Interfaces
 {
-    public interface ILikeService
+    public interface ILikeService 
     {
         Task<LikeResultDto> ToggleMissionLikeAsync(int missionId, string userId);
         Task<LikeResultDto> ToggleCommentLikeAsync(int commentId, string userId);
