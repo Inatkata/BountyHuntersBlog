@@ -1,12 +1,13 @@
 ﻿using BountyHuntersBlog.Data;
-using BountyHuntersBlog.Data.Models;
+using BountyHuntersBlog.Data.Models;using BountyHuntersBlog.Repositories.Base;
 using BountyHuntersBlog.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-public class TagRepository : ITagRepository
+public class TagRepository : Repository<Tag>, ITagRepository
 {
     private readonly BountyHuntersDbContext _ctx;
-    public TagRepository(BountyHuntersDbContext ctx) => _ctx = ctx;
+    public TagRepository(BountyHuntersDbContext context)
+        : base(context) { }
 
     public async Task<IReadOnlyList<Tag>> AllAsync()
         => await _ctx.Tags.AsNoTracking().ToListAsync();

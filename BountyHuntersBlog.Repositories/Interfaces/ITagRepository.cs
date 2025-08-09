@@ -2,7 +2,7 @@
 
 namespace BountyHuntersBlog.Repositories.Interfaces
 {
-    public interface ITagRepository
+    public interface ITagRepository : IRepository<Tag>
     {
         Task<IReadOnlyList<Tag>> AllAsync();
         Task<Tag?> GetByIdAsync(int id);

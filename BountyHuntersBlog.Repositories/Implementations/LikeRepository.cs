@@ -1,44 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BountyHuntersBlog.Data;
+﻿using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Base;
 using BountyHuntersBlog.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace BountyHuntersBlog.Repositories.Implementations
+namespace BountyHuntersBlog.Repositories
 {
     public class LikeRepository : Repository<Like>, ILikeRepository
     {
+        private readonly BountyHuntersDbContext _db;
+
         public LikeRepository(BountyHuntersDbContext context)
             : base(context) { }
-        public async Task<IEnumerable<Like>> GetLikesByMissionIdAsync(int missionId)
-            => await Context.Likes
-                .Where(l => l.MissionId == missionId)
-                .ToListAsync();
-        public async Task<IEnumerable<Like>> GetLikesByUserIdAsync(string userId)
-            => await Context.Likes
-                .Where(l => l.UserId == userId)
-                .ToListAsync();
 
-        public async Task<bool> ExistsAsync(int missionId, string userId)
-            => await Context.Likes.AnyAsync(l => l.MissionId == missionId && l.UserId == userId);
-        public async Task RemoveByMissionAndUserIdAsync(int missionId, string userId)
+        public Task<Like?> FindMissionLikeAsync(int missionId, string userId) =>
+            _db.Likes.FirstOrDefaultAsync(l => l.MissionId == missionId && l.UserId == userId);
+
+        public Task<Like?> FindCommentLikeAsync(int commentId, string userId) =>
+            _db.Likes.FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
+
+        public async Task AddAsync(Like like)
         {
-            var like = await Context.Likes
-                .FirstOrDefaultAsync(l => l.MissionId == missionId && l.UserId == userId);
-            if (like != null)
-            {
-                Delete(like);
-                await SaveChangesAsync();
-            }
+            await _db.Likes.AddAsync(like);
         }
-        public async Task<int> CountLikesByMissionIdAsync(int missionId)
-            => await Context.Likes.CountAsync(l => l.MissionId == missionId);
-        public async Task<int> CountLikesByUserIdAsync(string userId)
-            => await Context.Likes.CountAsync(l => l.UserId == userId);
+
+        public Task RemoveAsync(Like like)
+        {
+            _db.Likes.Remove(like);
+            return Task.CompletedTask;
+        }
+
+        public Task<int> CountForMissionAsync(int missionId) =>
+            _db.Likes.CountAsync(l => l.MissionId == missionId);
+
+        public Task<int> CountForCommentAsync(int commentId) =>
+            _db.Likes.CountAsync(l => l.CommentId == commentId);
+
+        public Task SaveChangesAsync() => _db.SaveChangesAsync();
     }
 }

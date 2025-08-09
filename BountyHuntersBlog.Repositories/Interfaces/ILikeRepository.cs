@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BountyHuntersBlog.Data.Models;
+﻿using BountyHuntersBlog.Data.Models;
 
 namespace BountyHuntersBlog.Repositories.Interfaces
 {
     public interface ILikeRepository : IRepository<Like>
     {
-        Task<IEnumerable<Like>> GetLikesByMissionIdAsync(int missionId);
-        
-        Task<IEnumerable<Like>> GetLikesByUserIdAsync(string userId);
-        
-        Task<bool> ExistsAsync(int missionId, string userId);
-        
-        Task RemoveByMissionAndUserIdAsync(int missionId, string userId);
-        
-        Task<int> CountLikesByMissionIdAsync(int missionId);
-        
-        Task<int> CountLikesByUserIdAsync(string userId);
+        Task<Like?> FindMissionLikeAsync(int missionId, string userId);
+        Task<Like?> FindCommentLikeAsync(int commentId, string userId);
+        Task AddAsync(Like like);
+        Task RemoveAsync(Like like);
+        Task<int> CountForMissionAsync(int missionId);
+        Task<int> CountForCommentAsync(int commentId);
+        Task SaveChangesAsync();
     }
 }

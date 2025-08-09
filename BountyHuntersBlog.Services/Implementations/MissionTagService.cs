@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using BountyHuntersBlog.Data.Models;
@@ -19,39 +20,58 @@ namespace BountyHuntersBlog.Services.Implementations
             _mapper = mapper;
         }
 
+        // Pagination kept minimal; ideally push it down to repo
         public async Task<IEnumerable<MissionTagDto>> GetAllAsync(int page, int pageSize)
         {
-            var entities = await _repo.AllAsync();
-            return _mapper.Map<IEnumerable<MissionTagDto>>(entities);
+            var all = await _repo.AllAsync(); // returns IEnumerable<MissionTag>
+            var paged = all
+                .Skip((page <= 0 ? 0 : (page - 1) * pageSize))
+                .Take(pageSize > 0 ? pageSize : int.MaxValue);
+
+            return _mapper.Map<IEnumerable<MissionTagDto>>(paged);
         }
 
-        public async Task<MissionTagDto?> GetByIdAsync(int id)
+        // Composite key
+        public async Task<MissionTagDto?> GetAsync(int missionId, int tagId)
         {
-            // composite key – може да не реализираме GetById
-            return null;
+            var entity = await _repo.GetAsync(missionId, tagId);
+            return entity == null ? null : _mapper.Map<MissionTagDto>(entity);
         }
 
         public async Task CreateAsync(MissionTagDto dto)
         {
+            // guard: avoid duplicates
+            var exists = await _repo.ExistsAsync(dto.MissionId, dto.TagId);
+            if (exists) return;
+
             var entity = _mapper.Map<MissionTag>(dto);
             await _repo.AddAsync(entity);
             await _repo.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(int id, MissionTagDto dto)
-        {
-            // няма смисъл – many-to-many се управлява при създаване/триене
-        }
+        // Not meaningful for m2m; no-op by design
+        public Task UpdateAsync(int missionId, int tagId, MissionTagDto dto)
+            => Task.CompletedTask;
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int missionId, int tagId)
         {
-            var entity = await _repo.GetByIdAsync(id)
-                         ?? throw new KeyNotFoundException($"MissionTag not found");
+            var entity = await _repo.GetAsync(missionId, tagId)
+                         ?? throw new KeyNotFoundException("MissionTag not found");
             _repo.Delete(entity);
             await _repo.SaveChangesAsync();
         }
 
-        public async Task<bool> ExistsAsync(int id)
-            => await _repo.GetByIdAsync(id) != null;
+        public Task<bool> ExistsAsync(int missionId, int tagId)
+            => _repo.ExistsAsync(missionId, tagId);
+
+        // Helpers used by Missions Create/Edit screens
+        public Task<IReadOnlyList<int>> GetTagIdsForMissionAsync(int missionId)
+            => _repo.GetTagIdsForMissionAsync(missionId);
+
+        public async Task SetMissionTagsAsync(int missionId, IEnumerable<int> tagIds)
+        {
+            await _repo.SetMissionTagsAsync(missionId, tagIds ?? Enumerable.Empty<int>());
+            await _repo.SaveChangesAsync();
+        }
     }
 }

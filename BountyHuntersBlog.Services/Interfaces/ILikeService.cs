@@ -1,11 +1,16 @@
 ﻿using BountyHuntersBlog.Services.DTOs;
 
-public interface ILikeService
+namespace BountyHuntersBlog.Services.Interfaces
 {
+    public interface ILikeService
+    {
+        Task<LikeResultDto> ToggleMissionLikeAsync(int missionId, string userId);
+        Task<LikeResultDto> ToggleCommentLikeAsync(int commentId, string userId);
 
-    Task<IEnumerable<LikeDto>> GetLikesByMissionIdAsync(int missionId);
-    Task<IEnumerable<LikeDto>> GetLikesByUserIdAsync(string userId);
-    Task<int> CountLikesByMissionIdAsync(int missionId);
-    Task<int> CountLikesByUserIdAsync(string userId);
-    Task<bool> IsLikedByUserAsync(int missionId, string userId);
+        Task<bool> IsMissionLikedByUserAsync(int missionId, string userId);
+        Task<bool> IsCommentLikedByUserAsync(int commentId, string userId);
+
+        Task<int> CountMissionLikesAsync(int missionId);
+        Task<int> CountCommentLikesAsync(int commentId);
+    }
 }
