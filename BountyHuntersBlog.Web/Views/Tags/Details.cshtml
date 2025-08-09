@@ -1,0 +1,10 @@
+﻿@model BountyHuntersBlog.ViewModels.TagViewModel
+@{ ViewData["Title"] = "Tag Details"; }
+
+<h2>@Model.Name</h2>
+<p><strong>Missions:</strong> @Model.MissionsCount</p>
+
+<p>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</p>

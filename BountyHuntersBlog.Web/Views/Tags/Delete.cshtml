@@ -1,0 +1,12 @@
+﻿@model BountyHuntersBlog.ViewModels.TagViewModel
+@{ ViewData["Title"] = "Delete Tag"; }
+
+<h2>Delete Tag</h2>
+<div class="alert alert-warning">
+    Are you sure you want to delete "<strong>@Model.Name</strong>"?
+</div>
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+</form>

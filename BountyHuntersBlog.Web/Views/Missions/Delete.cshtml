@@ -1,0 +1,40 @@
+﻿@using BountyHuntersBlog.ViewModels
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model BountyHuntersBlog.ViewModels.MissionViewModel
+@inject BountyHuntersBlog.Services.Interfaces.ILikeService LikeService
+@{
+    var userId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAuth = User?.Identity?.IsAuthenticated ?? false;
+}
+@{
+    ViewData["Title"] = "Delete Mission";
+}
+
+@{
+    var missionLiked = isAuth && userId != null
+        ? await LikeService.IsMissionLikedByUserAsync(Model.Id, userId)
+        : false;
+    var missionLikes = await LikeService.CountMissionLikesAsync(Model.Id);
+    var likeVm = new LikeButtonViewModel
+    {
+        TargetType = LikeTargetType.Mission,
+        TargetId = Model.Id,
+        IsLikedByCurrentUser = missionLiked,
+        TotalCount = missionLikes,
+        IsAuthenticated = isAuth
+    };
+}
+<partial name="~/Views/Shared/_LikeButton.cshtml" model="likeVm" />
+
+
+<h2>Delete Mission</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to delete "<strong>@Model.Title</strong>"?
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+</form>

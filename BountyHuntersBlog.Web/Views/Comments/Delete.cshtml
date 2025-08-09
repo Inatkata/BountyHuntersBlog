@@ -1,0 +1,20 @@
+﻿@model BountyHuntersBlog.ViewModels.CommentViewModel
+
+@{
+    ViewData["Title"] = "Delete Comment";
+}
+
+<h2>Delete Comment</h2>
+
+<div>
+    <p><strong>Content:</strong> @Model.Content</p>
+    <p><strong>Author:</strong> @Model.AuthorName</p>
+    <p><strong>Mission:</strong> @Model.MissionTitle</p>
+    <p><strong>Created On:</strong> @Model.CreatedOn.ToString("g")</p>
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
