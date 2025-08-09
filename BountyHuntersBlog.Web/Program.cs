@@ -9,7 +9,6 @@ using BountyHuntersBlog.Services;
 using BountyHuntersBlog.Services.Extensions;
 using BountyHuntersBlog.Services.Implementations;
 using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.Web.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,14 +20,18 @@ builder.Services.AddDbContext<BountyHuntersDbContext>(opt =>
         sql => sql.EnableRetryOnFailure()));
 
 // 2. Настройка на Identity
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
-    options.User.RequireUniqueEmail = true;
-})
+    {
+        options.User.RequireUniqueEmail = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireDigit = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+    })
     .AddEntityFrameworkStores<BountyHuntersDbContext>()
     .AddDefaultTokenProviders();
 
@@ -66,8 +69,12 @@ var app = builder.Build();
 // 7. Seed данни (ако имаш DbSeeder)
 using (var scope = app.Services.CreateScope())
 {
-    await DbSeeder.SeedAsync(scope.ServiceProvider);
+    var db = scope.ServiceProvider.GetRequiredService<BountyHuntersDbContext>();
+    await db.Database.MigrateAsync();                  // <<< първо миграции
+    await IdentitySeeder.SeedAsync(scope.ServiceProvider);
+    await DataSeeder.SeedAsync(scope.ServiceProvider); // ако имаш
 }
+
 
 // Middleware pipeline
 if (!app.Environment.IsDevelopment())
@@ -75,6 +82,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseStatusCodePagesWithReExecute("/Home/StatusCode", "?code={0}");
 }
+
+app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -85,6 +95,10 @@ app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
 );
+app.MapAreaControllerRoute(
+    name: "admin",
+    areaName: "Admin",
+    pattern: "Admin/{controller=Admin}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
@@ -93,5 +107,9 @@ app.MapControllerRoute(
 
 
 app.MapRazorPages();
+
 await IdentitySeeder.SeedAsync(app.Services);
+await DataSeeder.SeedAsync(app.Services);
+
+
 app.Run();
