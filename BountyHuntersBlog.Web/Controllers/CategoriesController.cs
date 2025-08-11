@@ -1,49 +1,69 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
 using BountyHuntersBlog.Services.Interfaces;
+using BountyHuntersBlog.Services.DTOs;
+using BountyHuntersBlog.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
+public class CategoriesController : Controller
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class CategoriesController : Controller
+    private readonly ICategoryService _categories;
+    private readonly IMapper _mapper;
+
+    public CategoriesController(ICategoryService categories, IMapper mapper)
     {
-        private readonly ICategoryService _categories;
-        public CategoriesController(ICategoryService categories) => _categories = categories;
+        _categories = categories;
+        _mapper = mapper;
+    }
 
-        public async Task<IActionResult> Index()
-            => View(await _categories.AllAsync());
+    [HttpGet]
+    public async Task<IActionResult> Index()
+        => View((await _categories.AllAsync()).Select(_mapper.Map<CategoryViewModel>).ToList());
 
-        public IActionResult Create() => View();
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        var dto = await _categories.GetAsync(id);
+        if (dto == null) return NotFound();
+        return View(_mapper.Map<CategoryViewModel>(dto));
+    }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name)) return View();
-            await _categories.CreateAsync(name.Trim());
-            return RedirectToAction(nameof(Index));
-        }
+    [Authorize]
+    [HttpGet] public IActionResult Create() => View(new CategoryViewModel());
 
-        public async Task<IActionResult> Edit(int id)
-        {
-            var c = await _categories.GetAsync(id);
-            if (c == null) return NotFound();
-            return View(c);
-        }
+    [Authorize]
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(CategoryViewModel vm)
+    {
+        if (!ModelState.IsValid) return View(vm);
+        var id = await _categories.CreateAsync(new CategoryDto { Name = vm.Name });
+        return RedirectToAction(nameof(Details), new { id });
+    }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, string name)
-        {
-            if (string.IsNullOrWhiteSpace(name)) return View(await _categories.GetAsync(id) ?? null);
-            await _categories.UpdateAsync(id, name.Trim());
-            return RedirectToAction(nameof(Index));
-        }
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> Edit(int id)
+    {
+        var dto = await _categories.GetAsync(id);
+        if (dto == null) return NotFound();
+        return View(_mapper.Map<CategoryViewModel>(dto));
+    }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _categories.DeleteAsync(id);
-            return RedirectToAction(nameof(Index));
-        }
+    [Authorize]
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(CategoryViewModel vm)
+    {
+        if (!ModelState.IsValid) return View(vm);
+        var ok = await _categories.UpdateAsync(new CategoryDto { Id = vm.Id, Name = vm.Name });
+        if (!ok) return NotFound();
+        return RedirectToAction(nameof(Details), new { id = vm.Id });
+    }
+
+    [Authorize]
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _categories.SoftDeleteAsync(id);
+        return RedirectToAction(nameof(Index));
     }
 }

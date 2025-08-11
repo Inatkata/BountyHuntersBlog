@@ -1,16 +1,112 @@
 ﻿@{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = ViewData["Title"] ?? "Home";
+    ViewData["BodyClass"] = ViewData["BodyClass"] ?? "home-light";
 }
-<div class="mt-4">
-    <h2>Welcome to Bounty Hunters</h2>
-    <p class="text-muted">Choose a section:</p>
-    <div class="d-flex gap-2 flex-wrap">
-        <a class="btn btn-outline-primary" asp-area="" asp-controller="Missions" asp-action="Index">Missions</a>
-        <a class="btn btn-outline-secondary" asp-area="" asp-controller="Categories" asp-action="Index">Categories</a>
-        <a class="btn btn-outline-secondary" asp-area="" asp-controller="Tags" asp-action="Index">Tags</a>
-        @if (User.IsInRole("Admin"))
-        {
-            <a class="btn btn-primary" asp-area="Admin" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
-        }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BountyHunters</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/retake.css" asp-append-version="true" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="d-flex flex-column min-vh-100 @ViewData["BodyClass"]">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand brand-mark" asp-controller="Home" asp-action="Index">
+                    <i class="fa-solid fa-bullseye"></i> BountyHunters
+                    <span class="visually-hidden">(current)</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01"
+                        aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarColor01">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-house-chimney"></i> Home
+                            </a>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                                <i class="fa-solid fa-crosshairs"></i> Missions
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" asp-controller="Missions" asp-action="Index">
+                                    <i class="fas fa-list"></i> All Missions
+                                </a>
+                                @if (User?.Identity?.IsAuthenticated ?? false)
+                                {
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" asp-controller="Missions" asp-action="Create">
+                                        <i class="fas fa-plus"></i> Create Mission
+                                    </a>
+                                }
+                            </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Categories" asp-action="Index">
+                                <i class="fa-solid fa-layer-group"></i> Categories
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Tags" asp-action="Index">
+                                <i class="fa-solid fa-tags"></i> Tags
+                            </a>
+                        </li>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
+                                    <i class="fa-solid fa-shield-halved"></i> Admin
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container flex-grow-1">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
     </div>
-</div>
+
+    <footer class="bg-dark text-white py-2">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span>&copy; @DateTime.Now.Year - BountyHunters</span>
+            <div class="d-flex align-items-center">
+                <span id="footer-quote" class="me-2">Loading...</span>
+                <button id="new-quote-btn" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-arrows-rotate"></i> New Quote
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/footer-quotes.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

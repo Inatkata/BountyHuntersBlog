@@ -1,17 +1,28 @@
-﻿@model BountyHuntersBlog.Services.DTOs.TagDto
-@{ ViewData["Title"] = "Create Tag"; }
-<h2>Create Tag</h2>
-
-<form method="post">
-    @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+﻿@model BountyHuntersBlog.ViewModels.TagViewModel
+@{
+    ViewData["Title"] = "Create Tag";
+}
+<div class="d-flex justify-content-between align-items-center mb-3" style="margin-top:20px;">
+    <h2>@ViewData["Title"]</h2>
+</div>
+<hr />
+<div class="row">
+    <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
+        <form asp-controller="Tags" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label-add-edit">Tag Name</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3 d-flex gap-2">
+                <button class="btn btn-warning btn-dark-text w-100 fw-bold rounded" type="submit">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <a asp-controller="Tags" asp-action="Index" class="btn btn-secondary w-100 fw-bold rounded">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </form>
     </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Back</a>
-</form>
-
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+</div>

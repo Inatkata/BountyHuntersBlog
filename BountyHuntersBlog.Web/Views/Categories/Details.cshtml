@@ -1,10 +1,38 @@
 ﻿@model BountyHuntersBlog.ViewModels.CategoryViewModel
-@{ ViewData["Title"] = "Category Details"; }
+@{
+    ViewData["Title"] = "Category Details";
+}
+<div class="d-flex justify-content-between align-items-center mb-3" style="margin-top:20px;">
+    <h2>@ViewData["Title"]</h2>
+</div>
+<hr />
 
-<h2>@Model.Name</h2>
-<p><strong>Missions:</strong> @Model.MissionsCount</p>
-
-<p>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Back</a>
-</p>
+<div class="row justify-content-center" style="margin:0 auto; max-width:800px;">
+    <div class="col-md-12">
+        <div class="card bg-dark text-white border-0 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-2">
+                    <i class="fa-solid fa-layer-group"></i> @Model.Name
+                </h4>
+                <p class="text-muted mb-0">Use this category to group related missions.</p>
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <a asp-controller="Missions" asp-action="Index" asp-route-categoryId="@Model.Id" class="btn btn-info">
+                    <i class="fas fa-crosshairs"></i> View Missions
+                </a>
+                @if (User?.Identity?.IsAuthenticated ?? false)
+                {
+                    <a asp-controller="Categories" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a asp-controller="Categories" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                }
+                <a asp-controller="Categories" asp-action="Index" class="btn btn-warning ms-auto">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

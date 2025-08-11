@@ -1,36 +1,36 @@
 ﻿using BountyHuntersBlog.Data;
-using BountyHuntersBlog.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
+using BountyHuntersBlog.Repositories.Interfaces;
 
 namespace BountyHuntersBlog.Repositories.Base
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        protected readonly BountyHuntersDbContext Context;
-        protected readonly DbSet<T> DbSet;
-       
-        public Repository(BountyHuntersDbContext context)
+        protected readonly BountyHuntersDbContext _ctx;
+        protected readonly DbSet<T> _dbSet;
+
+        public Repository(BountyHuntersDbContext ctx)
         {
-            Context = context;
-            DbSet = context.Set<T>();
+            _ctx = ctx;
+            _dbSet = _ctx.Set<T>();
         }
 
-        public async Task<IEnumerable<T>> AllAsync()
-            => await DbSet.ToListAsync();
+        public Task<List<T>> AllAsync() => _dbSet.ToListAsync();
+        public IQueryable<T> AllAsQueryable() => _dbSet.AsQueryable();
 
-        public async Task<T?> GetByIdAsync(int id)
-            => await DbSet.FindAsync(id);
+        public Task<T?> GetByIdAsync(object id) => _dbSet.FindAsync(id).AsTask();
 
-        public async Task AddAsync(T entity)
-            => await DbSet.AddAsync(entity);
+        public Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+            => _dbSet.AnyAsync(predicate);
 
-        public void Update(T entity)
-            => DbSet.Update(entity);
+        public Task AddAsync(T entity) => _dbSet.AddAsync(entity).AsTask();
+        public Task AddRangeAsync(IEnumerable<T> entities) => _dbSet.AddRangeAsync(entities);
 
-        public void Delete(T entity) => DbSet.Remove(entity);
-        public Task<int> SaveChangesAsync()
-        => Context.SaveChangesAsync();
+        public void Update(T entity) => _dbSet.Update(entity);
+        public void Delete(T entity) => _dbSet.Remove(entity);
+
+        public Task<int> SaveChangesAsync(CancellationToken ct = default)
+            => _ctx.SaveChangesAsync(ct);
     }
 }

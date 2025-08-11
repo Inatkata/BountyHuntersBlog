@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using BountyHuntersBlog.Data.Models;
 
-
 namespace BountyHuntersBlog.Data.Seeds
 {
     public static class DbSeeder
@@ -15,8 +14,6 @@ namespace BountyHuntersBlog.Data.Seeds
             var sp = scope.ServiceProvider;
 
             var db = sp.GetRequiredService<BountyHuntersDbContext>();
-            await db.Database.MigrateAsync();
-
             var roleManager = sp.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
 
@@ -24,15 +21,13 @@ namespace BountyHuntersBlog.Data.Seeds
             foreach (var role in new[] { "Admin", "User" })
             {
                 if (!await roleManager.RoleExistsAsync(role))
-                {
                     await roleManager.CreateAsync(new IdentityRole(role));
-                }
             }
 
-            // 2) Admin user (ApplicationUser — no DisplayName field)
+            // 2) Admin user (с DisplayName)
             const string adminUserName = "admin";
             const string adminEmail = "admin@bountyhunters.local";
-            const string adminPass = "Admin!234"; // change after first run
+            const string adminPass = "Admin!234"; // смени след първи старт
 
             var admin = await userManager.FindByNameAsync(adminUserName);
             if (admin == null)
@@ -41,7 +36,8 @@ namespace BountyHuntersBlog.Data.Seeds
                 {
                     UserName = adminUserName,
                     Email = adminEmail,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    DisplayName = "Administrator"
                 };
 
                 var create = await userManager.CreateAsync(admin, adminPass);
@@ -49,10 +45,10 @@ namespace BountyHuntersBlog.Data.Seeds
                     throw new InvalidOperationException(string.Join("; ", create.Errors.Select(e => e.Description)));
 
                 await userManager.AddToRoleAsync(admin, "Admin");
-                await userManager.AddClaimAsync(admin, new Claim(ClaimTypes.Role, "Admin"));
+                // Няма нужда от допълнителен Role claim – ролята е достатъчна
             }
 
-            // 3) Categories
+            // 3) Categories (idempotent по име, case-insensitive)
             if (!await db.Categories.AnyAsync())
             {
                 db.Categories.AddRange(
@@ -74,41 +70,39 @@ namespace BountyHuntersBlog.Data.Seeds
                 await db.SaveChangesAsync();
             }
 
-            // 5) Missions
+            // 5) Missions (CreatedOn идва от DB default)
             if (!await db.Missions.AnyAsync())
             {
                 var anyCategory = await db.Categories.OrderBy(c => c.Id).FirstAsync();
-                var adminId = admin.Id; // string
+                var adminId = admin.Id;
 
                 var m1 = new Mission
                 {
                     Title = "Silent Run in Old Town",
                     Description = "Plant trackers on targets. Avoid cameras; exfil via north alley.",
                     UserId = adminId,
-                    CategoryId = anyCategory.Id,
-                    // CreatedOn comes from DB default (GETUTCDATE()) per configuration
+                    CategoryId = anyCategory.Id
                 };
                 var m2 = new Mission
                 {
                     Title = "Convoy Intercept",
                     Description = "Stop and scan cargo. Use EMP drone; minimal collateral.",
                     UserId = adminId,
-                    CategoryId = anyCategory.Id,
+                    CategoryId = anyCategory.Id
                 };
 
                 db.Missions.AddRange(m1, m2);
                 await db.SaveChangesAsync();
 
-                // 6) MissionTags (link by entity to avoid guessing int IDs)
+                // 6) MissionTags
                 var tagStealth = await db.Tags.FirstOrDefaultAsync(t => t.Name == "stealth");
                 var tagUrgent = await db.Tags.FirstOrDefaultAsync(t => t.Name == "urgent");
                 if (tagStealth != null) db.MissionTags.Add(new MissionTag { MissionId = m1.Id, TagId = tagStealth.Id });
                 if (tagUrgent != null) db.MissionTags.Add(new MissionTag { MissionId = m2.Id, TagId = tagUrgent.Id });
-
                 await db.SaveChangesAsync();
             }
 
-            // (Optional) Seed a sample comment + like to verify relations
+            // 7) Sample comment + like
             if (!await db.Comments.AnyAsync())
             {
                 var mission = await db.Missions.FirstAsync();
@@ -116,7 +110,8 @@ namespace BountyHuntersBlog.Data.Seeds
                 {
                     MissionId = mission.Id,
                     UserId = admin.Id,
-                     C= "Initial briefing acknowledged."
+                    Content = "Initial briefing acknowledged."
+                    // CreatedOn -> DB default
                 });
                 await db.SaveChangesAsync();
             }
@@ -128,7 +123,7 @@ namespace BountyHuntersBlog.Data.Seeds
                 {
                     MissionId = mission.Id,
                     UserId = admin.Id
-                    // XOR rule satisfied: MissionId set, CommentId null
+                    // CreatedOn -> DB default; XOR правило спазено (CommentId null)
                 });
                 await db.SaveChangesAsync();
             }

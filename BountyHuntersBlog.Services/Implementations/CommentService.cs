@@ -1,48 +1,72 @@
-﻿using System.Security.Claims;
+﻿// Services/Implementations/CommentService.cs
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
+using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Services.Implementations
 {
     public class CommentService : ICommentService
     {
         private readonly ICommentRepository _comments;
-        private readonly IMissionRepository _missions;
+        private readonly IMapper _mapper;
 
-        public CommentService(ICommentRepository comments, IMissionRepository missions)
+        public CommentService(ICommentRepository comments, IMapper mapper)
         {
             _comments = comments;
-            _missions = missions;
+            _mapper = mapper;
         }
 
-        public async Task AddAsync(int missionId, string text, ClaimsPrincipal user)
+        public async Task<CommentDto> AddAsync(int missionId, string userId, string content)
         {
-            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
-            var mission = await _missions.GetByIdAsync(missionId) ?? throw new KeyNotFoundException("Mission not found.");
-
-            var c = new Comment
+            var entity = new Comment
             {
-                MissionId = mission.Id,
-                Text = text.Trim(),
+                MissionId = missionId,
                 UserId = userId,
-                CreatedOn = DateTime.UtcNow
+                Content = content
             };
 
-            await _comments.AddAsync(c);
+            await _comments.AddAsync(entity);
             await _comments.SaveChangesAsync();
+
+            var withIncludes = await _comments.GetByIdWithIncludesAsync(entity.Id);
+            return _mapper.Map<CommentDto>(withIncludes ?? entity);
         }
 
-        public async Task DeleteAsync(int commentId, ClaimsPrincipal user)
+        public async Task<bool> EditAsync(int id, string content)
         {
-            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
-            var c = await _comments.GetByIdAsync(commentId) ?? throw new KeyNotFoundException("Comment not found.");
-
-            if (c.UserId != userId && !(user.IsInRole("Admin")))
-                throw new UnauthorizedAccessException("Not allowed.");
-
-            _comments.Delete(c);
+            var entity = await _comments.GetByIdAsync(id);
+            if (entity == null) return false;
+            entity.Content = content;
+            _comments.Update(entity);
             await _comments.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var entity = await _comments.GetByIdAsync(id);
+            if (entity == null) return false;
+            _comments.Delete(entity);
+            await _comments.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IReadOnlyList<CommentDto>> GetForMissionAsync(int missionId)
+        {
+            var query = _comments.AllAsQueryable()
+                                 .Where(c => c.MissionId == missionId)
+                                 .OrderByDescending(c => c.CreatedOn);
+            return await query.ProjectTo<CommentDto>(_mapper.ConfigurationProvider).ToListAsync();
+        }
+
+        public async Task<CommentDto?> GetByIdAsync(int id)
+        {
+            var entity = await _comments.GetByIdWithIncludesAsync(id);
+            return entity == null ? null : _mapper.Map<CommentDto>(entity);
         }
     }
 }

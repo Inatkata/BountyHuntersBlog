@@ -1,23 +1,26 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿// BountyHuntersBlog.Data/Configurations/CategoryConfiguration.cs
 using BountyHuntersBlog.Data.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using BountyHuntersBlog.Data.Constants;
 
-namespace BountyHuntersBlog.Data.Configurations
+public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
-    public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+    public void Configure(EntityTypeBuilder<Category> b)
     {
-        public void Configure(EntityTypeBuilder<Category> builder)
-        {
-            builder.HasIndex(c => c.Name).IsUnique();
-            builder.HasKey(c => c.Id);
+        b.Property(x => x.Name)
+            .IsRequired()
+            .HasMaxLength(ModelConstants.User.DisplayNameMaxLength);
 
-            builder.Property(c => c.Name)
-                .IsRequired()
-                .HasMaxLength(50);
+        b.Property(x => x.IsDeleted).HasDefaultValue(false);
+        b.Property(x => x.CreatedOn).HasDefaultValueSql("GETUTCDATE()");
 
-            builder.HasMany(c => c.Missions)
-                .WithOne(m => m.Category)
-                .HasForeignKey(m => m.CategoryId);
-        }
+        // Уникален индекс за име (case-insensitive при SQL Server collation)
+        b.HasIndex(x => x.Name).IsUnique();
+
+        // Ако не искаш твърда уникалност, а soft-delete:
+        // b.HasIndex(x => new { x.Name, x.IsDeleted }).IsUnique();
+
+        // (по избор) Тригериране на ModifiedOn през save interceptor или ръчно в service слоя.
     }
 }

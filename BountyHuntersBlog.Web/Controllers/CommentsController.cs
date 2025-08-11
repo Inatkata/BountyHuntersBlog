@@ -1,31 +1,37 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿// BountyHuntersBlog.Web/Controllers/CommentsController.cs
+using System.Security.Claims;
+using AutoMapper;
 using BountyHuntersBlog.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace BountyHuntersBlog.Web.Controllers
+public class CommentsController : Controller
 {
-    [Authorize]
-    public class CommentsController : Controller
+    private readonly ICommentService _comments;
+    private readonly IMapper _mapper;
+
+    public CommentsController(ICommentService comments, IMapper mapper)
     {
-        private readonly ICommentService _comments;
+        _comments = comments;
+        _mapper = mapper;
+    }
 
-        public CommentsController(ICommentService comments) => _comments = comments;
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(int missionId, string content)
+    {
+        var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)!;
+        var dto = await _comments.AddAsync(missionId, userId, content);
+        return RedirectToAction("Details", "Missions", new { id = missionId });
+    }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Add(int missionId, string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return RedirectToAction("Details", "Missions", new { id = missionId });
-
-            await _comments.AddAsync(missionId, text, User);
-            return RedirectToAction("Details", "Missions", new { id = missionId });
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, int missionId)
-        {
-            await _comments.DeleteAsync(id, User);
-            return RedirectToAction("Details", "Missions", new { id = missionId });
-        }
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id, int missionId)
+    {
+        await _comments.DeleteAsync(id);
+        return RedirectToAction("Details", "Missions", new { id = missionId });
     }
 }

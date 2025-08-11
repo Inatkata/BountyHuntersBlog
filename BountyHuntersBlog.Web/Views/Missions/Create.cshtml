@@ -1,40 +1,51 @@
-﻿@model BountyHuntersBlog.ViewModels.Missions.MissionViewModel
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionEditViewModel
 @{
     ViewData["Title"] = "Create Mission";
-    var categories = (IEnumerable<SelectListItem>)ViewBag.Categories;
-    var tags = (IEnumerable<SelectListItem>)ViewBag.Tags;
 }
-<h2>Create Mission</h2>
+<div class="d-flex justify-content-between align-items-center mb-3" style="margin-top:20px;">
+    <h2>@ViewData["Title"]</h2>
+</div>
+<hr />
 
-<form asp-action="Create" method="post">
-    @Html.AntiForgeryToken()
+<div class="row">
+    <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
+        <form asp-controller="Missions" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
 
-    <div class="mb-3">
-        <label class="form-label">Category</label>
-        <select asp-for="CategoryId" class="form-select" asp-items="categories"></select>
-        <span asp-validation-for="CategoryId" class="text-danger"></span>
+            <div class="row">
+                <div class="col-sm-6 mb-2">
+                    <label asp-for="Title" class="form-label-add-edit">Mission Title</label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="col-sm-6 mb-2">
+                    <label asp-for="CategoryId" class="form-label-add-edit">Select Category</label>
+                    <select asp-for="CategoryId" class="form-control" asp-items="Model.Categories">
+                        <option value="">...</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <label asp-for="Description" class="form-label-add-edit">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label-add-edit">Tags</label>
+                <select asp-for="TagIds" class="form-control" asp-items="Model.Tags" multiple>
+                </select>
+                <span class="form-text">Hold Ctrl/Cmd for multi-select.</span>
+            </div>
+
+            <div class="mb-2">
+                <button class="btn btn-warning btn-dark-text w-100 py-2 fw-bold rounded" type="submit">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </form>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Tags</label>
-        <select asp-for="TagIds" class="form-select" asp-items="tags" multiple size="6"></select>
-        <span asp-validation-for="TagIds" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Title" class="form-label"></label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Description" class="form-label"></label>
-        <textarea asp-for="Description" rows="4" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Back</a>
-</form>
-
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+</div>

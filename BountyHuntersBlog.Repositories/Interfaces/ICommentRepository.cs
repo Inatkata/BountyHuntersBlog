@@ -1,4 +1,5 @@
-﻿using BountyHuntersBlog.Data.Models;
+﻿// Interfaces/ICommentRepository.cs
+using BountyHuntersBlog.Data.Models;
 
 namespace BountyHuntersBlog.Repositories.Interfaces
 {

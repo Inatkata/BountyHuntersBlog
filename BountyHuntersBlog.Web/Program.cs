@@ -6,16 +6,12 @@ using BountyHuntersBlog.Web.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // DB
 builder.Services.AddDbContext<BountyHuntersDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         sql => sql.EnableRetryOnFailure()));
-
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -33,11 +29,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.ConfigureApplicationCookie(opt =>
 {
     opt.LoginPath = "/Account/Login";
-    opt.AccessDeniedPath = "/Account/Login";
+    opt.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-
-// Repos & Services (използвай само extension-ите, без ръчни дубли)
+// Repos & Services
 builder.Services.AddRepositories();
 builder.Services.AddApplicationServices();
 
@@ -48,7 +43,19 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// DB migrate + seed (САМО ВЕДНЪЖ)
+// Exception handling / HSTS
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+else
+{
+    // по избор: detailed errors в Dev
+    app.UseDeveloperExceptionPage();
+}
+
+// DB migrate + seed
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BountyHuntersDbContext>();
@@ -57,28 +64,21 @@ using (var scope = app.Services.CreateScope())
     await DataSeeder.SeedAsync(scope.ServiceProvider);
 }
 
-
-
-
 // Pipeline
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-
 app.UseStatusCodePagesWithReExecute("/Error/{0}");
-app.UseExceptionHandler("/Error");
-
-
 app.UseAuthentication();
-app.UseUserization();
+app.UseAuthorization();
 
 // Routes
 app.MapAreaControllerRoute(
     name: "admin",
     areaName: "Admin",
-    pattern: "Admin/{controller=Admin}/{action=Index}/{id?}");
+    pattern: "Admin/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",

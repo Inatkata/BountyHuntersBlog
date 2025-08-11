@@ -1,7 +1,7 @@
-﻿
+﻿using BountyHuntersBlog.Data.Constants;
+using BountyHuntersBlog.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using BountyHuntersBlog.Data.Models;
 
 namespace BountyHuntersBlog.Data.Configurations
 {
@@ -9,6 +9,12 @@ namespace BountyHuntersBlog.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<ApplicationUser> builder)
         {
+            // Scalar props
+            builder.Property(u => u.DisplayName)
+                .IsRequired()
+                .HasMaxLength(ModelConstants.User.DisplayNameMaxLength);
+
+            // Relations
             builder.HasMany(u => u.Missions)
                 .WithOne(m => m.User)
                 .HasForeignKey(m => m.UserId)

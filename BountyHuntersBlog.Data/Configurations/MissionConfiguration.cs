@@ -8,16 +8,21 @@ public class MissionConfiguration : IEntityTypeConfiguration<Mission>
     public void Configure(EntityTypeBuilder<Mission> builder)
     {
         builder.HasKey(m => m.Id);
+
         builder.Property(m => m.Title)
             .IsRequired()
-            .HasMaxLength(ModelConstants.MissionTitleMaxLength);
+            .HasMaxLength(ModelConstants.User.DisplayNameMaxLength);
 
         builder.Property(m => m.Description)
             .IsRequired()
-            .HasMaxLength(ModelConstants.MissionDescriptionMaxLength);
+            .HasMaxLength(ModelConstants.User.DisplayNameMaxLength);
 
         builder.Property(m => m.CreatedOn)
             .HasDefaultValueSql("GETUTCDATE()");
+
+        // По избор, ако има такива полета в ентитито:
+        // builder.Property(m => m.IsCompleted).HasDefaultValue(false);
+        // builder.Property(m => m.IsDeleted).HasDefaultValue(false);
 
         builder.HasOne(m => m.User)
             .WithMany(u => u.Missions)
@@ -29,5 +34,8 @@ public class MissionConfiguration : IEntityTypeConfiguration<Mission>
             .HasForeignKey(m => m.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Индекси за търсене / списъци
+        builder.HasIndex(m => m.Title);
+        builder.HasIndex(m => new { m.CategoryId, m.CreatedOn });
     }
 }

@@ -1,39 +1,20 @@
-﻿using BountyHuntersBlog.Data.Models;
-
-using Microsoft.EntityFrameworkCore;
+﻿// Implementations/CategoryRepository.cs
 using BountyHuntersBlog.Data;
+using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Base;
+using BountyHuntersBlog.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Repositories.Implementations
 {
     public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
-        private readonly BountyHuntersDbContext _db;
+        public CategoryRepository(BountyHuntersDbContext ctx) : base(ctx) { }
 
-        public CategoryRepository(BountyHuntersDbContext context)
-            : base(context)
-        {
-            _db = context;
-        }
+        public Task<Category?> GetByNameAsync(string name) =>
+            _dbSet.FirstOrDefaultAsync(c => c.Name == name);
 
-        public async Task<Category?> GetByNameAsync(string name)
-            => await DbSet.FirstOrDefaultAsync(c => c.Name == name);
-
-        public async Task<IEnumerable<Category>> GetCategoriesByMissionIdAsync(int missionId)
-            => await Context.Missions
-                .Where(m => m.Id == missionId)
-                .Select(m => m.Category)
-                .ToListAsync();
-
-
-        public async Task<IEnumerable<Category>> GetCategoriesByUserIdAsync(string userId)
-            => await Context.Missions
-                .Where(m => m.UserId == userId)
-                .SelectMany(m => m.Category != null ? new[] { m.Category } : Array.Empty<Category>())
-                .Distinct()
-                .ToListAsync();
-
-        public async Task<bool> ExistsAsync(int categoryId)
-            => await DbSet.AnyAsync(c => c.Id == categoryId);
+        public Task<bool> ExistsByNameAsync(string name) =>
+            _dbSet.AnyAsync(c => c.Name == name);
     }
 }

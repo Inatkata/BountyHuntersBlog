@@ -1,47 +1,58 @@
-﻿using System.Security.Claims;
+﻿// Services/Implementations/LikeService.cs
 using BountyHuntersBlog.Repositories.Interfaces;
+using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Services.Implementations
 {
     public class LikeService : ILikeService
     {
         private readonly ILikeRepository _likes;
-        private readonly IMissionRepository _missions;
-        private readonly ICommentRepository _comments;
 
-        public LikeService(ILikeRepository likes, IMissionRepository missions, ICommentRepository comments)
+        public LikeService(ILikeRepository likes)
         {
             _likes = likes;
-            _missions = missions;
-            _comments = comments;
         }
 
-        public async Task LikeMissionAsync(int missionId, ClaimsPrincipal user)
+        public async Task<LikeResultDto> ToggleMissionLikeAsync(int missionId, string userId)
         {
-            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
-            var mission = await _missions.GetByIdWithIncludesAsync(missionId) ?? throw new KeyNotFoundException("Mission not found.");
-
-            if (!mission.Likes.Any(l => l.UserId == userId))
+            var existing = await _likes.FindForMissionAsync(userId, missionId);
+            bool liked;
+            if (existing != null)
             {
-                await _likes.AddAsync(new Like { MissionId = mission.Id, UserId = userId, CreatedOn = DateTime.UtcNow });
-                await _likes.SaveChangesAsync();
+                _likes.Delete(existing);
+                liked = false;
             }
+            else
+            {
+                await _likes.AddAsync(new Data.Models.Like { MissionId = missionId, UserId = userId });
+                liked = true;
+            }
+            await _likes.SaveChangesAsync();
+
+            var count = await _likes.AllAsQueryable().CountAsync(l => l.MissionId == missionId);
+            return new LikeResultDto { TargetType = "mission", TargetId = missionId, IsLiked = liked, LikesCount = count };
         }
 
-        public async Task<int> LikeCommentAsync(int commentId, ClaimsPrincipal user)
+        public async Task<LikeResultDto> ToggleCommentLikeAsync(int commentId, string userId)
         {
-            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
-            var comment = await _comments.GetByIdWithIncludesAsync(commentId) ?? throw new KeyNotFoundException("Comment not found.");
-
-            if (!comment.Likes.Any(l => l.UserId == userId))
+            var existing = await _likes.FindForCommentAsync(userId, commentId);
+            bool liked;
+            if (existing != null)
             {
-                await _likes.AddAsync(new Like { CommentId = comment.Id, UserId = userId, CreatedOn = DateTime.UtcNow });
-                await _likes.SaveChangesAsync();
+                _likes.Delete(existing);
+                liked = false;
             }
+            else
+            {
+                await _likes.AddAsync(new Data.Models.Like { CommentId = commentId, UserId = userId });
+                liked = true;
+            }
+            await _likes.SaveChangesAsync();
 
-            return comment.MissionId;
+            var count = await _likes.AllAsQueryable().CountAsync(l => l.CommentId == commentId);
+            return new LikeResultDto { TargetType = "comment", TargetId = commentId, IsLiked = liked, LikesCount = count };
         }
     }
 }

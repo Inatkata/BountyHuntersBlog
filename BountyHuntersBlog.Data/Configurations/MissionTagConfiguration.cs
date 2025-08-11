@@ -1,22 +1,30 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿// BountyHuntersBlog.Data/Configurations/MissionTagConfiguration.cs
 using BountyHuntersBlog.Data.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BountyHuntersBlog.Data.Configurations
+public class MissionTagConfiguration : IEntityTypeConfiguration<MissionTag>
 {
-    public class MissionTagConfiguration : IEntityTypeConfiguration<MissionTag>
+    public void Configure(EntityTypeBuilder<MissionTag> b)
     {
-        public void Configure(EntityTypeBuilder<MissionTag> builder)
-        {
-            builder.HasKey(mt => new { mt.MissionId, mt.TagId });
+        // Композитен ключ: предотвратява дублиране на (MissionId, TagId)
+        b.HasKey(mt => new { mt.MissionId, mt.TagId });
 
-            builder.HasOne(mt => mt.Mission)
-                .WithMany(m => m.MissionTags)
-                .HasForeignKey(mt => mt.MissionId);
+        b.Property(mt => mt.CreatedOn)
+            .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.HasOne(mt => mt.Tag)
-                .WithMany(t => t.MissionTags)
-                .HasForeignKey(mt => mt.TagId);
-        }
+        b.HasOne(mt => mt.Mission)
+            .WithMany(m => m.MissionTags)
+            .HasForeignKey(mt => mt.MissionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        b.HasOne(mt => mt.Tag)
+            .WithMany(t => t.MissionTags)
+            .HasForeignKey(mt => mt.TagId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Полезни индекси за филтър
+        b.HasIndex(mt => mt.TagId);
+        b.HasIndex(mt => mt.MissionId);
     }
 }

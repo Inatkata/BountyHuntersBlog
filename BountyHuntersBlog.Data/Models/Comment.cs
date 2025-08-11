@@ -1,24 +1,28 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿// BountyHuntersBlog.Data/Models/Comment.cs
+using System.ComponentModel.DataAnnotations;
+using BountyHuntersBlog.Data.Constants;
 
 namespace BountyHuntersBlog.Data.Models
 {
     public class Comment
     {
+        [Key]
         public int Id { get; set; }
 
         [Required]
-        public int MissionId { get; set; }
-        public Mission Mission { get; set; } = null!;
+        [MaxLength(ModelConstants.User.DisplayNameMaxLength)]
+        public string Content { get; set; } = null!;
+
+        [Required]
+        public DateTime CreatedOn { get; set; }
 
         [Required]
         public string UserId { get; set; } = null!;
         public ApplicationUser User { get; set; } = null!;
 
-        [Required, MaxLength(4000)]
-        public string Text { get; set; } = string.Empty;
-
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+        [Required]
+        public int MissionId { get; set; }
+        public Mission Mission { get; set; } = null!;
 
         public ICollection<Like> Likes { get; set; } = new List<Like>();
     }

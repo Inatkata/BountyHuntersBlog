@@ -1,14 +1,14 @@
-﻿using BountyHuntersBlog.Services.DTOs;
+﻿// Services/Interfaces/ITagService.cs
+using BountyHuntersBlog.Services.DTOs;
 
 namespace BountyHuntersBlog.Services.Interfaces
 {
     public interface ITagService
     {
-        Task<IEnumerable<TagDto>> GetAllAsync(int page, int pageSize);
-        Task<TagDto?> GetByIdAsync(int id);
-        Task CreateAsync(TagDto dto);
-        Task UpdateAsync(int id, TagDto dto);
-        Task DeleteAsync(int id);
-        Task<bool> ExistsAsync(int id);
+        Task<IReadOnlyList<TagDto>> AllAsync();
+        Task<TagDto?> GetAsync(int id);
+        Task<int> CreateAsync(TagDto dto);
+        Task<bool> UpdateAsync(TagDto dto);
+        Task<bool> SoftDeleteAsync(int id);
     }
 }

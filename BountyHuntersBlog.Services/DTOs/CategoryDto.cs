@@ -1,9 +1,9 @@
-﻿namespace BountyHuntersBlog.Services.DTOs
+﻿// Services/DTOs/CategoryDto.cs
+namespace BountyHuntersBlog.Services.DTOs
 {
     public class CategoryDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = null!;
-        public int MissionsCount { get; set; }
     }
 }

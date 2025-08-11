@@ -1,11 +1,11 @@
-﻿using BountyHuntersBlog.Data.Models;
-using BountyHuntersBlog.Repositories.Interfaces;
+﻿// Interfaces/ICategoryRepository.cs
+using BountyHuntersBlog.Data.Models;
 
-public interface ICategoryRepository : IRepository<Category>
+namespace BountyHuntersBlog.Repositories.Interfaces
 {
-    Task<Category?> GetByNameAsync(string name);
-    Task<IEnumerable<Category>> GetCategoriesByMissionIdAsync(int missionId);
-
-    Task<IEnumerable<Category>> GetCategoriesByUserIdAsync(string userId);
-    Task<bool> ExistsAsync(int categoryId);
+    public interface ICategoryRepository : IRepository<Category>
+    {
+        Task<Category?> GetByNameAsync(string name);
+        Task<bool> ExistsByNameAsync(string name);
+    }
 }

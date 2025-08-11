@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using BountyHuntersBlog.Services.Interfaces;
+﻿using AutoMapper;
 using BountyHuntersBlog.Services.DTOs;
+using BountyHuntersBlog.Services.Interfaces;
+using BountyHuntersBlog.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
 {
@@ -9,49 +11,44 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminTagsController : Controller
     {
-        private readonly ITagService _service;
-        public AdminTagsController(ITagService service) => _service = service;
-
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 20)
-        {
-            var items = await _service.GetAllAsync(page, pageSize); // FIX: add paging args
-            return View(items);
-        }
+        private readonly ITagService _tags; private readonly IMapper _mapper;
+        public AdminTagsController(ITagService tags, IMapper mapper) { _tags = tags; _mapper = mapper; }
 
         [HttpGet]
-        public IActionResult Create() => View(new TagDto());
+        public async Task<IActionResult> Index()
+            => View((await _tags.AllAsync()).Select(_mapper.Map<TagViewModel>).ToList());
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(TagDto dto)
+        [HttpGet] public IActionResult Create() => View(new TagViewModel());
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(TagViewModel vm)
         {
-            if (!ModelState.IsValid) return View(dto);
-            await _service.CreateAsync(dto);
+            if (!ModelState.IsValid) return View(vm);
+            await _tags.CreateAsync(new TagDto { Name = vm.Name });
             return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var dto = await _service.GetByIdAsync(id);
+            var dto = await _tags.GetAsync(id);
             if (dto == null) return NotFound();
-            return View(dto);
+            return View(_mapper.Map<TagViewModel>(dto));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(TagDto dto)
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(TagViewModel vm)
         {
-            if (!ModelState.IsValid) return View(dto);
-            await _service.UpdateAsync(dto.Id, dto); // FIX: id + dto
+            if (!ModelState.IsValid) return View(vm);
+            var ok = await _tags.UpdateAsync(new TagDto { Id = vm.Id, Name = vm.Name });
+            if (!ok) return NotFound();
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeleteAsync(id);
+            await _tags.SoftDeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
     }

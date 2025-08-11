@@ -31,7 +31,7 @@ namespace BountyHuntersBlog.Web.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var result = await _signInManager.PasswordSignInAsync(
-                model.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
+                model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
                 return Redirect(model.ReturnUrl ?? Url.Action("Index", "Home")!);
@@ -51,12 +51,12 @@ namespace BountyHuntersBlog.Web.Controllers
             var user = new ApplicationUser
             {
                 UserName = model.UserName,
-                Email = model.Email
+                Email = model.Email,
+                DisplayName = model.DisplayName
             };
-            user.DisplayName ??= user.UserName ?? user.Email ?? "User"; // fallback
+            var result = await _userManager.CreateAsync(user, model.Password);
 
-            var create = await _userManager.CreateAsync(user, model.Password);
-            if (create.Succeeded)
+            if (result.Succeeded)
             {
                 // default role
                 if (!await _userManager.IsInRoleAsync(user, "User"))
@@ -66,7 +66,7 @@ namespace BountyHuntersBlog.Web.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            foreach (var e in create.Errors)
+            foreach (var e in result.Errors)
                 ModelState.AddModelError(string.Empty, e.Description);
 
             return View(model);

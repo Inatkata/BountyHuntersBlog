@@ -1,61 +1,63 @@
-﻿using AutoMapper;
-using Azure;
+﻿// Services/Implementations/TagService.cs
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Services.Implementations
 {
     public class TagService : ITagService
     {
-        private readonly ITagRepository _repo;
+        private readonly ITagRepository _tags;
         private readonly IMapper _mapper;
 
-        public TagService(ITagRepository repo, IMapper mapper)
+        public TagService(ITagRepository tags, IMapper mapper)
         {
-            _repo = repo;
+            _tags = tags;
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<TagDto>> GetAllAsync(int page, int pageSize)
+        public async Task<IReadOnlyList<TagDto>> AllAsync() =>
+            await _tags.AllAsQueryable()
+                .OrderBy(t => t.Name)
+                .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+        public async Task<TagDto?> GetAsync(int id)
         {
-            var entities = await _repo.AllAsync(); // TODO: добави реален paging ако искаш
-            return _mapper.Map<IEnumerable<TagDto>>(entities);
+            var e = await _tags.GetByIdAsync(id);
+            return e == null ? null : _mapper.Map<TagDto>(e);
         }
 
-        public async Task<TagDto?> GetByIdAsync(int id)
+        public async Task<int> CreateAsync(TagDto dto)
         {
-            var entity = await _repo.GetByIdAsync(id);
-            return entity is null ? null : _mapper.Map<TagDto>(entity);
+            var e = _mapper.Map<Tag>(dto);
+            await _tags.AddAsync(e);
+            await _tags.SaveChangesAsync();
+            return e.Id;
         }
 
-        public async Task CreateAsync(TagDto dto)
+        public async Task<bool> UpdateAsync(TagDto dto)
         {
-            var entity = _mapper.Map<Tag>(dto);
-            await _repo.AddAsync(entity);
-            await _repo.SaveChangesAsync();
+            var e = await _tags.GetByIdAsync(dto.Id);
+            if (e == null) return false;
+            e.Name = dto.Name;
+            _tags.Update(e);
+            await _tags.SaveChangesAsync();
+            return true;
         }
 
-        public async Task UpdateAsync(int id, TagDto dto)
+        public async Task<bool> SoftDeleteAsync(int id)
         {
-            var entity = await _repo.GetByIdAsync(id)
-                         ?? throw new KeyNotFoundException($"Tag {id} not found");
-            _mapper.Map(dto, entity);
-            _repo.Update(entity);
-            await _repo.SaveChangesAsync();
+            var e = await _tags.GetByIdAsync(id);
+            if (e == null) return false;
+            e.IsDeleted = true;
+            _tags.Update(e);
+            await _tags.SaveChangesAsync();
+            return true;
         }
-
-        public async Task DeleteAsync(int id)
-        {
-            var entity = await _repo.GetByIdAsync(id)
-                         ?? throw new KeyNotFoundException($"Tag {id} not found");
-            _repo.Delete(entity);
-            await _repo.SaveChangesAsync();
-        }
-
-        public async Task<bool> ExistsAsync(int id) => await _repo.ExistsAsync(id);
-       
-
     }
 }

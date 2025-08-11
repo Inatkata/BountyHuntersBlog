@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿// Services/Extensions/ServiceCollectionExtensions.cs
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.Services.Implementations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BountyHuntersBlog.Services.Extensions
 {
@@ -16,6 +17,5 @@ namespace BountyHuntersBlog.Services.Extensions
             services.AddScoped<IMissionTagService, MissionTagService>();
             return services;
         }
-
     }
 }
