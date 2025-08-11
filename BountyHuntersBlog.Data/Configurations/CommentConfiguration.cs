@@ -1,37 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BountyHuntersBlog.Data.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using BountyHuntersBlog.Data.Models;
 
-namespace BountyHuntersBlog.Data.Configurations
+public class CommentConfiguration : IEntityTypeConfiguration<Comment>
 {
-    public class CommentConfiguration : IEntityTypeConfiguration<Comment>
+    public void Configure(EntityTypeBuilder<Comment> b)
     {
-        public void Configure(EntityTypeBuilder<Comment> builder)
-        {
-            builder.HasKey(c => c.Id);
+        b.Property(x => x.CreatedOn).HasDefaultValueSql("GETUTCDATE()");
+        b.Property(x => x.Text).HasMaxLength(4000).IsRequired();
 
-            builder.Property(c => c.Content)
-                .IsRequired();
+        b.HasOne(c => c.Mission)
+            .WithMany(m => m.Comments)
+            .HasForeignKey(c => c.MissionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Property(c => c.CreatedOn)
-                .HasDefaultValueSql("GETUTCDATE()");
-
-           
-            builder.HasOne(c => c.Mission)
-                .WithMany(m => m.Comments)
-                .HasForeignKey(c => c.MissionId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(c => c.Author)
-                .WithMany(u => u.Comments)
-                .HasForeignKey(c => c.AuthorId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasMany(c => c.Likes)
-                .WithOne(l => l.Comment)
-                .HasForeignKey(l => l.CommentId)
-                .OnDelete(DeleteBehavior.Cascade);
-            
-        }
+        b.HasOne(c => c.User)
+            .WithMany(u => u.Comments)
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

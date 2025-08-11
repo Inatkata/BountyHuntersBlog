@@ -1,27 +1,71 @@
-﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model IEnumerable<TagViewModel>
-@{ ViewData["Title"] = "Tags"; }
-<h2>Tags</h2>
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionsIndexViewModel
+@{
+    ViewData["Title"] = "Missions";
+}
 
+<h2>Missions</h2>
 
-    <p><a asp-action="Create" class="btn btn-primary">Create</a></p>
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4"><input asp-for="Q" class="form-control" placeholder="Search..." /></div>
+    <div class="col-md-3"><select asp-for="CategoryId" class="form-select" asp-items="Model.Categories"><option value="">-- All categories --</option></select></div>
+    <div class="col-md-3"><select asp-for="TagId" class="form-select" asp-items="Model.Tags"><option value="">-- All tags --</option></select></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Filter</button></div>
+</form>
 
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">No missions found.</div>
+}
+else
+{
+    <ul class="list-group mb-3">
+        @foreach (var m in Model.Items)
+        {
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <strong>@m.Title</strong>
+                    <small class="text-muted">@m.CategoryId</small>
+                </div>
 
-<table class="table table-striped">
-    <thead><tr><th>Name</th><th></th></tr></thead>
-    <tbody>
-    @foreach (var t in Model)
-    {
-        <tr>
-            <td>@t.Name</td>
-            <td class="text-end">
-                <a class="btn btn-sm btn-outline-secondary"
-                   asp-controller="Missions" asp-action="Index" asp-route-tagId="@t.Id">
-                    View missions
-                </a>
-                @* no Edit/Delete here *@
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+                @* Tag badges (null-safe) *@
+                @if (m.TagIds != null && m.TagIds.Any())
+                {
+                    <div class="mt-1">
+                        @foreach (var tn in m.TagIds)
+                        {
+                            <span class="badge bg-secondary me-1">@tn</span>
+                        }
+                    </div>
+                }
+
+                <div class="mt-2 d-flex justify-content-between">
+                    <small class="text-muted">@m.CommentsCount comment(s) · @m.LikesCount like(s)</small>
+                    <a asp-action="Details" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                </div>
+            </li>
+        }
+    </ul>
+}
+
+@{
+    var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+}
+@if (totalPages > 1)
+{
+    <nav>
+        <ul class="pagination">
+            @for (int p = 1; p <= totalPages; p++)
+            {
+                <li class="page-item @(p == Model.Page ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-q="@Model.Q"
+                       asp-route-categoryId="@Model.CategoryId"
+                       asp-route-tagId="@Model.TagId"
+                       asp-route-page="@p"
+                       asp-route-pageSize="@Model.PageSize">@p</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

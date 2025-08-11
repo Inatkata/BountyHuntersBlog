@@ -1,63 +1,47 @@
-﻿using BountyHuntersBlog.Data.Models;
+﻿using System.Security.Claims;
 using BountyHuntersBlog.Repositories.Interfaces;
-using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
+using BountyHuntersBlog.Data.Models;
 
-namespace BountyHuntersBlog.Services
+namespace BountyHuntersBlog.Services.Implementations
 {
     public class LikeService : ILikeService
     {
-        private readonly ILikeRepository _repo;
+        private readonly ILikeRepository _likes;
+        private readonly IMissionRepository _missions;
+        private readonly ICommentRepository _comments;
 
-        public LikeService(ILikeRepository repo) => _repo = repo;
-
-        public async Task<LikeResultDto> ToggleMissionLikeAsync(int missionId, string userId)
+        public LikeService(ILikeRepository likes, IMissionRepository missions, ICommentRepository comments)
         {
-            var existing = await _repo.FindMissionLikeAsync(missionId, userId);
-            bool nowLiked;
-            if (existing is null)
-            {
-                await _repo.AddAsync(new Like { MissionId = missionId, UserId = userId });
-                nowLiked = true;
-            }
-            else
-            {
-                await _repo.RemoveAsync(existing);
-                nowLiked = false;
-            }
-            await _repo.SaveChangesAsync();
-
-            var count = await _repo.CountForMissionAsync(missionId);
-            return new LikeResultDto { IsLiked = nowLiked, TotalCount = count };
+            _likes = likes;
+            _missions = missions;
+            _comments = comments;
         }
 
-        public async Task<LikeResultDto> ToggleCommentLikeAsync(int commentId, string userId)
+        public async Task LikeMissionAsync(int missionId, ClaimsPrincipal user)
         {
-            var existing = await _repo.FindCommentLikeAsync(commentId, userId);
-            bool nowLiked;
-            if (existing is null)
-            {
-                await _repo.AddAsync(new Like { CommentId = commentId, UserId = userId });
-                nowLiked = true;
-            }
-            else
-            {
-                await _repo.RemoveAsync(existing);
-                nowLiked = false;
-            }
-            await _repo.SaveChangesAsync();
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
+            var mission = await _missions.GetByIdWithIncludesAsync(missionId) ?? throw new KeyNotFoundException("Mission not found.");
 
-            var count = await _repo.CountForCommentAsync(commentId);
-            return new LikeResultDto { IsLiked = nowLiked, TotalCount = count };
+            if (!mission.Likes.Any(l => l.UserId == userId))
+            {
+                await _likes.AddAsync(new Like { MissionId = mission.Id, UserId = userId, CreatedOn = DateTime.UtcNow });
+                await _likes.SaveChangesAsync();
+            }
         }
 
-        public async Task<bool> IsMissionLikedByUserAsync(int missionId, string userId) =>
-            (await _repo.FindMissionLikeAsync(missionId, userId)) != null;
+        public async Task<int> LikeCommentAsync(int commentId, ClaimsPrincipal user)
+        {
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
+            var comment = await _comments.GetByIdWithIncludesAsync(commentId) ?? throw new KeyNotFoundException("Comment not found.");
 
-        public async Task<bool> IsCommentLikedByUserAsync(int commentId, string userId) =>
-            (await _repo.FindCommentLikeAsync(commentId, userId)) != null;
+            if (!comment.Likes.Any(l => l.UserId == userId))
+            {
+                await _likes.AddAsync(new Like { CommentId = comment.Id, UserId = userId, CreatedOn = DateTime.UtcNow });
+                await _likes.SaveChangesAsync();
+            }
 
-        public Task<int> CountMissionLikesAsync(int missionId) => _repo.CountForMissionAsync(missionId);
-        public Task<int> CountCommentLikesAsync(int commentId) => _repo.CountForCommentAsync(commentId);
+            return comment.MissionId;
+        }
     }
 }

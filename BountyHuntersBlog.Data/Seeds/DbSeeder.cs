@@ -83,7 +83,7 @@ namespace BountyHuntersBlog.Data.Seeds
                 {
                     Title = "Silent Run in Old Town",
                     Description = "Plant trackers on targets. Avoid cameras; exfil via north alley.",
-                    AuthorId = adminId,
+                    UserId = adminId,
                     CategoryId = anyCategory.Id,
                     // CreatedOn comes from DB default (GETUTCDATE()) per configuration
                 };
@@ -91,7 +91,7 @@ namespace BountyHuntersBlog.Data.Seeds
                 {
                     Title = "Convoy Intercept",
                     Description = "Stop and scan cargo. Use EMP drone; minimal collateral.",
-                    AuthorId = adminId,
+                    UserId = adminId,
                     CategoryId = anyCategory.Id,
                 };
 
@@ -114,7 +114,7 @@ namespace BountyHuntersBlog.Data.Seeds
                 db.Comments.Add(new Comment
                 {
                     MissionId = mission.Id,
-                    AuthorId = admin.Id,
+                    UserId = admin.Id,
                     Content = "Initial briefing acknowledged."
                     // CreatedOn has default value (GETUTCDATE()) in configuration
                 });

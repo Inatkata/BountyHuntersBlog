@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.ViewModels;
@@ -9,35 +8,36 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        // Data → DTO
+        // Entities <-> DTOs
         CreateMap<Mission, MissionDto>().ReverseMap();
         CreateMap<Comment, CommentDto>().ReverseMap();
         CreateMap<Like, LikeDto>().ReverseMap();
-        CreateMap<Category, CategoryDto>().ReverseMap();
-        CreateMap<Tag, TagDto>().ReverseMap();
 
         CreateMap<Category, CategoryDto>()
-            .ForMember(d => d.MissionsCount, opt => opt.MapFrom(s => s.Missions.Count))
+            .ForMember(d => d.MissionsCount, o => o.MapFrom(s => s.Missions.Count))
             .ReverseMap()
-            .ForMember(s => s.Missions, opt => opt.Ignore());
+            .ForMember(s => s.Missions, o => o.Ignore());
 
         CreateMap<Tag, TagDto>()
-            .ForMember(d => d.MissionsCount, opt => opt.MapFrom(s => s.MissionTags.Count))
+            .ForMember(d => d.MissionsCount, o => o.MapFrom(s => s.MissionTags.Count))
             .ReverseMap()
-            .ForMember(s => s.MissionTags, opt => opt.Ignore());
+            .ForMember(s => s.MissionTags, o => o.Ignore());
 
+        // DTO -> ViewModel
         CreateMap<TagDto, TagViewModel>().ReverseMap();
-        // DTO → ViewModel
-        CreateMap<MissionDto, MissionViewModel>()
-            .ForMember(vm => vm.AuthorName, opt => opt.MapFrom(d => d.AuthorId))
-            .ForMember(vm => vm.CategoryName, opt => opt.MapFrom(d => d.CategoryId.ToString()))
-            .ForMember(vm => vm.TagNames, opt => opt.MapFrom(d => d.TagIds.Select(id => id.ToString())))
-            .ForMember(vm => vm.CommentsCount, opt => opt.Ignore())
-            .ForMember(vm => vm.LikesCount, opt => opt.Ignore());
-        CreateMap<CommentDto, CommentViewModel>()
-            .ForMember(vm => vm.AuthorName, opt => opt.MapFrom(d => d.AuthorId));
-        CreateMap<CategoryDto, CategoryViewModel>();
-        CreateMap<TagDto, TagViewModel>();
 
+        CreateMap<MissionDto, MissionViewModel>()
+            .ForMember(vm => vm.UserName, o => o.Ignore())   // ще го попълниш по userId
+            .ForMember(vm => vm.CategoryName, o => o.Ignore())   // ще го попълниш по CategoryId
+            .ForMember(vm => vm.TagNames, o => o.Ignore())   // ще ги попълниш по TagIds
+            .ForMember(vm => vm.CommentsCount, o => o.Ignore())
+            .ForMember(vm => vm.LikesCount, o => o.Ignore());
+
+        CreateMap<MissionDto, MissionListItemViewModel>()
+            .ForMember(vm => vm.CategoryName, o => o.Ignore())
+            .ForMember(vm => vm.TagNames, o => o.Ignore())
+            .ForMember(vm => vm.CommentsCount, o => o.Ignore())
+            .ForMember(vm => vm.LikesCount, o => o.Ignore());
+        
     }
 }

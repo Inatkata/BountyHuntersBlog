@@ -10,13 +10,13 @@ namespace BountyHuntersBlog.Data.Configurations
         public void Configure(EntityTypeBuilder<ApplicationUser> builder)
         {
             builder.HasMany(u => u.Missions)
-                .WithOne(m => m.Author)
-                .HasForeignKey(m => m.AuthorId)
+                .WithOne(m => m.User)
+                .HasForeignKey(m => m.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(u => u.Comments)
-                .WithOne(c => c.Author)
-                .HasForeignKey(c => c.AuthorId)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(u => u.Likes)

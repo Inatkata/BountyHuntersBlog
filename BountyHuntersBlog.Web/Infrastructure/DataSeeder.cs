@@ -31,14 +31,14 @@ namespace BountyHuntersBlog.Web.Infrastructure
             }
             await db.SaveChangesAsync();
 
-            // Author = admin if exists, else first user
+            // User = admin if exists, else first user
             var admins = await (from u in db.Users
                                 join ur in db.UserRoles on u.Id equals ur.UserId
                                 join r in db.Roles on ur.RoleId equals r.Id
                                 where r.Name == "Admin"
                                 select u).ToListAsync();
-            var authorId = admins.FirstOrDefault()?.Id ?? await db.Users.Select(u => u.Id).FirstOrDefaultAsync();
-            if (authorId == null) return; // no users yet
+            var UserId = admins.FirstOrDefault()?.Id ?? await db.Users.Select(u => u.Id).FirstOrDefaultAsync();
+            if (UserId == null) return; // no users yet
 
             // Resolve some ids
             var cat = await db.Categories.FirstAsync();
@@ -55,7 +55,7 @@ namespace BountyHuntersBlog.Web.Infrastructure
                     Title = title,
                     Description = desc,
                     CategoryId = categoryId,
-                    AuthorId = authorId
+                    UserId = UserId
                 };
 
                 mission.MissionTags = new List<MissionTag>();

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Userization;
 using Microsoft.AspNetCore.Mvc;
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
@@ -6,7 +6,7 @@ using BountyHuntersBlog.Services.DTOs;
 namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [Userize(Roles = "Admin")]
     public class AdminTagsController : Controller
     {
         private readonly ITagService _service;

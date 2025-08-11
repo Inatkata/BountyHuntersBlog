@@ -1,84 +1,48 @@
-﻿using AutoMapper;
-using BountyHuntersBlog.Services.DTOs;
-using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.ViewModels;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Userization;
 using Microsoft.AspNetCore.Mvc;
+using BountyHuntersBlog.Services.Interfaces;
 
-namespace BountyHuntersBlog.Web.Controllers
+namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
 {
+    [Area("Admin")]
+    [Userize(Roles = "Admin")]
     public class CategoriesController : Controller
     {
-        private readonly ICategoryService _service;
-        private readonly IMapper _mapper;
+        private readonly ICategoryService _categories;
+        public CategoriesController(ICategoryService categories) => _categories = categories;
 
-        public CategoriesController(ICategoryService service, IMapper mapper)
-        {
-            _service = service;
-            _mapper = mapper;
-        }
-        [AllowAnonymous]
-        [HttpGet]
-        public async Task<IActionResult> Index(int page = 1)
-        {
-            const int pageSize = 10;
-            var dtos = await _service.GetAllAsync(page, pageSize);
-            var vms = _mapper.Map<IEnumerable<CategoryViewModel>>(dtos);
-            return View(vms);
-        }
-        [AllowAnonymous]
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
-        {
-            var dto = await _service.GetByIdAsync(id);
-            if (dto == null) return NotFound();
-            return View(_mapper.Map<CategoryViewModel>(dto));
-        }
+        public async Task<IActionResult> Index()
+            => View(await _categories.AllAsync());
 
-        [HttpGet]
-        public IActionResult Create() => View(new CategoryViewModel());
+        public IActionResult Create() => View();
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CategoryViewModel vm)
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(string name)
         {
-            if (!ModelState.IsValid) return View(vm);
-            var dto = _mapper.Map<CategoryDto>(vm);
-            await _service.CreateAsync(dto);
+            if (string.IsNullOrWhiteSpace(name)) return View();
+            await _categories.CreateAsync(name.Trim());
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var dto = await _service.GetByIdAsync(id);
-            if (dto == null) return NotFound();
-            return View(_mapper.Map<CategoryViewModel>(dto));
+            var c = await _categories.GetAsync(id);
+            if (c == null) return NotFound();
+            return View(c);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(CategoryViewModel vm)
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, string name)
         {
-            if (!ModelState.IsValid) return View(vm);
-            var dto = _mapper.Map<CategoryDto>(vm);
-            await _service.UpdateAsync(vm.Id, dto);
-            return RedirectToAction(nameof(Details), new { id = vm.Id });
+            if (string.IsNullOrWhiteSpace(name)) return View(await _categories.GetAsync(id) ?? null);
+            await _categories.UpdateAsync(id, name.Trim());
+            return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var dto = await _service.GetByIdAsync(id);
-            if (dto == null) return NotFound();
-            return View(_mapper.Map<CategoryViewModel>(dto));
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _service.DeleteAsync(id);
+            await _categories.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
     }

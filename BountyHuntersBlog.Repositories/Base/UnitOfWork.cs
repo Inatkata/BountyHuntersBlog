@@ -1,5 +1,4 @@
 ﻿using BountyHuntersBlog.Data;
-using System.Threading.Tasks;
 
 namespace BountyHuntersBlog.Repositories.Base
 {

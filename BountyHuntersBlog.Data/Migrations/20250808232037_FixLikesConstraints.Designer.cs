@@ -119,7 +119,7 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AuthorId")
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -138,7 +138,7 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
+                    b.HasIndex("UserId");
 
                     b.HasIndex("MissionId");
 
@@ -196,7 +196,7 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AuthorId")
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -220,7 +220,7 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
+                    b.HasIndex("UserId");
 
                     b.HasIndex("CategoryId");
 
@@ -398,9 +398,9 @@ namespace BountyHuntersBlog.Data.Migrations
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.Comment", b =>
                 {
-                    b.HasOne("BountyHuntersBlog.Data.Models.ApplicationUser", "Author")
+                    b.HasOne("BountyHuntersBlog.Data.Models.ApplicationUser", "User")
                         .WithMany("Comments")
-                        .HasForeignKey("AuthorId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -410,7 +410,7 @@ namespace BountyHuntersBlog.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Author");
+                    b.Navigation("User");
 
                     b.Navigation("Mission");
                 });
@@ -442,9 +442,9 @@ namespace BountyHuntersBlog.Data.Migrations
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.Mission", b =>
                 {
-                    b.HasOne("BountyHuntersBlog.Data.Models.ApplicationUser", "Author")
+                    b.HasOne("BountyHuntersBlog.Data.Models.ApplicationUser", "User")
                         .WithMany("Missions")
-                        .HasForeignKey("AuthorId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -454,7 +454,7 @@ namespace BountyHuntersBlog.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Author");
+                    b.Navigation("User");
 
                     b.Navigation("Category");
                 });

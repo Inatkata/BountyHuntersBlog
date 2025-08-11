@@ -19,9 +19,9 @@ public class MissionConfiguration : IEntityTypeConfiguration<Mission>
         builder.Property(m => m.CreatedOn)
             .HasDefaultValueSql("GETUTCDATE()");
 
-        builder.HasOne(m => m.Author)
+        builder.HasOne(m => m.User)
             .WithMany(u => u.Missions)
-            .HasForeignKey(m => m.AuthorId)
+            .HasForeignKey(m => m.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(m => m.Category)

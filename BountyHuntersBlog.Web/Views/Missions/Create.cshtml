@@ -1,20 +1,40 @@
-﻿@using BountyHuntersBlog.ViewModels.Missions
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model MissionViewModel
-<h1>New Mission</h1>
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionViewModel
+@{
+    ViewData["Title"] = "Create Mission";
+    var categories = (IEnumerable<SelectListItem>)ViewBag.Categories;
+    var tags = (IEnumerable<SelectListItem>)ViewBag.Tags;
+}
+<h2>Create Mission</h2>
+
 <form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="categories"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Tags</label>
+        <select asp-for="TagIds" class="form-select" asp-items="tags" multiple size="6"></select>
+        <span asp-validation-for="TagIds" class="text-danger"></span>
+    </div>
+
     <div class="mb-3">
         <label asp-for="Title" class="form-label"></label>
         <input asp-for="Title" class="form-control" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
+
     <div class="mb-3">
         <label asp-for="Description" class="form-label"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
+        <textarea asp-for="Description" rows="4" class="form-control"></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
 </form>
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

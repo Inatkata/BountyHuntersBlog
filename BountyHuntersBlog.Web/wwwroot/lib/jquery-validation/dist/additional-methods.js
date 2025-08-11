@@ -203,7 +203,7 @@ $.validator.addMethod( "bic", function( value, element ) {
  *   L. Old format
  *   M. Old format
  *   N. Nonresident entities
- *   P. Local authorities
+ *   P. Local Userities
  *   Q. Autonomous bodies, state or not, and the like, and congregations and religious institutions
  *   R. Congregations and religious institutions (since 2008 ORDER EHA/451/2008)
  *   S. Organs of State Administration and regions
@@ -984,7 +984,7 @@ $.validator.addMethod( "netmask", function( value, element ) {
 
 /*
  * The NIE (Número de Identificación de Extranjero) is a Spanish tax identification number assigned by the Spanish
- * authorities to any foreigner.
+ * Userities to any foreigner.
  *
  * The NIE is the equivalent of a Spaniards Número de Identificación Fiscal (NIF) which serves as a fiscal
  * identification number. The CIF number (Certificado de Identificación Fiscal) is equivalent to the NIF, but applies to
@@ -1082,7 +1082,7 @@ $.validator.addMethod( "nipPL", function( value ) {
  * Brazilian tax registration number NIS of PIS numbers have 11 digits in total: 10 numbers followed by 1 check numbers
  * that are being used for validation.
  * @copyright (c) 21/08/2018 13:14, Cleiton da Silva Mendonça
- * @author Cleiton da Silva Mendonça <cleiton.mendonca@gmail.com>
+ * @User Cleiton da Silva Mendonça <cleiton.mendonca@gmail.com>
  * @link http://gitlab.com/csmendonca Gitlab of Cleiton da Silva Mendonça
  * @link http://github.com/csmendonca Github of Cleiton da Silva Mendonça
  */

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BountyHuntersBlog.Services"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BountyHuntersBlog.ViewModels", "BountyHuntersBlog.ViewModels\BountyHuntersBlog.ViewModels.csproj", "{3F2C9C27-D0BC-45B6-B54E-AE822BE1AEC1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BountyHuntersBlog.UnitTests", "UnitTests\BountyHuntersBlog.UnitTests.csproj", "{ED754F18-0FAF-4E64-90CE-3E713B07C3EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{3F2C9C27-D0BC-45B6-B54E-AE822BE1AEC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F2C9C27-D0BC-45B6-B54E-AE822BE1AEC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F2C9C27-D0BC-45B6-B54E-AE822BE1AEC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED754F18-0FAF-4E64-90CE-3E713B07C3EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED754F18-0FAF-4E64-90CE-3E713B07C3EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED754F18-0FAF-4E64-90CE-3E713B07C3EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED754F18-0FAF-4E64-90CE-3E713B07C3EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,42 +1,37 @@
-﻿@using BountyHuntersBlog.Data.Models
-@using BountyHuntersBlog.ViewModels
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@inject SignInManager<ApplicationUser> SignInManager
-@await Html.PartialAsync("_LikeButton", (LikeButtonViewModel)ViewBag.MissionLike)
-
-<h1>@Model.Title</h1>
-<p>@Model.Description</p>
-<p>Author: @Model.AuthorName</p>
-
-@if (SignInManager.IsSignedIn(User))
-{
-    <a class="btn btn-sm btn-outline-primary"
-   asp-controller="Comments" asp-action="Create"
-   asp-route-missionId="@Model.Id">Add Comment</a>
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionDetailsViewModel
+@{
+    ViewData["Title"] = Model.Title;
 }
-<button id="likeBtn" data-id="@Model.Id" class="btn btn-outline-primary">
-    ♡ <span id="likeCount">@Model.LikesCount</span>
-</button>
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <h2 class="mb-0">@Model.Title</h2>
+    <div>
+        <span class="badge bg-primary me-2">Likes: @Model.LikesCount</span>
+        @if (Model.CanLike)
+        {
+            <form asp-controller="Likes" asp-action="LikeMission" method="post" class="d-inline">
+                <input type="hidden" name="missionId" value="@Model.Id" />
+                <button class="btn btn-outline-primary btn-sm">Like</button>
+            </form>
+        }
+    </div>
+</div>
 
-@section Scripts {
-    <script>
-document.getElementById('likeBtn')?.addEventListener('click', async (e) => {
-  const id = e.currentTarget.dataset.id;
-  const token = document.querySelector('meta[name="csrf-token"]').content;
+<p class="text-muted">
+    by @Model.AuthorDisplayName · @Model.CreatedOnUtc.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+</p>
 
-  const res = await fetch(`/Likes/ToggleMission/${id}`, {
-    method: 'POST',
-    headers: { 'RequestVerificationToken': token }
-  });
+<div class="mb-3">
+    @Html.Raw(Html.Encode(Model.Description).Replace("\n","<br/>"))
+</div>
 
-  if (!res.ok) return; // опционално: show error
-  const data = await res.json();
-  document.getElementById('likeCount').textContent = data.count;
-  e.currentTarget.classList.toggle('btn-outline-primary', !data.liked);
-  e.currentTarget.classList.toggle('btn-primary', data.liked);
-});
-</script>
-}
+<div class="mb-3">
+    @foreach (var t in Model.TagNames)
+    {
+        <span class="badge bg-secondary">@t</span>
+    }
+</div>
 
-
+<hr />
+<h4>Comments</h4>
+<partial name="~/Views/Comments/_CommentForm.cshtml" model="Model.Id" />
+<partial name="~/Views/Comments/_CommentsList.cshtml" model="Model.Comments" />

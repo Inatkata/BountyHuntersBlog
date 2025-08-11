@@ -1,32 +1,5 @@
-﻿@using BountyHuntersBlog.ViewModels
-@using BountyHuntersBlog.ViewModels.Missions
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model MissionViewModel
-@inject BountyHuntersBlog.Services.Interfaces.ILikeService LikeService
-@{
-    var userId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-    var isAuth = User?.Identity?.IsAuthenticated ?? false;
-}
-@{
-    ViewData["Title"] = "Delete Mission";
-}
-
-@{
-    var missionLiked = isAuth && userId != null
-        ? await LikeService.IsMissionLikedByUserAsync(Model.Id, userId)
-        : false;
-    var missionLikes = await LikeService.CountMissionLikesAsync(Model.Id);
-    var likeVm = new LikeButtonViewModel
-    {
-        TargetType = LikeTargetType.Mission,
-        TargetId = Model.Id,
-        IsLikedByCurrentUser = missionLiked,
-        TotalCount = missionLikes,
-        IsAuthenticated = isAuth
-    };
-}
-<partial name="~/Views/Shared/_LikeButton.cshtml" model="likeVm" />
-
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionViewModel
+@{ ViewData["Title"] = "Delete Mission"; }
 
 <h2>Delete Mission</h2>
 
@@ -35,6 +8,7 @@
 </div>
 
 <form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <button type="submit" class="btn btn-danger">Delete</button>
     <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>

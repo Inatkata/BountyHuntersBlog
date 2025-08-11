@@ -8,7 +8,7 @@
 
         public DateTime CreatedOn { get; set; }
 
-        public string AuthorName { get; set; } = null!;
+        public string UserName { get; set; } = null!;
 
         public int MissionId { get; set; }
 

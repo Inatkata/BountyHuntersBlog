@@ -1,6 +1,5 @@
 ﻿
 using AutoMapper;
-using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
 

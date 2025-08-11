@@ -17,8 +17,8 @@ namespace BountyHuntersBlog.Data.Models
         [MaxLength(ModelConstants.MissionDescriptionMaxLength)]
         public string Description { get; set; } = null!;
         [Required]
-        public string AuthorId { get; set; } = null!;
-        public ApplicationUser Author { get; set; } = null!;
+        public string UserId { get; set; } = null!;
+        public ApplicationUser User { get; set; } = null!;
         [Required]
         public DateTime CreatedOn { get; set; }
         public int CategoryId { get; set; }

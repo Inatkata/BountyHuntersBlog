@@ -1,70 +1,48 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
-using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
 
-public class CommentService : ICommentService
+namespace BountyHuntersBlog.Services.Implementations
 {
-    private readonly ICommentRepository _repo;
-    private readonly IMapper _mapper;
-
-    public CommentService(ICommentRepository repo, IMapper mapper)
+    public class CommentService : ICommentService
     {
-        _repo = repo;
-        _mapper = mapper;
-    }
+        private readonly ICommentRepository _comments;
+        private readonly IMissionRepository _missions;
 
-    public async Task<IEnumerable<CommentDto>> GetAllAsync(int page, int pageSize)
-    {
-        // if your base repo has AllAsync(), use it + paging; otherwise add one
-        var all = await _repo.AllAsync();
-        var pageItems = all
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
-        return _mapper.Map<IEnumerable<CommentDto>>(pageItems);
-    }
+        public CommentService(ICommentRepository comments, IMissionRepository missions)
+        {
+            _comments = comments;
+            _missions = missions;
+        }
 
-    public async Task<CommentDto?> GetByIdAsync(int id)
-    {
-        var entity = await _repo.GetCommentByIdAsync(id);
-        return entity is null ? null : _mapper.Map<CommentDto>(entity);
-    }
+        public async Task AddAsync(int missionId, string text, ClaimsPrincipal user)
+        {
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
+            var mission = await _missions.GetByIdAsync(missionId) ?? throw new KeyNotFoundException("Mission not found.");
 
-    public async Task CreateAsync(CommentDto dto)
-    {
-        var entity = _mapper.Map<Comment>(dto);
-        await _repo.AddAsync(entity);
-        await _repo.SaveChangesAsync();
-    }
+            var c = new Comment
+            {
+                MissionId = mission.Id,
+                Text = text.Trim(),
+                UserId = userId,
+                CreatedOn = DateTime.UtcNow
+            };
 
-    public async Task UpdateAsync(int id, CommentDto dto)
-    {
-        var entity = await _repo.GetCommentByIdAsync(id)
-                     ?? throw new KeyNotFoundException($"Comment {id} not found");
-        _mapper.Map(dto, entity);
-        _repo.Update(entity);
-        await _repo.SaveChangesAsync();
-    }
+            await _comments.AddAsync(c);
+            await _comments.SaveChangesAsync();
+        }
 
-    public async Task DeleteAsync(int id)
-    {
-        var exists = await _repo.ExistsAsync(id);
-        if (!exists) throw new KeyNotFoundException($"Comment {id} not found");
-        await _repo.RemoveByIdAsync(id);
-    }
+        public async Task DeleteAsync(int commentId, ClaimsPrincipal user)
+        {
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
+            var c = await _comments.GetByIdAsync(commentId) ?? throw new KeyNotFoundException("Comment not found.");
 
-    public Task<bool> ExistsAsync(int id) => _repo.ExistsAsync(id);
+            if (c.UserId != userId && !(user.IsInRole("Admin")))
+                throw new UnauthorizedAccessException("Not allowed.");
 
-    public async Task<IEnumerable<CommentDto>> GetCommentsByMissionIdAsync(int missionId)
-    {
-        var list = await _repo.GetCommentsByMissionIdAsync(missionId);
-        return _mapper.Map<IEnumerable<CommentDto>>(list);
-    }
-
-    public async Task<IEnumerable<CommentDto>> GetCommentsByUserIdAsync(string userId)
-    {
-        var list = await _repo.GetCommentsByUserIdAsync(userId);
-        return _mapper.Map<IEnumerable<CommentDto>>(list);
+            _comments.Delete(c);
+            await _comments.SaveChangesAsync();
+        }
     }
 }

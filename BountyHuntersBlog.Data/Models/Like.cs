@@ -11,7 +11,6 @@ namespace BountyHuntersBlog.Data.Models
         [Required]
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
-        // може да е Like към Mission или към Comment
         public int? MissionId { get; set; }
         public Mission? Mission { get; set; }
 

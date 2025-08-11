@@ -28,7 +28,7 @@ namespace BountyHuntersBlog.Repositories.Implementations
 
         public async Task<IEnumerable<Category>> GetCategoriesByUserIdAsync(string userId)
             => await Context.Missions
-                .Where(m => m.AuthorId == userId)
+                .Where(m => m.UserId == userId)
                 .SelectMany(m => m.Category != null ? new[] { m.Category } : Array.Empty<Category>())
                 .Distinct()
                 .ToListAsync();

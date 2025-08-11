@@ -1,13 +1,14 @@
-﻿@using BountyHuntersBlog.ViewModels.Missions
-@model MissionViewModel
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionEditViewModel
 @{
-    ViewData["Title"] = "Edit Mission";
+    ViewData["Title"] = Model.Id.HasValue ? "Edit Mission" : "Create Mission";
 }
+<h2>@ViewData["Title"]</h2>
 
-<h2>Edit Mission</h2>
-
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
+<form method="post" asp-action="@(Model.Id.HasValue ? "Edit" : "Create")">
+    @if (Model.Id.HasValue)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
 
     <div class="mb-3">
         <label asp-for="Title" class="form-label"></label>
@@ -17,15 +18,24 @@
 
     <div class="mb-3">
         <label asp-for="Description" class="form-label"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
+        <textarea asp-for="Description" class="form-control" rows="6"></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
 
-    <div class="form-check mb-3">
-        <input class="form-check-input" asp-for="IsCompleted" />
-        <label class="form-check-label" asp-for="IsCompleted"></label>
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label">Category</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="Model.Categories"></select>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+    <div class="mb-3">
+        <label class="form-label">Tags</label>
+        <select asp-for="TagIds" class="form-select" asp-items="Model.Tags" multiple></select>
+    </div>
+
+    <button class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
 </form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}
