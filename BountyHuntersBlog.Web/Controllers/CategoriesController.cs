@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
+using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
@@ -16,7 +17,8 @@ namespace BountyHuntersBlog.Web.Controllers
             _service = service;
             _mapper = mapper;
         }
-
+        [AllowAnonymous]
+        [HttpGet]
         public async Task<IActionResult> Index(int page = 1)
         {
             const int pageSize = 10;
@@ -24,7 +26,8 @@ namespace BountyHuntersBlog.Web.Controllers
             var vms = _mapper.Map<IEnumerable<CategoryViewModel>>(dtos);
             return View(vms);
         }
-
+        [AllowAnonymous]
+        [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var dto = await _service.GetByIdAsync(id);

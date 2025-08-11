@@ -1,8 +1,14 @@
 ﻿@model IEnumerable<BountyHuntersBlog.Services.DTOs.CategoryDto>
-<h2>Categories</h2>
-<p><a class="btn btn-primary" asp-action="Create">Add</a></p>
-<table class="table">
-    <thead><tr><th>Name</th><th style="width:160px;"></th></tr></thead>
+@{
+    ViewData["Title"] = "Categories";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+<div class="d-flex justify-content-between align-items-center">
+    <h2>Categories</h2>
+    <a class="btn btn-primary" asp-action="Create">Add Category</a>
+</div>
+<table class="table table-striped mt-3">
+    <thead><tr><th>Name</th><th style="width:180px"></th></tr></thead>
     <tbody>
     @foreach (var c in Model)
     {
@@ -10,8 +16,9 @@
             <td>@c.Name</td>
             <td class="text-end">
                 <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@c.Id">Edit</a>
-                <form method="post" asp-action="Delete" asp-route-id="@c.Id" class="d-inline">
-                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                <form asp-action="Delete" asp-route-id="@c.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                 </form>
             </td>
         </tr>

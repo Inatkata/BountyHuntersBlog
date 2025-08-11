@@ -3,9 +3,10 @@ using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels;
 using BountyHuntersBlog.ViewModels.Missions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Claims;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
@@ -25,7 +26,7 @@ namespace BountyHuntersBlog.Web.Controllers
             _tags = tags;
             _likeService = likeService;
         }
-
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Index(string? q, int? categoryId, int? tagId, int page = 1, int pageSize = 10)
         {
@@ -49,7 +50,7 @@ namespace BountyHuntersBlog.Web.Controllers
 
             return View(vm);
         }
-
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
             MissionDto? dto = await _service.GetByIdAsync(id);

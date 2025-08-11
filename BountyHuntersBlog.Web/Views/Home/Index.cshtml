@@ -1,8 +1,16 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="mt-4">
+    <h2>Welcome to Bounty Hunters</h2>
+    <p class="text-muted">Choose a section:</p>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-outline-primary" asp-area="" asp-controller="Missions" asp-action="Index">Missions</a>
+        <a class="btn btn-outline-secondary" asp-area="" asp-controller="Categories" asp-action="Index">Categories</a>
+        <a class="btn btn-outline-secondary" asp-area="" asp-controller="Tags" asp-action="Index">Tags</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="btn btn-primary" asp-area="Admin" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
+        }
+    </div>
 </div>

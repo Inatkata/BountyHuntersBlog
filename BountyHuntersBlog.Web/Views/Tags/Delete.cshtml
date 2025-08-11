@@ -1,7 +1,9 @@
 ﻿@model BountyHuntersBlog.ViewModels.TagViewModel
 @{ ViewData["Title"] = "Delete Tag"; }
-
-<h2>Delete Tag</h2>
+@if (User.IsInRole("Admin"))
+{
+    <h2>Delete Tag</h2>
+}
 <div class="alert alert-warning">
     Are you sure you want to delete "<strong>@Model.Name</strong>"?
 </div>

@@ -1,100 +1,77 @@
 ﻿using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Data.Models;
-using BountyHuntersBlog.Data.Seeds;
-using BountyHuntersBlog.Repositories;
 using BountyHuntersBlog.Repositories.Extensions;
-using BountyHuntersBlog.Repositories.Implementations;
-using BountyHuntersBlog.Repositories.Interfaces;
-using BountyHuntersBlog.Services;
 using BountyHuntersBlog.Services.Extensions;
-using BountyHuntersBlog.Services.Implementations;
-using BountyHuntersBlog.Services.Interfaces;
+using BountyHuntersBlog.Web.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Регистрация на DbContext
+// DB
 builder.Services.AddDbContext<BountyHuntersDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         sql => sql.EnableRetryOnFailure()));
 
-// 2. Настройка на Identity
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
-
+// Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-    {
-        options.User.RequireUniqueEmail = true;
-        options.Password.RequiredLength = 6;
-        options.Password.RequireDigit = false;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
-    })
-    .AddEntityFrameworkStores<BountyHuntersDbContext>()
-    .AddDefaultTokenProviders();
+{
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireDigit = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+.AddEntityFrameworkStores<BountyHuntersDbContext>()
+.AddDefaultTokenProviders();
 
-// 3. Регистрация на репозитории
-builder.Services.AddRepositories(); // ако имаш общия метод в Repositories.Extensions
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.LogoutPath = "/Account/Logout";
+    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+});
 
-// или директно така, ако искаш ръчно:
-builder.Services.AddScoped<IMissionRepository, MissionRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<ILikeRepository, LikeRepository>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ITagRepository, TagRepository>();
-builder.Services.AddScoped<IMissionTagRepository, MissionTagRepository>();
+// Repos & Services (използвай само extension-ите, без ръчни дубли)
+builder.Services.AddRepositories();
+builder.Services.AddApplicationServices();
 
-// 4. Регистрация на услуги
-builder.Services.AddApplicationServices(); // ако имаш общия метод в Services.Extensions
-
-// или ръчно:
-builder.Services.AddScoped<IMissionService, MissionService>();
-builder.Services.AddScoped<ICommentService, CommentService>();
-builder.Services.AddScoped<ILikeService, LikeService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<ITagService, TagService>();
-builder.Services.AddScoped<IMissionTagService, MissionTagService>();
-
-// 5. AutoMapper
+// AutoMapper + MVC
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-
-// 6. MVC + Razor Pages
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// 7. Seed данни (ако имаш DbSeeder)
+// DB migrate + seed (САМО ВЕДНЪЖ)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BountyHuntersDbContext>();
-    await db.Database.MigrateAsync();                  // <<< първо миграции
+    await db.Database.MigrateAsync();
     await IdentitySeeder.SeedAsync(scope.ServiceProvider);
-    await DataSeeder.SeedAsync(scope.ServiceProvider); // ако имаш
+    await DataSeeder.SeedAsync(scope.ServiceProvider);
 }
 
-
-// Middleware pipeline
+// Error pages
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseStatusCodePagesWithReExecute("/Home/StatusCode", "?code={0}");
+    app.UseExceptionHandler("/Error/500"); // съгласно ErrorController от по-рано
+    app.UseHsts();
 }
+app.UseStatusCodePagesWithReExecute("/Error/{0}"); // 403/404 и др.
 
+// Pipeline
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-app.UseRouting();
 
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-);
+// Routes
 app.MapAreaControllerRoute(
     name: "admin",
     areaName: "Admin",
@@ -102,14 +79,8 @@ app.MapAreaControllerRoute(
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"
-);
-
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
-
-await IdentitySeeder.SeedAsync(app.Services);
-await DataSeeder.SeedAsync(app.Services);
-
 
 app.Run();

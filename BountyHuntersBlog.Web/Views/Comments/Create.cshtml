@@ -1,10 +1,18 @@
-﻿@model BountyHuntersBlog.ViewModels.CommentViewModel
+﻿@using BountyHuntersBlog.Data.Models
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model BountyHuntersBlog.ViewModels.CommentViewModel
+@inject SignInManager<ApplicationUser> SignInManager
 
 @{
     ViewData["Title"] = "Add Comment";
 }
+@if (SignInManager.IsSignedIn(User))
+{
+    <h2>Add Comment</h2> 
+}
 
-<h2>Add Comment</h2>
+
 
 <form asp-action="Create" method="post">
     <input type="hidden" asp-for="MissionId" />

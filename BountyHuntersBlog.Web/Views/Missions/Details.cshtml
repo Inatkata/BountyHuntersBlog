@@ -1,10 +1,42 @@
-﻿@using BountyHuntersBlog.ViewModels
+﻿@using BountyHuntersBlog.Data.Models
+@using BountyHuntersBlog.ViewModels
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+@inject SignInManager<ApplicationUser> SignInManager
 @await Html.PartialAsync("_LikeButton", (LikeButtonViewModel)ViewBag.MissionLike)
 
 <h1>@Model.Title</h1>
 <p>@Model.Description</p>
 <p>Author: @Model.AuthorName</p>
-<a class="btn btn-sm btn-outline-primary"
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <a class="btn btn-sm btn-outline-primary"
    asp-controller="Comments" asp-action="Create"
    asp-route-missionId="@Model.Id">Add Comment</a>
+}
+<button id="likeBtn" data-id="@Model.Id" class="btn btn-outline-primary">
+    ♡ <span id="likeCount">@Model.LikesCount</span>
+</button>
+
+@section Scripts {
+    <script>
+document.getElementById('likeBtn')?.addEventListener('click', async (e) => {
+  const id = e.currentTarget.dataset.id;
+  const token = document.querySelector('meta[name="csrf-token"]').content;
+
+  const res = await fetch(`/Likes/ToggleMission/${id}`, {
+    method: 'POST',
+    headers: { 'RequestVerificationToken': token }
+  });
+
+  if (!res.ok) return; // опционално: show error
+  const data = await res.json();
+  document.getElementById('likeCount').textContent = data.count;
+  e.currentTarget.classList.toggle('btn-outline-primary', !data.liked);
+  e.currentTarget.classList.toggle('btn-primary', data.liked);
+});
+</script>
+}
+
+

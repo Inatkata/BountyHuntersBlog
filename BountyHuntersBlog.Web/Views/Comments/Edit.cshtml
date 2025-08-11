@@ -1,10 +1,17 @@
-﻿@model BountyHuntersBlog.ViewModels.CommentViewModel
+﻿@using BountyHuntersBlog.Data.Models
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model BountyHuntersBlog.ViewModels.CommentViewModel
+@inject SignInManager<ApplicationUser> SignInManager
+@inject SignInManager<ApplicationUser> UserInManager
 
 @{
     ViewData["Title"] = "Edit Comment";
 }
 
-<h2>Edit Comment</h2>
+    <h2>Edit Comment</h2>
+
+
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
@@ -22,4 +29,4 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+};
