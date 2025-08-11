@@ -40,10 +40,12 @@ namespace BountyHuntersBlog.Services.Implementations
                 var qq = q.Trim().ToLower();
                 query = query.Where(m => m.Title.ToLower().Contains(qq) || m.Description.ToLower().Contains(qq));
             }
+
             if (categoryId.HasValue)
             {
                 query = query.Where(m => m.CategoryId == categoryId.Value);
             }
+
             if (tagId.HasValue)
             {
                 query = query.Where(m => m.MissionTags.Any(mt => mt.TagId == tagId.Value));
@@ -69,7 +71,9 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task<MissionWithStatsDto?> GetByIdWithStatsAsync(int id, ClaimsPrincipal? user = null)
         {
-            var entity = await _missions.GetByIdWithIncludesAsync(id); // include Category, MissionTags->Tag, User, Comments->User, Likes
+            var entity =
+                await _missions
+                    .GetByIdWithIncludesAsync(id); // include Category, MissionTags->Tag, User, Comments->User, Likes
             if (entity == null) return null;
 
             var currentUserId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -83,7 +87,8 @@ namespace BountyHuntersBlog.Services.Implementations
                 CreatedOnUtc = entity.CreatedOn,
                 TagNames = entity.MissionTags.Select(mt => mt.Tag.Name).Distinct().ToList(),
                 LikesCount = entity.Likes.Count,
-                LikedByCurrentUser = !string.IsNullOrEmpty(currentUserId) && entity.Likes.Any(l => l.UserId == currentUserId),
+                LikedByCurrentUser = !string.IsNullOrEmpty(currentUserId) &&
+                                     entity.Likes.Any(l => l.UserId == currentUserId),
                 Comments = entity.Comments
                     .OrderByDescending(c => c.CreatedOn)
                     .Select(c => new MissionWithStatsDto.CommentItem
@@ -94,7 +99,8 @@ namespace BountyHuntersBlog.Services.Implementations
                         UserDisplayName = c.User?.DisplayName ?? c.User?.UserName,
                         CreatedOnUtc = c.CreatedOn,
                         LikesCount = c.Likes.Count,
-                        LikedByCurrentUser = !string.IsNullOrEmpty(currentUserId) && c.Likes.Any(l => l.UserId == currentUserId)
+                        LikedByCurrentUser = !string.IsNullOrEmpty(currentUserId) &&
+                                             c.Likes.Any(l => l.UserId == currentUserId)
                     }).ToList()
             };
 
@@ -103,13 +109,15 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task CreateAsync(MissionDto dto, ClaimsPrincipal user)
         {
-            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                         throw new InvalidOperationException("Unauthenticated.");
             var entity = _mapper.Map<Mission>(dto);
             entity.UserId = userId;
             entity.CreatedOn = DateTime.UtcNow;
 
             // tags
-            entity.MissionTags = dto.TagIds?.Distinct().Select(tid => new MissionTag { TagId = tid }).ToList() ?? new List<MissionTag>();
+            entity.MissionTags = dto.TagIds?.Distinct().Select(tid => new MissionTag { TagId = tid }).ToList() ??
+                                 new List<MissionTag>();
 
             await _missions.AddAsync(entity);
             await _missions.SaveChangesAsync();
@@ -117,10 +125,12 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task UpdateAsync(int id, MissionDto dto, ClaimsPrincipal user)
         {
-            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("Unauthenticated.");
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                         throw new InvalidOperationException("Unauthenticated.");
             var entity = await _missions.GetByIdWithIncludesAsync(id);
             if (entity == null) throw new KeyNotFoundException("Mission not found.");
-            if (entity.UserId != userId && !(user.IsInRole("Admin"))) throw new UnauthorizedAccessException("Not allowed.");
+            if (entity.UserId != userId && !(user.IsInRole("Admin")))
+                throw new UnauthorizedAccessException("Not allowed.");
 
             entity.Title = dto.Title;
             entity.Description = dto.Description;
@@ -131,6 +141,14 @@ namespace BountyHuntersBlog.Services.Implementations
             foreach (var tid in dto.TagIds ?? Enumerable.Empty<int>())
                 entity.MissionTags.Add(new MissionTag { MissionId = id, TagId = tid });
 
+            await _missions.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var entity = await _missions.GetByIdWithIncludesAsync(id)
+                         ?? throw new KeyNotFoundException("Mission not found.");
+            _missions.Delete(entity);
             await _missions.SaveChangesAsync();
         }
     }

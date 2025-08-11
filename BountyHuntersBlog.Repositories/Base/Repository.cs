@@ -10,7 +10,7 @@ namespace BountyHuntersBlog.Repositories.Base
     {
         protected readonly BountyHuntersDbContext Context;
         protected readonly DbSet<T> DbSet;
-
+       
         public Repository(BountyHuntersDbContext context)
         {
             Context = context;
@@ -29,10 +29,8 @@ namespace BountyHuntersBlog.Repositories.Base
         public void Update(T entity)
             => DbSet.Update(entity);
 
-        public void Delete(T entity)
-            => DbSet.Remove(entity);
-
-        public async Task SaveChangesAsync()
-            => await Context.SaveChangesAsync();
+        public void Delete(T entity) => DbSet.Remove(entity);
+        public Task<int> SaveChangesAsync()
+        => Context.SaveChangesAsync();
     }
 }

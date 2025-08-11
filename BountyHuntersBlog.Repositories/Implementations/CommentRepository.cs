@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 public class CommentRepository : Repository<Comment>, ICommentRepository
 {
-    public CommentRepository(BountyHuntersDbContext ctx) : base(ctx) { }
+    public CommentRepository(BountyHuntersDbContext db) : base(db) { }
 
     public Task<Comment?> GetByIdWithIncludesAsync(int id)
-        => _db.Set<Comment>()
-            .Include(c => c.Mission)
+        => Db<Comment>()
             .Include(c => c.User)
+            .Include(c => c.Mission)
             .Include(c => c.Likes)
             .FirstOrDefaultAsync(c => c.Id == id);
 }

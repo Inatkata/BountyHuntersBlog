@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using BountyHuntersBlog.Data.Models;
 
+
 namespace BountyHuntersBlog.Data.Seeds
 {
     public static class DbSeeder
@@ -115,8 +116,7 @@ namespace BountyHuntersBlog.Data.Seeds
                 {
                     MissionId = mission.Id,
                     UserId = admin.Id,
-                    Content = "Initial briefing acknowledged."
-                    // CreatedOn has default value (GETUTCDATE()) in configuration
+                     C= "Initial briefing acknowledged."
                 });
                 await db.SaveChangesAsync();
             }

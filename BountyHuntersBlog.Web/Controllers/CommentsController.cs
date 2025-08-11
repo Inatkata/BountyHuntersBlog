@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Userization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BountyHuntersBlog.Services.Interfaces;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
-    [Userize]
+    [Authorize]
     public class CommentsController : Controller
     {
         private readonly ICommentService _comments;

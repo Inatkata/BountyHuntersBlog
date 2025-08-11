@@ -6,7 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 public class MissionRepository : Repository<Mission>, IMissionRepository
 {
-    public MissionRepository(BountyHuntersDbContext ctx) : base(ctx) { }
+    private readonly BountyHuntersDbContext _db;
+
+    public MissionRepository(BountyHuntersDbContext context)
+        : base(context)
+    {
+        _db = context;
+    }
 
     public Task<Mission?> GetByIdWithIncludesAsync(int id)
         => _db.Set<Mission>()

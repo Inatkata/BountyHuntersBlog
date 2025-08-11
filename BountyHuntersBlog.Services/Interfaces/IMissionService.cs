@@ -10,5 +10,6 @@ namespace BountyHuntersBlog.Services.Interfaces
         Task<MissionDto?> GetByIdAsync(int id);
         Task CreateAsync(MissionDto dto, ClaimsPrincipal user);
         Task UpdateAsync(int id, MissionDto dto, ClaimsPrincipal user);
+        Task DeleteAsync(int id);
     }
 }

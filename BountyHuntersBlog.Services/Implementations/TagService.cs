@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
+using Azure;
+using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.Data.Models;
 
 namespace BountyHuntersBlog.Services.Implementations
 {
@@ -54,5 +55,7 @@ namespace BountyHuntersBlog.Services.Implementations
         }
 
         public async Task<bool> ExistsAsync(int id) => await _repo.ExistsAsync(id);
+       
+
     }
 }
