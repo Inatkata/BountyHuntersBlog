@@ -1,40 +1,42 @@
-﻿@model BountyHuntersBlog.ViewModels.Account.LoginViewModel
+@model BountyHuntersBlog.ViewModels.Account.LoginViewModel
 @{
-    ViewData["Title"] = "Log in";
+    ViewData["Title"] = "Login";
 }
-<div class="row justify-content-center" style="margin-top:20px;">
-    <div class="col-md-6 col-lg-5">
-        <div class="card bg-dark text-white border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="mb-3">@ViewData["Title"]</h2>
-                <hr />
-                <form asp-controller="Account" asp-action="Login" method="post">
-                    @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
-                    <div class="form-floating mb-3">
-                        <input asp-for="Email" class="form-control" autocomplete="username" placeholder="name@example.com" />
-                        <label asp-for="Email"></label>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0 mt-5">
+            <div class="card-body p-4">
+                <h3 class="mb-4 text-center">Login</h3>
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email" />
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
-
-                    <div class="form-floating mb-3">
-                        <input asp-for="Password" class="form-control" autocomplete="current-password" placeholder="password" />
-                        <label asp-for="Password"></label>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" placeholder="Enter your password" />
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
-
+                    <div class="form-check mb-3">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label"></label>
+                    </div>
                     <input type="hidden" asp-for="ReturnUrl" />
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
                 </form>
+                <div class="text-center mt-3">
+                    <span>Don't have an account?</span> <a asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Register</a>
+                </div>
             </div>
-        </div>
-        <div class="text-center mt-3">
-            <a asp-controller="Account" asp-action="Register" asp-route-returnUrl="@Model?.ReturnUrl" class="btn btn-outline-info">
-                <i class="fa-solid fa-user-plus me-1"></i> Create account
-            </a>
         </div>
     </div>
 </div>
 
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

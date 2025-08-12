@@ -23,7 +23,9 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         b.HasOne(c => c.Mission)
             .WithMany(m => m.Comments)
             .HasForeignKey(c => c.MissionId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
+
+        b.HasQueryFilter(c => !c.Mission.IsDeleted);
 
         b.HasIndex(c => new { c.MissionId, c.CreatedOn });
     }

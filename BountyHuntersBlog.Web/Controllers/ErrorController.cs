@@ -11,4 +11,4 @@ namespace BountyHuntersBlog.Web.Controllers
         [Route("Error")]
         public IActionResult Index() => View("ServerError");
     }
-}
+} 

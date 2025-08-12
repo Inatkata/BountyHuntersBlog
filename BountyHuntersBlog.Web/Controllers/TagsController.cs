@@ -1,91 +1,64 @@
 ﻿using AutoMapper;
 using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.Services.DTOs;
+using BountyHuntersBlog.ViewModels.Missions;
 using BountyHuntersBlog.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
-public class TagsController : Controller
+namespace BountyHuntersBlog.Web.Controllers
 {
-    private readonly ITagService _tags;
-    private readonly IMapper _mapper;
-
-
-    public TagsController(ITagService tags, IMapper mapper)
+    public class TagsController : Controller
     {
-        _tags = tags;
-        _mapper = mapper;
-    }
+        private readonly ITagService _tags;
+        private readonly IMissionService _missions;
+        private readonly ICategoryService _categories;
+        private readonly IMapper _mapper;
 
-    [HttpGet]
-    [HttpGet]
-    public async Task<IActionResult> Index()
-    {
-        var list = await _tags.AllAsync();
-        var model = list.Select(t => _mapper.Map<TagViewModel>(t)).ToList();
-        return View(model);
-    }
+        public TagsController(
+            ITagService tags,
+            IMissionService missions,
+            ICategoryService categories,
+            IMapper mapper)
+        {
+            _tags = tags;
+            _missions = missions;
+            _categories = categories;
+            _mapper = mapper;
+        }
 
-    [HttpGet]
-    public async Task<IActionResult> Details(int id)
-    {
-        var dto = await _tags.GetAsync(id);
-        if (dto == null) return NotFound();
-        var vm = _mapper.Map<TagViewModel>(dto);
-        return View(vm);
-    }
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var allTags = await _tags.AllAsync();
+            var vm = allTags.Select(_mapper.Map<TagViewModel>).ToList();
+            return View(vm);
+        }
 
-    [Authorize]
-    [HttpGet]
-    public IActionResult Create() => View(new TagViewModel());
+        [HttpGet]
+        public async Task<IActionResult> Details(int id, int page = 1, int pageSize = 10)
+        {
+            var tag = await _tags.GetAsync(id);
+            if (tag == null) return NotFound();
 
+            var (items, total) = await _missions.SearchPagedAsync(null, null, id, page, pageSize);
 
+            var vm = new MissionIndexViewModel
+            {
+                Q = null,
+                CategoryId = null,
+                TagId = id,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = total,
+                Items = items.Select(_mapper.Map<MissionListItemViewModel>).ToList(),
+                Categories = (await _categories.AllAsync())
+                    .Select(c => new SelectListItem(c.Name, c.Id.ToString())),
+                Tags = (await _tags.AllAsync())
+                    .Select(t => new SelectListItem(t.Name, t.Id.ToString()))
+            };
 
-    [HttpGet]
-    public async Task<IActionResult> Details(int id)
-    {
-        var dto = await _tags.GetAsync(id);
-        if (dto == null) return NotFound();
-        return View(_mapper.Map<TagViewModel>(dto));
-
-    }
-
-    [Authorize]
-    [HttpGet] public IActionResult Create() => View(new TagViewModel());
-
-    [Authorize]
-    [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(TagViewModel vm)
-    {
-        if (!ModelState.IsValid) return View(vm);
-        var id = await _tags.CreateAsync(new TagDto { Name = vm.Name });
-        return RedirectToAction(nameof(Details), new { id });
-    }
-
-    [Authorize]
-    [HttpGet]
-    public async Task<IActionResult> Edit(int id)
-    {
-        var dto = await _tags.GetAsync(id);
-        if (dto == null) return NotFound();
-        return View(_mapper.Map<TagViewModel>(dto));
-    }
-
-    [Authorize]
-    [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(TagViewModel vm)
-    {
-        if (!ModelState.IsValid) return View(vm);
-        var ok = await _tags.UpdateAsync(new TagDto { Id = vm.Id, Name = vm.Name });
-        if (!ok) return NotFound();
-        return RedirectToAction(nameof(Details), new { id = vm.Id });
-    }
-
-    [Authorize]
-    [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(int id)
-    {
-        await _tags.SoftDeleteAsync(id);
-        return RedirectToAction(nameof(Index));
+            ViewData["TagName"] = tag.Name;
+            return View(vm);
+        }
     }
 }

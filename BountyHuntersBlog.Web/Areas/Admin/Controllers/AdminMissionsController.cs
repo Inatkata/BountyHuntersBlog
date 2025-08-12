@@ -1,11 +1,12 @@
 ﻿
 using AutoMapper;
+using BountyHuntersBlog.Services.DTOs;
+using BountyHuntersBlog.Services.Interfaces;
+using BountyHuntersBlog.ViewModels.Missions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.Services.DTOs;
-using BountyHuntersBlog.ViewModels.Missions;
+using System.Security.Claims;
 
 namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
 {
@@ -70,7 +71,8 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
                 Description = vm.Description,
                 CategoryId = vm.CategoryId,
                 TagIds = vm.TagIds,
-                UserId = "admin" // admin създава – по желание замени с реален админ Id
+                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+
             };
 
             var id = await _missions.CreateAsync(dto);

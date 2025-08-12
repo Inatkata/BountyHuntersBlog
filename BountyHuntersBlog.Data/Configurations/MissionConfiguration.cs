@@ -34,6 +34,7 @@ public class MissionConfiguration : IEntityTypeConfiguration<Mission>
             .HasForeignKey(m => m.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasQueryFilter(m => !m.IsDeleted);
         // Индекси за търсене / списъци
         builder.HasIndex(m => m.Title);
         builder.HasIndex(m => new { m.CategoryId, m.CreatedOn });

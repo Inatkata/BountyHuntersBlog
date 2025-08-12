@@ -1,15 +1,1 @@
-﻿
-@model dynamic
-@{
-    ViewData["Title"] = "Edit a Tag";
-}
-<h2>Edit Category</h2>
-<form method="post">
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input name="name" class="form-control" value="@Model.Name" />
-    </div>
-    <button class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-    @Html.AntiForgeryToken()
-</form>
+@{ ViewData["IsEdit"] = true; } @Html.Partial("Form")

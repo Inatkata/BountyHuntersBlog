@@ -1,35 +1,35 @@
-﻿@model IEnumerable<BountyHuntersBlog.Services.DTOs.MissionDto>
-@{
+﻿@{
     ViewData["Title"] = "Missions";
-    Layout = "/Views/Shared/_Layout.cshtml";
 }
-<div class="d-flex justify-content-between align-items-center">
-    <h2>Missions</h2>
-    <a class="btn btn-primary" asp-action="Create">Add Mission</a>
-</div>
-
-<table class="table table-striped mt-3">
+<partial name="~/Areas/Admin/Views/Shared/_ListHeader.cshtml" />
+<table class="table table-hover align-middle">
     <thead>
     <tr>
         <th>Title</th>
         <th>Category</th>
-        <th style="width:220px"></th>
+        <th>Completed</th>
+        <th class="text-end">Actions</th>
     </tr>
     </thead>
     <tbody>
-    @foreach (var m in Model)
+    @if (Model is IEnumerable<dynamic> items)
     {
-        <tr>
-            <td>@m.Title</td>
-            <td>@m.CategoryId</td>
-            <td class="text-end">
-                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@m.Id">Edit</a>
-                <form asp-action="Delete" asp-route-id="@m.Id" method="post" class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                </form>
-            </td>
-        </tr>
+        foreach (var m in items)
+        {
+            <tr>
+                <td>@m.Title</td>
+                <td>@m.CategoryName</td>
+                <td>@(m.IsCompleted ? "Yes" : "No")</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@(m.Id)">Edit</a>
+                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@(m.Id)">Delete</a>
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr><td colspan="4" class="text-muted">No data. Bind IEnumerable to the view.</td></tr>
     }
     </tbody>
 </table>

@@ -16,14 +16,15 @@ public class MissionTagConfiguration : IEntityTypeConfiguration<MissionTag>
         b.HasOne(mt => mt.Mission)
             .WithMany(m => m.MissionTags)
             .HasForeignKey(mt => mt.MissionId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         b.HasOne(mt => mt.Tag)
             .WithMany(t => t.MissionTags)
             .HasForeignKey(mt => mt.TagId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Полезни индекси за филтър
+        b.HasQueryFilter(mt => !mt.Mission.IsDeleted);
         b.HasIndex(mt => mt.TagId);
         b.HasIndex(mt => mt.MissionId);
     }

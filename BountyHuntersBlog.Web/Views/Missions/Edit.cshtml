@@ -1,53 +1,15 @@
-﻿@model BountyHuntersBlog.ViewModels.Missions.MissionEditViewModel
+@model BountyHuntersBlog.ViewModels.Missions.MissionEditViewModel
 @{
     ViewData["Title"] = "Edit Mission";
 }
-<div class="d-flex justify-content-between align-items-center mb-3" style="margin-top:20px;">
-    <h2>@ViewData["Title"]</h2>
-</div>
-<hr />
-
-<div class="row">
-    <div class="col-sm-12 offset-lg-2 col-lg-8 offset-xl-3 col-xl-6">
-        <form asp-controller="Missions" asp-action="Edit" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="Id" />
-
-            <div class="row">
-                <div class="col-sm-6 mb-2">
-                    <label asp-for="Title" class="form-label-add-edit">Mission Title</label>
-                    <input asp-for="Title" class="form-control" />
-                    <span asp-validation-for="Title" class="text-danger"></span>
-                </div>
-
-                <div class="col-sm-6 mb-2">
-                    <label asp-for="CategoryId" class="form-label-add-edit">Select Category</label>
-                    <select asp-for="CategoryId" class="form-control" asp-items="Model.Categories">
-                        <option value="">...</option>
-                    </select>
-                    <span asp-validation-for="CategoryId" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="mb-2">
-                <label asp-for="Description" class="form-label-add-edit">Description</label>
-                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label-add-edit">Tags</label>
-                <select asp-for="TagIds" class="form-control" asp-items="Model.Tags" multiple></select>
-            </div>
-
-            <div class="mb-3 d-flex gap-2">
-                <button class="btn btn-primary w-100 fw-bold rounded" type="submit">
-                    <i class="fas fa-save"></i> Update
-                </button>
-                <a asp-controller="Missions" asp-action="Index" class="btn btn-secondary w-100 fw-bold rounded">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
-            </div>
-        </form>
+<h2>Edit Mission</h2>
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <partial name="_Form" />
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
     </div>
-</div>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

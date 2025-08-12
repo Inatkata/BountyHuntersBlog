@@ -1,32 +1,28 @@
-﻿@using BountyHuntersBlog.Data.Models
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model BountyHuntersBlog.ViewModels.CommentViewModel
-@inject SignInManager<ApplicationUser> SignInManager
-@inject SignInManager<ApplicationUser> UserInManager
-
+﻿@model BountyHuntersBlog.ViewModels.CommentViewModel
 @{
     ViewData["Title"] = "Edit Comment";
 }
+<h2>Edit Comment</h2>
 
-    <h2>Edit Comment</h2>
-
-
-
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="MissionId" />
-
-    <div class="mb-3">
-        <label asp-for="Content" class="form-label"></label>
-        <textarea asp-for="Content" class="form-control"></textarea>
-        <span asp-validation-for="Content" class="text-danger"></span>
+<div class="card shadow-sm border-0 mt-4">
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="MissionId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Content" class="form-label"></label>
+                <textarea asp-for="Content" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+        <a asp-action="Details" asp-controller="Missions" asp-route-id="@Model.MissionId" class="btn btn-secondary mt-3">Back to Mission</a>
     </div>
-
-    <button type="submit" class="btn btn-primary">Update</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-};
+    <partial name="_ValidationScriptsPartial" />
+}

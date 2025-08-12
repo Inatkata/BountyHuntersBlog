@@ -1,14 +1,22 @@
 ﻿@{
     ViewData["Title"] = "Access Denied";
 }
-<h2>Access Denied</h2>
-<div class="alert alert-danger mt-3">
-    You don’t have permission to view this page.
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-danger">
+            <div class="card-body text-center p-5">
+                <h1 class="display-4 text-danger mb-3">
+                    <i class="fa-solid fa-ban"></i>
+                </h1>
+                <h2 class="mb-4">Access Denied</h2>
+                <p class="text-muted mb-4">
+                    You do not have permission to view this page.
+                </p>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                    <i class="fa-solid fa-house"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
-<p class="mt-3">
-    <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-secondary">Go Home</a>
-    @if (!(User?.Identity?.IsAuthenticated ?? false))
-    {
-        <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-primary ms-2">Login</a>
-    }
-</p>

@@ -1,39 +1,43 @@
-﻿@model BountyHuntersBlog.ViewModels.TagViewModel
+@model BountyHuntersBlog.ViewModels.Missions.MissionIndexViewModel
 @{
-    ViewData["Title"] = "Tag Details";
+    ViewData["Title"] = "Missions with Tag: " + (ViewData["TagName"] ?? "");
 }
-<div class="d-flex justify-content-between align-items-center mb-3" style="margin-top:20px;">
-    <h2>@ViewData["Title"]</h2>
-</div>
-<hr />
+<h2 class="mb-3">Missions tagged with "@ViewData["TagName"]"</h2>
 
-<div class="row justify-content-center" style="margin:0 auto; max-width:800px;">
-    <div class="col-md-12">
-        <div class="card bg-dark text-white border-0 shadow-sm">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-tag text-secondary"></i>
-                    <h4 class="card-title mb-0">@Model.Name</h4>
-                </div>
-                <div class="small text-muted">Tag Id: @Model.Id</div>
-            </div>
-            <div class="card-footer d-flex gap-2">
-                <a asp-controller="Missions" asp-action="Index" asp-route-tagId="@Model.Id" class="btn btn-info">
-                    <i class="fas fa-crosshairs"></i> View Missions
-                </a>
-                @if (User?.Identity?.IsAuthenticated ?? false)
-                {
-                    <a asp-controller="Tags" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                    <a asp-controller="Tags" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Delete
-                    </a>
-                }
-                <a asp-controller="Tags" asp-action="Index" class="btn btn-warning ms-auto">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
-            </div>
-        </div>
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-4"><input asp-for="Q" class="form-control" placeholder="Search..." /></div>
+    <div class="col-md-3">
+        <select asp-for="CategoryId" class="form-select" asp-items="Model.Categories">
+            <option value="">-- All Categories --</option>
+        </select>
     </div>
-</div>
+    <div class="col-md-3">
+        <select asp-for="TagId" class="form-select" asp-items="Model.Tags">
+            <option value="">-- All Tags --</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Filter</button>
+    </div>
+</form>
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">No missions found for this tag.</div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var m in Model.Items)
+        {
+            <a asp-controller="Missions" asp-action="Details" asp-route-id="@m.Id" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@m.Title</h5>
+                    <small>@m.CreatedOn.ToShortDateString()</small>
+                </div>
+                <p class="mb-1 text-muted">@m.ShortDescription</p>
+                <small>@m.CommentsCount comments • @m.LikesCount likes</small>
+            </a>
+        }
+    </div>
+}
