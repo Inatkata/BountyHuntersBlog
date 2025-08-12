@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = ViewData["Title"] ?? "Home";
     ViewData["BodyClass"] = ViewData["BodyClass"] ?? "home-light";
 }
@@ -18,7 +17,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<body class="d-flex flex-column min-vh-100 @ViewData["BodyClass"]">
+<body class="d-flex flex-column min-vh-100 @(ViewData["BodyClass"])">
+
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">

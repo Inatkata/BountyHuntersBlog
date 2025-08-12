@@ -2,8 +2,8 @@
     ViewData["Title"] = "Home";
 }
 <div class="py-5 text-center">
-    <h1 class="display-5 fw-bold">Welcome to BookVerse Missions</h1>
-    <p class="lead text-muted">Discover missions, tag them, and collaborate. Create missions (if logged in) and join the hunt!</p>
+    <h1 class="display-5 fw-bold">Welcome to Bounty Hunters Blog</h1>
+    <p class="lead text-muted">Discover missions, tag them, and collaborate. Create missions and join the hunt!</p>
     <div class="d-inline-flex gap-2 mt-3">
         <a asp-controller="Missions" asp-action="Index" class="btn btn-primary btn-lg">Browse Missions</a>
         <a asp-controller="Tags" asp-action="Index" class="btn btn-outline-secondary btn-lg">Browse Tags</a>
@@ -25,7 +25,7 @@
             <div class="card-body">
                 <h5 class="card-title">Explore by Category</h5>
                 <p class="card-text text-muted">Find missions grouped by categories curated by the admins.</p>
-                <a asp-controller="Categories" asp-action="Index" class="btn btn-outline-primary">Categories</a>
+                <a asp-controller="Categories" asp-action="Index" class="btn btn-success">Categories</a>
             </div>
         </div>
     </div>
@@ -34,7 +34,7 @@
             <div class="card-body">
                 <h5 class="card-title">Tag your ideas</h5>
                 <p class="card-text text-muted">Use tags to connect related missions and discover new ones.</p>
-                <a asp-controller="Tags" asp-action="Index" class="btn btn-outline-primary">Tags</a>
+                <a asp-controller="Tags" asp-action="Index" class="btn btn-success">Tags</a>
             </div>
         </div>
     </div>

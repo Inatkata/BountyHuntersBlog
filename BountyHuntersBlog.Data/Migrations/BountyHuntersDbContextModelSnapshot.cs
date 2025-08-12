@@ -123,7 +123,7 @@ namespace BountyHuntersBlog.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.Comment", b =>
@@ -157,7 +157,7 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.HasIndex("MissionId", "CreatedOn");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.Like", b =>
@@ -199,7 +199,7 @@ namespace BountyHuntersBlog.Data.Migrations
                         .IsUnique()
                         .HasFilter("[MissionId] IS NOT NULL");
 
-                    b.ToTable("Likes", t =>
+                    b.ToTable("Likes", null, t =>
                         {
                             t.HasCheckConstraint("CK_Like_Target_XOR", "((MissionId IS NULL AND CommentId IS NOT NULL) OR (MissionId IS NOT NULL AND CommentId IS NULL))");
                         });
@@ -249,7 +249,7 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.HasIndex("CategoryId", "CreatedOn");
 
-                    b.ToTable("Missions");
+                    b.ToTable("Missions", (string)null);
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.MissionTag", b =>
@@ -271,7 +271,7 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("MissionTags");
+                    b.ToTable("MissionTags", (string)null);
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.Tag", b =>
@@ -305,7 +305,7 @@ namespace BountyHuntersBlog.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

@@ -17,13 +17,21 @@ public class MappingProfile : Profile
         CreateMap<CommentDto, CommentViewModel>()
             .ForMember(d => d.UserName, m => m.MapFrom(s => s.UserDisplayName));
 
-        CreateMap<MissionDto, MissionListItemViewModel>()
-            .ForMember(d => d.CreatedOn, m => m.Ignore()); // няма в DTO; идва от Details или добави в DTO при нужда
-
+        CreateMap<Mission, MissionDto>()
+            .ForMember(dest => dest.TagIds, opt => opt.MapFrom(src => src.MissionTags.Select(mt => mt.TagId)))
+            .ReverseMap()
+            .ForMember(dest => dest.MissionTags, opt => opt.Ignore());
         CreateMap<MissionWithStatsDto, MissionDetailsViewModel>()
             .ForMember(d => d.Tags, m => m.MapFrom(s => s.Tags));
 
+        CreateMap<MissionDto, BountyHuntersBlog.ViewModels.Missions.MissionListItemViewModel>();
+        CreateMap<MissionDto, BountyHuntersBlog.ViewModels.Missions.MissionEditViewModel>().ReverseMap();
+        CreateMap<MissionDto, BountyHuntersBlog.ViewModels.Missions.MissionViewModel>().ReverseMap();
+
         CreateMap<TagDto, TagViewModel>();
         CreateMap<CategoryDto, CategoryViewModel>();
+        CreateMap<MissionDto, MissionViewModel>().ReverseMap();
+        CreateMap<MissionWithStatsDto, MissionDto>().ReverseMap();
+
     }
 }
