@@ -1,5 +1,6 @@
 ﻿// ViewModels/Admin/Categories/AdminCategoryListItemVM.cs
 using System;
+using BountyHuntersBlog.Data.Models;
 
 namespace BountyHuntersBlog.ViewModels.Admin.Categories
 {

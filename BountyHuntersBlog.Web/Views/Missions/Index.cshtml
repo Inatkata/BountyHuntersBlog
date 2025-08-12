@@ -2,47 +2,72 @@
 @{
     ViewData["Title"] = "Missions";
 }
+
 <h2 class="mb-3">Missions</h2>
 
-<form method="get" class="row g-2 mb-4">
-    <div class="col-md-4"><input asp-for="Q" class="form-control" placeholder="Search..." /></div>
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input class="form-control" name="q" value="@Model.Q" placeholder="Search..." />
+    </div>
     <div class="col-md-3">
-        <select asp-for="CategoryId" class="form-select" asp-items="Model.Categories">
-            <option value="">-- All Categories --</option>
+        <select class="form-select" name="categoryId" asp-items="Model.Categories">
+            <option value="">All categories</option>
         </select>
     </div>
     <div class="col-md-3">
-        <select asp-for="TagId" class="form-select" asp-items="Model.Tags">
-            <option value="">-- All Tags --</option>
+        <select class="form-select" name="tagId" asp-items="Model.Tags">
+            <option value="">All tags</option>
         </select>
     </div>
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100" type="submit">Filter</button>
+    <div class="col-md-2 d-grid">
+        <button class="btn btn-primary" type="submit">Filter</button>
     </div>
 </form>
 
-@if (!Model.Items.Any())
+@if (Model.Items == null || !Model.Items.Any())
 {
     <div class="alert alert-info">No missions found.</div>
 }
 else
 {
-    <div class="list-group">
+    <div class="list-group mb-3">
         @foreach (var m in Model.Items)
         {
-            <a asp-action="Details" asp-route-id="@m.Id" class="list-group-item list-group-item-action">
+            <a class="list-group-item list-group-item-action"
+               asp-controller="Missions" asp-action="Details" asp-route-id="@m.Id">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">@m.Title</h5>
-                    <small>@m.CreatedOn.ToShortDateString()</small>
+                    @if (m.IsCompleted)
+                    {
+                        <span class="badge bg-success">Completed</span>
+                    }
                 </div>
-                <p class="mb-1 text-muted">@m.ShortDescription</p>
-                <small>@m.CommentsCount comments • @m.LikesCount likes</small>
+                <small class="text-muted">@m.CategoryId</small>
+                <div class="mt-1">
+                    @if (m.TagNames?.Any() == true)
+                    {
+                        foreach (var t in m.TagNames)
+                        {
+                            <span class="badge bg-secondary me-1">@t</span>
+                        }
+                    }
+                </div>
             </a>
         }
     </div>
-}
 
-@if (User.Identity.IsAuthenticated)
-{
-    <a asp-action="Create" class="btn btn-success mt-3">Create Mission</a>
+    <nav>
+        <ul class="pagination">
+            @{
+                var totalPages = (int)Math.Ceiling((decimal)Model.TotalCount / Model.PageSize);
+                for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Page ? "active" : "")">
+                        <a class="page-link"
+                           href="?q=@Model.Q&categoryId=@Model.CategoryId&tagId=@Model.TagId&page=@i&pageSize=@Model.PageSize">@i</a>
+                    </li>
+                }
+            }
+        </ul>
+    </nav>
 }

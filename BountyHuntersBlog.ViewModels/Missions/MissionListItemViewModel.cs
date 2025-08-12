@@ -18,5 +18,6 @@ namespace BountyHuntersBlog.ViewModels.Missions
 
         public int CommentsCount { get; set; } = 0;      // back-compat
         public int LikesCount { get; set; } = 0;         // back-compat
+        public bool IsCompleted { get; set; } = false; // back-compat
     }
 }

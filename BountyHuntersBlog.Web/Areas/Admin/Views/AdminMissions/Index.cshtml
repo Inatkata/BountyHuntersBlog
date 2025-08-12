@@ -1,47 +1,81 @@
-﻿@model BountyHuntersBlog.ViewModels.Admin.Missions.AdminMissionListItemVM
+﻿@model IReadOnlyList<BountyHuntersBlog.Services.DTOs.MissionDto>
 @{
     ViewData["Title"] = "Missions";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-<partial name="~/Areas/Admin/Views/Shared/_ListHeader.cshtml" />
 
-<table class="table table-hover align-middle">
-    <thead>
-    <tr>
-        <th>Title</th>
-        <th class="d-none d-md-table-cell">Description</th>
-        <th class="d-none d-lg-table-cell">Created</th>
-        <th class="text-end">Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    @if (Model?.Items != null && Model.Items.Any())
-    {
-        foreach (var it in Model.Items)
-        {
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="m-0">Missions</h2>
+    <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminMissions" asp-action="Create">Create</a>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">No missions found.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
             <tr>
-                <td>@it.Title</td>
-                <td class="d-none d-md-table-cell text-truncate" style="max-width: 420px;">@it.Description</td>
-                <td class="d-none d-lg-table-cell">
-                    @(it.CreatedOn = default ? "-" : it.CreatedOn.ToString("yyyy-MM-dd"))
-                </td>
-                <td class="text-end d-flex gap-2 justify-content-end">
-                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@it.Id">Edit</a>
-                    <form asp-action="Delete" asp-route-id="@it.Id" method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                onclick="return confirm('Delete (soft) this mission?');">
-                            Delete
-                        </button>
-                    </form>
-                </td>
+                <th style="width:60px">Id</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Tags</th>
+                <th style="width:120px">Completed</th>
+                <th style="width:200px" class="text-end">Actions</th>
             </tr>
-        }
-    }
-    else
-    {
-        <tr><td colspan="4" class="text-muted">No data.</td></tr>
-    }
-    </tbody>
-</table>
-
-<partial name="~/Areas/Admin/Views/Shared/_Pager.cshtml" model="Model" />
+        </thead>
+        <tbody>
+            @foreach (var m in Model)
+            {
+                <tr>
+                    <td>@m.Id</td>
+                    <td>@m.Title</td>
+                    <td>@m.CategoryName</td>
+                    <td>
+                        @if (m.TagNames?.Any() == true)
+                        {
+                            foreach (var tag in m.TagNames)
+                            {
+                                <span class="badge bg-secondary me-1">@tag</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">No tags</span>
+                        }
+                    </td>
+                    <td>
+                        @if (m.IsCompleted)
+                        {
+                            <span class="badge bg-success">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">No</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-info"
+                           asp-area="Admin" asp-controller="AdminMissions" asp-action="Details" asp-route-id="@m.Id">
+                            Details
+                        </a>
+                        <a class="btn btn-sm btn-outline-secondary"
+                           asp-area="Admin" asp-controller="AdminMissions" asp-action="Edit" asp-route-id="@m.Id">
+                            Edit
+                        </a>
+                        <form method="post" class="d-inline"
+                              asp-area="Admin" asp-controller="AdminMissions" asp-action="Delete" asp-route-id="@m.Id">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Delete this mission?');">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

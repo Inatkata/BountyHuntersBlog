@@ -1,46 +1,62 @@
-﻿@model IEnumerable<BountyHuntersBlog.ViewModels.Admin.Comments.AdminCommentListItemVM>
+﻿@model IReadOnlyList<BountyHuntersBlog.ViewModels.Admin.Comments.AdminCommentListItemVM>
 @{
     ViewData["Title"] = "Comments";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-<partial name="~/Areas/Admin/Views/Shared/_ListHeader.cshtml" />
 
-<table class="table table-hover align-middle">
-    <thead>
-    <tr>
-        <th>Mission</th>
-        <th class="d-none d-md-table-cell">User</th>
-        <th>Content</th>
-        <th class="d-none d-lg-table-cell">Created</th>
-        <th>Likes</th>
-        <th class="text-end">Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    @if (Model != null && Model.Any())
-    {
-        foreach (var it in Model)
-        {
+<h2 class="mb-3">Comments</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">No comments found.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
             <tr>
-                <td>@it.MissionTitle</td>
-                <td class="d-none d-md-table-cell">@it.UserDisplayName</td>
-                <td class="text-truncate" style="max-width:420px">@it.Content</td>
-                <td class="d-none d-lg-table-cell">@it.CreatedOn.ToString("yyyy-MM-dd")</td>
-                <td>@it.LikesCount</td>
-                <td class="text-end">
-                    <form asp-action="Delete" asp-route-id="@it.Id" method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                onclick="return confirm('Delete (soft) this comment?');">
-                            Delete
-                        </button>
-                    </form>
-                </td>
+                <th style="width:80px">Id</th>
+                <th>User</th>
+                <th>Mission</th>
+                <th>Content</th>
+                <th style="width:120px">Status</th>
+                <th style="width:160px" class="text-end">Actions</th>
             </tr>
-        }
-    }
-    else
-    {
-        <tr><td colspan="6" class="text-muted">No data.</td></tr>
-    }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.Id</td>
+                    <td>@c.UserName</td>
+                    <td>@c.MissionTitle</td>
+                    <td>@c.Content</td>
+                    <td>
+                        @if (c.IsDeleted)
+                        {
+                            <span class="badge bg-danger">Deleted</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        @if (!c.IsDeleted)
+                        {
+                            <form method="post" class="d-inline"
+                                  asp-area="Admin" asp-controller="AdminComments" asp-action="Delete"
+                                  asp-route-id="@c.Id">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Soft delete this comment?');">
+                                    Delete
+                                </button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

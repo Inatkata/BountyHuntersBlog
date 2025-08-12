@@ -12,7 +12,7 @@ namespace BountyHuntersBlog.Services.DTOs
 
         public string UserId { get; set; } = null!;
         public string UserDisplayName { get; set; } = null!;
-
+        public string ImageUrl { get; set; } = null!;
         public int CategoryId { get; set; }
         public string CategoryName { get; set; } = null!;
 

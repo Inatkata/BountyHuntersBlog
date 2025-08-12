@@ -2,9 +2,10 @@
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels.Admin.Tags;
+using BountyHuntersBlog.ViewModels.Missions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using BountyHuntersBlog.ViewModels.Admin.Tags; 
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 
 namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
@@ -15,11 +16,13 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
     {
         private readonly ITagService _tags;
         private readonly IMapper _mapper;
+        private readonly IMissionService _missions;
 
-        public AdminTagsController(ITagService tags, IMapper mapper)
+        public AdminTagsController(ITagService tags, IMapper mapper, IMissionService missions)
         {
             _tags = tags;
             _mapper = mapper;
+            _missions = missions;
         }
 
         [HttpGet]
@@ -50,14 +53,28 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int missionId)
         {
-            var dto = await _tags.GetAsync(id);
-            if (dto == null) return NotFound();
+            var mission = await _missions.GetByIdAsync(missionId);
+            if (mission == null) return NotFound();
 
-            var vm = _mapper.Map<AdminTagFormVM>(dto);
+            var allTags = (await _tags.AllAsync()).ToList();
+            var selected = mission.TagIds.ToHashSet();
+
+            var vm = new MissionEditViewModel
+            {
+                Id = mission.Id,
+                Title = mission.Title,
+                Tags = allTags.Select(t => new SelectListItem(
+                    text: t.Name,
+                    value: t.Id.ToString(),
+                    selected: selected.Contains(t.Id)
+                )).ToList()
+            };
+
             return View(vm);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

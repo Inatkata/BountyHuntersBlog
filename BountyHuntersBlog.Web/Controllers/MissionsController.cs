@@ -131,9 +131,13 @@ namespace BountyHuntersBlog.Web.Controllers
             var dto = await _missions.GetByIdAsync(id);
             if (dto == null) return NotFound();
 
-            // проверка за автор/админ
+           
             if (!User.IsInRole("Admin") && dto.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
                 return Forbid();
+
+            var selected = dto.TagIds?.ToHashSet() ?? new HashSet<int>();
+            var allTags = await _tags.AllAsync();
+            var allCats = await _categories.AllAsync();
 
             var vm = new MissionEditViewModel
             {
@@ -141,12 +145,11 @@ namespace BountyHuntersBlog.Web.Controllers
                 Title = dto.Title,
                 Description = dto.Description,
                 CategoryId = dto.CategoryId,
-                TagIds = dto.TagIds.ToList(),
-                Categories = (await _categories.AllAsync())
-                    .Select(c => new SelectListItem(c.Name, c.Id.ToString())),
-                Tags = (await _tags.AllAsync())
-                    .Select(t => new SelectListItem(t.Name, t.Id.ToString()))
+                TagIds = dto.TagIds?.ToList() ?? new List<int>(),
+                Categories = allCats.Select(c => new SelectListItem(c.Name, c.Id.ToString(), c.Id == dto.CategoryId)),
+                Tags = allTags.Select(t => new SelectListItem(t.Name, t.Id.ToString(), selected.Contains(t.Id)))
             };
+
 
             return View(vm);
         }
@@ -190,6 +193,7 @@ namespace BountyHuntersBlog.Web.Controllers
 
             if (!User.IsInRole("Admin") && dto.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
                 return Forbid();
+           
 
             await _missions.SoftDeleteAsync(id);
             return RedirectToAction(nameof(Index));

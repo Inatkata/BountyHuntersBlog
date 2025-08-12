@@ -12,6 +12,7 @@ namespace BountyHuntersBlog.ViewModels.Missions
         public DateTime CreatedOn { get; set; }
         public DateTime CreatedOnUtc => CreatedOn;          // back-compat
         public bool IsCompleted { get; set; }
+        public string ImageUrl { get; set; } = null!;
 
         public string UserId { get; set; } = null!;
         public string UserDisplayName { get; set; } = null!;

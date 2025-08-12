@@ -31,17 +31,31 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
             _mapper = mapper;
         }
 
-        // GET: /Admin/AdminUsers
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search, int page = 1, int pageSize = 10)
         {
-            var users = await _userManager.Users.AsNoTracking().ToListAsync();
+            var query = _userManager.Users.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+                query = query.Where(u =>
+                    (u.UserName != null && u.UserName.ToLower().Contains(search)) ||
+                    (u.Email != null && u.Email.ToLower().Contains(search)));
+            }
+
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .OrderBy(u => u.UserName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
             var list = new List<AdminUserListItemVM>(users.Count);
             foreach (var u in users)
             {
                 var roles = await _userManager.GetRolesAsync(u);
-                var vm = new AdminUserListItemVM
+                list.Add(new AdminUserListItemVM
                 {
                     Id = u.Id,
                     UserName = u.UserName ?? string.Empty,
@@ -52,15 +66,43 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
                     CommentsCount = await _db.Comments.CountAsync(c => c.UserId == u.Id),
                     LikesCount = await _db.Likes.CountAsync(l => l.UserId == u.Id),
                     IsLockedOut = u.LockoutEnd.HasValue && u.LockoutEnd.Value.UtcDateTime > DateTime.UtcNow
-                };
-
-                list.Add(vm);
+                });
             }
+
+            ViewBag.TotalCount = totalCount;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Search = search;
 
             return View(list);
         }
 
-        
+        [HttpGet]
+        public async Task<IActionResult> Details(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var vm = new AdminUserDetailsVM
+            {
+                Id = user.Id,
+                UserName = user.UserName ?? string.Empty,
+                DisplayName = user.DisplayName,
+                Email = user.Email ?? string.Empty,
+                Roles = roles,
+                Missions = await _db.Missions.Where(m => m.UserId == user.Id).ToListAsync(),
+                Comments = await _db.Comments.Where(c => c.UserId == user.Id).ToListAsync(),
+                LikesCount = await _db.Likes.CountAsync(l => l.UserId == user.Id),
+                IsLockedOut = user.LockoutEnd.HasValue && user.LockoutEnd.Value.UtcDateTime > DateTime.UtcNow
+            };
+
+            return View(vm);
+        }
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Lock(string id, int days = 7)
