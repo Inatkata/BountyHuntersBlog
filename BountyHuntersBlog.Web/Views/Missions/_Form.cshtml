@@ -1,0 +1,21 @@
+@model BountyHuntersBlog.ViewModels.Missions.MissionEditViewModel
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="mb-3">
+    <label asp-for="Title" class="form-label"></label>
+    <input asp-for="Title" class="form-control" placeholder="Enter mission title" />
+    <span asp-validation-for="Title" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Description" class="form-label"></label>
+    <textarea asp-for="Description" class="form-control" rows="5" placeholder="Enter mission description"></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="CategoryId" class="form-label">Category</label>
+    <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select"></select>
+    <span asp-validation-for="CategoryId" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="TagIds" class="form-label">Tags</label>
+    <select asp-for="TagIds" asp-items="Model.Tags" class="form-select" multiple></select>
+</div>

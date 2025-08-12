@@ -25,5 +25,6 @@ namespace BountyHuntersBlog.Data.Models
         public Mission Mission { get; set; } = null!;
 
         public ICollection<Like> Likes { get; set; } = new List<Like>();
+        public bool IsDeleted { get; set; }
     }
 }

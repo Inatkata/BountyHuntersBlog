@@ -1,0 +1,23 @@
+﻿@model BountyHuntersBlog.ViewModels.Admin.Missions.AdminMissionListItemVM
+@{
+    var totalPages = (int)Math.Ceiling((double)(Model.TotalCount) / Model.PageSize);
+    if (totalPages < 1) { totalPages = 1; }
+}
+<nav aria-label="Pagination">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)" asp-route-pageSize="@Model.PageSize">Prev</a>
+        </li>
+
+        @for (var p = 1; p <= totalPages; p++)
+        {
+            <li class="page-item @(p == Model.Page ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-pageSize="@Model.PageSize">@p</a>
+            </li>
+        }
+
+        <li class="page-item @(Model.Page >= totalPages ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)" asp-route-pageSize="@Model.PageSize">Next</a>
+        </li>
+    </ul>
+</nav>

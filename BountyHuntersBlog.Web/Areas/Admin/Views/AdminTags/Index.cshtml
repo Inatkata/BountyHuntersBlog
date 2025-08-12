@@ -1,31 +1,46 @@
+@model IEnumerable<BountyHuntersBlog.ViewModels.Admin.Tags.AdminTagListItemVM>
+
 @{
     ViewData["Title"] = "Tags";
 }
 <partial name="~/Areas/Admin/Views/Shared/_ListHeader.cshtml" />
+
 <table class="table table-hover align-middle">
     <thead>
-        <tr>
-            <th>Name</th>
-            <th class="text-end">Actions</th>
-        </tr>
+    <tr>
+        <th>Name</th>
+        <th>Missions</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+    </tr>
     </thead>
     <tbody>
-    @if (Model is IEnumerable<dynamic> items)
+    @if (Model != null && Model.Any())
     {
-        foreach (var it in items)
+        foreach (var it in Model)
         {
             <tr>
-                <td>@(it.Name)</td>
-                <td class="text-end">
-                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@(it.Id)">Edit</a>
-                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@(it.Id)">Delete</a>
+                <td>@it.Name</td>
+                <td>@it.MissionsCount</td>
+                <td>@(it.IsDeleted ? "Deleted" : "Active")</td>
+                <td class="text-end d-flex gap-2 justify-content-end">
+                    <a class="btn btn-sm btn-outline-secondary"
+                       asp-action="Edit" asp-route-id="@it.Id">Edit</a>
+
+                    <form asp-action="Delete" asp-route-id="@it.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Delete (soft) this tag?');">
+                            Delete
+                        </button>
+                    </form>
                 </td>
             </tr>
         }
     }
     else
     {
-        <tr><td colspan="2" class="text-muted">No data. Bind IEnumerable to the view.</td></tr>
+        <tr><td colspan="4" class="text-muted">No data.</td></tr>
     }
     </tbody>
 </table>

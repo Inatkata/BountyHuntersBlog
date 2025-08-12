@@ -1,11 +1,11 @@
-﻿// Services/Implementations/CommentService.cs
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace BountyHuntersBlog.Services.Implementations
 {
@@ -58,8 +58,8 @@ namespace BountyHuntersBlog.Services.Implementations
         public async Task<IReadOnlyList<CommentDto>> GetForMissionAsync(int missionId)
         {
             var query = _comments.AllAsQueryable()
-                                 .Where(c => c.MissionId == missionId)
-                                 .OrderByDescending(c => c.CreatedOn);
+                .Where(c => c.MissionId == missionId)
+                .OrderByDescending(c => c.CreatedOn);
             return await query.ProjectTo<CommentDto>(_mapper.ConfigurationProvider).ToListAsync();
         }
 
@@ -68,5 +68,27 @@ namespace BountyHuntersBlog.Services.Implementations
             var entity = await _comments.GetByIdWithIncludesAsync(id);
             return entity == null ? null : _mapper.Map<CommentDto>(entity);
         }
+
+        public async Task<CommentDto> SoftDeleteAsync(int id)
+        {
+            var entity = await _comments.GetByIdAsync(id);
+            if (entity == null) throw new ArgumentException("Comment not found", nameof(id));
+            entity.IsDeleted = true;
+            _comments.Update(entity);
+            await _comments.SaveChangesAsync();
+            return _mapper.Map<CommentDto>(entity);
+        }
+
+        public async Task<IReadOnlyList<CommentDto>> AllAsync()
+        {
+            var query = _comments.AllAsQueryable()          // IQueryable<Comment>
+                .Where(c => !c.IsDeleted)
+                .OrderByDescending(c => c.CreatedOn);
+
+            return await query
+                .ProjectTo<CommentDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
     }
 }

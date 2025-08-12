@@ -59,51 +59,58 @@ namespace BountyHuntersBlog.Services.Implementations
             return dto;
         }
 
+        // Services/Implementations/MissionService.cs
         public async Task<int> CreateAsync(MissionDto dto)
         {
             var entity = _mapper.Map<Mission>(dto);
+            entity.CreatedOn = DateTime.UtcNow;
+
+            // attach category
+            entity.CategoryId = dto.CategoryId;
+
+            // mission tags
+            entity.MissionTags = dto.TagIds?.Distinct()
+                .Select(tid => new MissionTag { TagId = tid })
+                .ToList() ?? new List<MissionTag>();
+
+            // author
+            if (!string.IsNullOrEmpty(dto.UserId))
+                entity.UserId = dto.UserId;
+
             await _missions.AddAsync(entity);
             await _missions.SaveChangesAsync();
 
-            if (dto.TagIds != null && dto.TagIds.Any())
-            {
-                foreach (var tagId in dto.TagIds.Distinct())
-                {
-                    if (!await _missionTags.LinkExistsAsync(entity.Id, tagId))
-                        await _missionTags.AddAsync(new MissionTag { MissionId = entity.Id, TagId = tagId });
-                }
-                await _missionTags.SaveChangesAsync();
-            }
             return entity.Id;
         }
+
+
 
         public async Task<bool> UpdateAsync(MissionDto dto)
         {
             var entity = await _missions.GetByIdAsync(dto.Id);
             if (entity == null) return false;
 
+            // simple fields
             entity.Title = dto.Title;
             entity.Description = dto.Description;
+            entity.ImageUrl = dto.ImageUrl;
+            entity.IsCompleted = dto.IsCompleted;
+            entity.IsDeleted = dto.IsDeleted;
             entity.CategoryId = dto.CategoryId;
 
-            _missions.Update(entity);
+            // sync MissionTags (remove missing; add new)
+            var newSet = (dto.TagIds ?? Enumerable.Empty<int>()).Distinct().ToHashSet();
+            var currentSet = entity.MissionTags?.Select(mt => mt.TagId).ToHashSet() ?? new HashSet<int>();
+
+            // remove
+            foreach (var mt in entity.MissionTags.Where(mt => !newSet.Contains(mt.TagId)).ToList())
+                entity.MissionTags.Remove(mt);
+
+            // add
+            foreach (var tid in newSet.Except(currentSet))
+                entity.MissionTags.Add(new MissionTag { MissionId = entity.Id, TagId = tid });
+
             await _missions.SaveChangesAsync();
-
-            // sync tags
-            var newTags = (dto.TagIds ?? Enumerable.Empty<int>()).ToHashSet();
-            var existing = _missionTags.AllAsQueryable()
-                                       .Where(x => x.MissionId == entity.Id);
-            var existingList = await existing.ToListAsync();
-
-            // remove missing
-            foreach (var mt in existingList.Where(x => !newTags.Contains(x.TagId)))
-                _missionTags.Delete(mt);
-
-            // add new
-            foreach (var tagId in newTags.Where(t => !existingList.Any(x => x.TagId == t)))
-                await _missionTags.AddAsync(new MissionTag { MissionId = entity.Id, TagId = tagId });
-
-            await _missionTags.SaveChangesAsync();
             return true;
         }
 

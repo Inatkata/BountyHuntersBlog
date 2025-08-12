@@ -1,0 +1,46 @@
+﻿@model IEnumerable<BountyHuntersBlog.ViewModels.Admin.Comments.AdminCommentListItemVM>
+@{
+    ViewData["Title"] = "Comments";
+}
+<partial name="~/Areas/Admin/Views/Shared/_ListHeader.cshtml" />
+
+<table class="table table-hover align-middle">
+    <thead>
+    <tr>
+        <th>Mission</th>
+        <th class="d-none d-md-table-cell">User</th>
+        <th>Content</th>
+        <th class="d-none d-lg-table-cell">Created</th>
+        <th>Likes</th>
+        <th class="text-end">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (Model != null && Model.Any())
+    {
+        foreach (var it in Model)
+        {
+            <tr>
+                <td>@it.MissionTitle</td>
+                <td class="d-none d-md-table-cell">@it.UserDisplayName</td>
+                <td class="text-truncate" style="max-width:420px">@it.Content</td>
+                <td class="d-none d-lg-table-cell">@it.CreatedOn.ToString("yyyy-MM-dd")</td>
+                <td>@it.LikesCount</td>
+                <td class="text-end">
+                    <form asp-action="Delete" asp-route-id="@it.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Delete (soft) this comment?');">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr><td colspan="6" class="text-muted">No data.</td></tr>
+    }
+    </tbody>
+</table>

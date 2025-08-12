@@ -1,35 +1,47 @@
-﻿@{
+﻿@model BountyHuntersBlog.ViewModels.Admin.Missions.AdminMissionListItemVM
+@{
     ViewData["Title"] = "Missions";
 }
 <partial name="~/Areas/Admin/Views/Shared/_ListHeader.cshtml" />
+
 <table class="table table-hover align-middle">
     <thead>
     <tr>
         <th>Title</th>
-        <th>Category</th>
-        <th>Completed</th>
+        <th class="d-none d-md-table-cell">Description</th>
+        <th class="d-none d-lg-table-cell">Created</th>
         <th class="text-end">Actions</th>
     </tr>
     </thead>
     <tbody>
-    @if (Model is IEnumerable<dynamic> items)
+    @if (Model?.Items != null && Model.Items.Any())
     {
-        foreach (var m in items)
+        foreach (var it in Model.Items)
         {
             <tr>
-                <td>@m.Title</td>
-                <td>@m.CategoryName</td>
-                <td>@(m.IsCompleted ? "Yes" : "No")</td>
-                <td class="text-end">
-                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@(m.Id)">Edit</a>
-                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@(m.Id)">Delete</a>
+                <td>@it.Title</td>
+                <td class="d-none d-md-table-cell text-truncate" style="max-width: 420px;">@it.Description</td>
+                <td class="d-none d-lg-table-cell">
+                    @(it.CreatedOn = default ? "-" : it.CreatedOn.ToString("yyyy-MM-dd"))
+                </td>
+                <td class="text-end d-flex gap-2 justify-content-end">
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@it.Id">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@it.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Delete (soft) this mission?');">
+                            Delete
+                        </button>
+                    </form>
                 </td>
             </tr>
         }
     }
     else
     {
-        <tr><td colspan="4" class="text-muted">No data. Bind IEnumerable to the view.</td></tr>
+        <tr><td colspan="4" class="text-muted">No data.</td></tr>
     }
     </tbody>
 </table>
+
+<partial name="~/Areas/Admin/Views/Shared/_Pager.cshtml" model="Model" />

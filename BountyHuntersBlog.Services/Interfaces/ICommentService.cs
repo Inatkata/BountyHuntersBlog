@@ -10,5 +10,7 @@ namespace BountyHuntersBlog.Services.Interfaces
         Task<bool> DeleteAsync(int id);
         Task<IReadOnlyList<CommentDto>> GetForMissionAsync(int missionId);
         Task<CommentDto?> GetByIdAsync(int id);
+        Task<CommentDto> SoftDeleteAsync(int id);
+        Task<IReadOnlyList<CommentDto>> AllAsync();
     }
 }

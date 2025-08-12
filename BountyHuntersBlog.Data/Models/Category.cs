@@ -1,5 +1,4 @@
-﻿// BountyHuntersBlog.Data/Models/Category.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using BountyHuntersBlog.Data.Constants;
 
 namespace BountyHuntersBlog.Data.Models

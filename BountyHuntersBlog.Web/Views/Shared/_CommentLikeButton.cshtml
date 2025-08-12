@@ -1,0 +1,42 @@
+﻿@* Usage:
+   <partial name="_CommentLikeButton" model="new { Id = comment.Id, MissionId = Model.Id, Likes = comment.LikesCount, IsLiked = comment.CanLike }" />
+   Model props: Id (int commentId), MissionId (int), Likes (int), IsLiked (bool)
+*@
+@{
+    var commentId = (int)(ViewData["Id"] ?? (Model?.Id ?? 0));
+    var missionId = (int)(ViewData["MissionId"] ?? (Model?.MissionId ?? 0));
+    var likes = (int)(ViewData["Likes"] ?? (Model?.Likes ?? 0));
+    var isLiked = (bool)(ViewData["IsLiked"] ?? (Model?.IsLiked ?? false));
+    var formId = $"like-comment-{commentId}";
+}
+<form id="@formId" asp-controller="Likes" asp-action="ToggleComment" method="post" class="d-inline">
+    <input type="hidden" name="commentId" value="@commentId" />
+    <input type="hidden" name="missionId" value="@missionId" />
+    <button type="submit" class="btn btn-sm @(isLiked ? "btn-primary" : "btn-outline-primary")">
+        👍 <span class="like-count">@likes</span>
+    </button>
+</form>
+<script>
+(function(){
+  const form = document.getElementById('@formId');
+  if (!form) return;
+  form.addEventListener('submit', async function (e) {
+    if (!window.fetch) return; // fallback: нормален POST
+    e.preventDefault();
+    const fd = new FormData(form);
+    const res = await fetch(form.action, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd
+    });
+    if (!res.ok) return;
+    try{
+      const data = await res.json();
+      if (data && typeof data.likesCount !== 'undefined') {
+        form.querySelector('.like-count').textContent = data.likesCount;
+        form.querySelector('button').className = 'btn btn-sm ' + (data.isLiked ? 'btn-primary' : 'btn-outline-primary');
+      }
+    }catch(_){}
+  });
+})();
+</script>

@@ -1,0 +1,26 @@
+﻿@model BountyHuntersBlog.ViewModels.CommentViewModel
+
+@{
+    var isEdit = (bool?)ViewData["IsEdit"] == true;
+    ViewData["Title"] = isEdit ? "Edit Comment" : "Create Comment";
+}
+<partial name="~/Areas/Admin/Views/Shared/_BackToIndex.cshtml" />
+<form method="post">
+    @if (isEdit)
+    {
+        <input type="hidden" name="Id" value="@(Model?.Id)" />
+    }
+    <div class="mb-3">
+        <label class="form-label">Mission</label>
+        <select name="MissionId" class="form-select" asp-items="Model.Missions"></select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">User</label>
+        <select name="UserId" class="form-select" asp-items="Model.Users"></select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Content</label>
+        <textarea name="Content" class="form-control" rows="4">@(Model?.Content)</textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">@((isEdit) ? "Save" : "Create")</button>
+</form>

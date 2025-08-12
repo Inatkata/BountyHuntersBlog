@@ -1,0 +1,99 @@
+@model IEnumerable<BountyHuntersBlog.ViewModels.Admin.Users.AdminUserListItemVM>
+@{
+    ViewData["Title"] = "Users";
+}
+<h2 class="mb-3">Users</h2>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>UserName</th>
+            <th class="d-none d-md-table-cell">Display</th>
+            <th class="d-none d-md-table-cell">Email</th>
+            <th>Roles</th>
+            <th class="d-none d-lg-table-cell">Missions</th>
+            <th class="d-none d-lg-table-cell">Comments</th>
+            <th class="d-none d-lg-table-cell">Likes</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.UserName</td>
+                    <td class="d-none d-md-table-cell">@u.DisplayName</td>
+                    <td class="d-none d-md-table-cell">@u.Email</td>
+                    <td>
+                        @if (u.Roles != null && u.Roles.Any())
+                        {
+                            foreach (var r in u.Roles)
+                            {
+                                <span class="badge text-bg-secondary me-1">@r</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">none</span>
+                        }
+                    </td>
+                    <td class="d-none d-lg-table-cell">@u.MissionsCount</td>
+                    <td class="d-none d-lg-table-cell">@u.CommentsCount</td>
+                    <td class="d-none d-lg-table-cell">@u.LikesCount</td>
+                    <td>@(u.IsLockedOut ? "Locked" : "Active")</td>
+                    <td class="text-end">
+                        <div class="d-flex gap-2 justify-content-end flex-wrap">
+                            @if (u.IsLockedOut)
+                            {
+                                <form asp-action="Unlock" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-success">Unlock</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="Lock" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <input type="hidden" name="days" value="7" />
+                                    <button type="submit" class="btn btn-sm btn-outline-warning">Lock 7d</button>
+                                </form>
+                            }
+
+                            <form asp-action="AddToRole" method="post" class="d-inline d-flex gap-1">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <input name="role" class="form-control form-control-sm" placeholder="role..." style="width:120px" />
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Add role</button>
+                            </form>
+
+                            @if (u.Roles != null && u.Roles.Any())
+                            {
+                                foreach (var r in u.Roles)
+                                {
+                                    <form asp-action="RemoveFromRole" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@u.Id" />
+                                        <input type="hidden" name="role" value="@r" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Remove role @r ?');">
+                                            Remove @r
+                                        </button>
+                                    </form>
+                                }
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="9" class="text-muted">No users.</td></tr>
+        }
+    </tbody>
+</table>

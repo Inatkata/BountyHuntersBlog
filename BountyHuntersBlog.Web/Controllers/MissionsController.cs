@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.ViewModels.Comments;
+using BountyHuntersBlog.ViewModels.Admin.Missions;
 using BountyHuntersBlog.ViewModels.Missions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
+using BountyHuntersBlog.ViewModels;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
@@ -39,6 +40,7 @@ namespace BountyHuntersBlog.Web.Controllers
         public async Task<IActionResult> Index(string? q, int? categoryId, int? tagId, int page = 1, int pageSize = 10)
         {
             var (items, total) = await _missions.SearchPagedAsync(q, categoryId, tagId, page, pageSize);
+     
 
             var vm = new MissionIndexViewModel
             {
@@ -86,7 +88,7 @@ namespace BountyHuntersBlog.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var vm = new MissionEditViewModel
+            var vm = new AdminMissionFormVM
             {
                 Categories = (await _categories.AllAsync())
                     .Select(c => new SelectListItem(c.Name, c.Id.ToString())),
@@ -98,7 +100,7 @@ namespace BountyHuntersBlog.Web.Controllers
 
         [Authorize]
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(MissionEditViewModel vm)
+        public async Task<IActionResult> Create(AdminMissionFormVM vm)
         {
             if (!ModelState.IsValid)
             {
@@ -111,9 +113,11 @@ namespace BountyHuntersBlog.Web.Controllers
             {
                 Title = vm.Title,
                 Description = vm.Description,
+                ImageUrl = vm.ImageUrl,           
                 CategoryId = vm.CategoryId,
                 TagIds = vm.TagIds,
-                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!
+                IsCompleted = vm.IsCompleted,
+                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
             };
 
             var id = await _missions.CreateAsync(dto);

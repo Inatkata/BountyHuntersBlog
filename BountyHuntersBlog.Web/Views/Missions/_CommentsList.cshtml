@@ -1,0 +1,35 @@
+@model IEnumerable<BountyHuntersBlog.ViewModels.Missions.MissionDetailsViewModel.CommentItem>
+@if (!Model.Any())
+{
+    <p class="text-muted">No comments yet.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var c in Model)
+        {
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <strong>@c.UserDisplayName</strong>
+                    <small>@c.CreatedOn.ToShortDateString()</small>
+                </div>
+                <p>@c.Content</p>
+                <div class="d-flex justify-content-between">
+                    <form asp-action="ToggleCommentLike" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <input type="hidden" name="missionId" value="@c.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-primary">👍 (@c.LikesCount)</button>
+                    </form>
+                    @if (c.CanDelete)
+                    {
+                        <form asp-action="DeleteComment" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@c.Id" />
+                            <input type="hidden" name="missionId" value="@c.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    }
+                </div>
+            </li>
+        }
+    </ul>
+}

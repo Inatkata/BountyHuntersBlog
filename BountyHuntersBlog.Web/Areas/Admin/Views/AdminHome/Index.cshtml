@@ -1,0 +1,50 @@
+﻿gmodel BountyHuntersBlog.Web.Areas.Admin.Models.AdminHomeViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row g-3">
+    <div class="col-lg-3 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Users</h5>
+                <p class="card-text text-muted">Manage application users & roles.</p>
+                <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminHome" asp-action="Index">Open</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Missions</h5>
+                <p class="card-text text-muted">Create, edit, archive missions.</p>
+                <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminMissions" asp-action="Index">Open</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Comments</h5>
+                <p class="card-text text-muted">Moderate user comments.</p>
+                <!-- Използвай AdminCommentsController, ако го имаш -->
+                <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminComments" asp-action="Index">Open</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Taxonomy</h5>
+                <p class="card-text text-muted">Tags & categories.</p>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="AdminTags" asp-action="Index">Tags</a>
+                    <a class="btn btn-outline-primary" asp-area="Admin" asp-controller="AdminCategories" asp-action="Index">Categories</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

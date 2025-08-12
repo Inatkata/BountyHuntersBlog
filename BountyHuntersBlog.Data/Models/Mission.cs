@@ -16,9 +16,7 @@ namespace BountyHuntersBlog.Data.Models
         [MaxLength(ModelConstants.User.DisplayNameMaxLength)]
         public string Description { get; set; } = null!;
 
-        // Optional SEO handle (ако ще го ползваш във Details URL)
-        // [MaxLength(128)]
-        // public string? UrlHandle { get; set; }
+        public string? ImageUrl { get; set; }
 
         [Required]
         public string UserId { get; set; } = null!;
