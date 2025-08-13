@@ -4,8 +4,14 @@
     {
         public int Id { get; set; }
         public string Title { get; set; } = null!;
+        public string Description { get; set; } = null!; // +++
+        public string? ImageUrl { get; set; } // +++
+        public int CategoryId { get; set; } // +++
+        public bool IsDeleted { get; set; } // +++
         public bool IsCompleted { get; set; }
+
         public string CategoryName { get; set; } = "";
+        public IEnumerable<int> TagIds { get; set; } = new List<int>();
         public IEnumerable<string> TagNames { get; set; } = new List<string>();
     }
 
@@ -16,6 +22,7 @@
         public string Description { get; set; } = null!;
         public string? ImageUrl { get; set; }
         public string CategoryName { get; set; } = "";
+        public IEnumerable<int> TagIds { get; set; } = new List<int>();
         public IEnumerable<string> TagNames { get; set; } = new List<string>();
         public int LikesCount { get; set; }
         public List<MissionCommentDetailsDto> Comments { get; set; } = new();
@@ -39,5 +46,6 @@
         public int CategoryId { get; set; }
         public IEnumerable<int> TagIds { get; set; } = new List<int>();
         public bool IsCompleted { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

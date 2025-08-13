@@ -33,7 +33,7 @@ else
             <a asp-controller="Missions" asp-action="Details" asp-route-id="@m.Id" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">@m.Title</h5>
-                    <small>@m.CreatedOn.ToShortDateString()</small>
+                    <small>@m.CreatedOn.ToString()</small>
                 </div>
                 <p class="mb-1 text-muted">@m.ShortDescription</p>
                 <small>@m.CommentsCount comments • @m.LikesCount likes</small>

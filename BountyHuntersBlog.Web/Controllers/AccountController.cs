@@ -34,8 +34,8 @@ namespace BountyHuntersBlog.Web.Controllers
             if (!ModelState.IsValid) return View(model);
 
             // приемаме и email, и username
-            ApplicationUser? user = await _userManager.FindByEmailAsync(model.Email)
-                                     ?? await _userManager.FindByNameAsync(model.Email);
+            ApplicationUser? user = await _userManager.FindByEmailAsync(model.Username)
+                                     ?? await _userManager.FindByNameAsync(model.Username);
 
             if (user == null)
             {

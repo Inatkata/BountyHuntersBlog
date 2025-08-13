@@ -50,7 +50,7 @@ namespace BountyHuntersBlog.Web.Controllers
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = total,
-                Items = items.Select(_mapper.Map<MissionListItemViewModel>).ToList(),
+                Items = items.Select(_mapper.Map<MissionListItemVm>).ToList(),
                 Categories = (await _categories.AllAsync())
                     .Select(c => new SelectListItem(c.Name, c.Id.ToString())),
                 Tags = (await _tags.AllAsync())

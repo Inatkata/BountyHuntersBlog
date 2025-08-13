@@ -19,7 +19,8 @@ public class CategoriesController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var list = await _categories.AllAsync();
+        var list = (await _categories.AllAsync()).ToList();
+
         var vmList = list.Select(_mapper.Map<CategoryViewModel>).ToList();
         return View(vmList);
     }
@@ -34,7 +35,7 @@ public class CategoriesController : Controller
 
         // вземаме и мисиите в тази категория (ако искаме да ги покажем)
         var (items, _) = await _missions.SearchPagedAsync(null, id, null, 1, 100);
-        vm.Missions = items;
+        vm.Missions = (List<BountyHuntersBlog.Services.DTOs.MissionDto>)items;
 
         return View(vm);
     }

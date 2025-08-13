@@ -20,5 +20,8 @@ namespace BountyHuntersBlog.Services.Interfaces
 
         Task<IEnumerable<SelectListItem>> GetCategoriesSelectListAsync();
         Task<IEnumerable<SelectListItem>> GetTagsSelectListAsync();
+        Task<MissionDto?> GetByIdAsync(int id);          // +++
+        Task UpdateAsync(MissionDto dto);                // +++
+        Task SoftDeleteAsync(int id);
     }
 }

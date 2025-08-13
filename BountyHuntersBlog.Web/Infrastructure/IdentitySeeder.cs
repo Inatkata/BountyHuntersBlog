@@ -9,26 +9,31 @@ public static class IdentitySeeder
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        string[] roles = new[] { "Admin", "User" };
-        foreach (var r in roles)
-            if (!await roleManager.RoleExistsAsync(r))
-                await roleManager.CreateAsync(new IdentityRole(r));
+        // Roles
+        foreach (var role in new[] { "Admin", "User" })
+            if (!await roleManager.RoleExistsAsync(role))
+                await roleManager.CreateAsync(new IdentityRole(role));
 
-        // seed admin user
+        // Admin
         var adminEmail = "admin@site.local";
-        var adminUser = await userManager.FindByEmailAsync(adminEmail);
-        if (adminUser == null)
+        var admin = await userManager.FindByEmailAsync(adminEmail);
+        if (admin == null)
         {
-            adminUser = new ApplicationUser
-            {
-                UserName = "admin",
-                Email = adminEmail,
-                DisplayName = "Admin"
-            };
-            await userManager.CreateAsync(adminUser, "Admin!123"); // временно
+            admin = new ApplicationUser { UserName = "admin", Email = adminEmail, DisplayName = "Admin" };
+            await userManager.CreateAsync(admin, "Admin!123"); // TODO: move to secrets
         }
+        if (!await userManager.IsInRoleAsync(admin, "Admin"))
+            await userManager.AddToRoleAsync(admin, "Admin");
 
-        if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
-            await userManager.AddToRoleAsync(adminUser, "Admin");
+        // Demo user
+        var userEmail = "demo@site.local";
+        var demo = await userManager.FindByEmailAsync(userEmail);
+        if (demo == null)
+        {
+            demo = new ApplicationUser { UserName = "demo", Email = userEmail, DisplayName = "Demo User" };
+            await userManager.CreateAsync(demo, "User!123"); // TODO: move to secrets
+        }
+        if (!await userManager.IsInRoleAsync(demo, "User"))
+            await userManager.AddToRoleAsync(demo, "User");
     }
 }

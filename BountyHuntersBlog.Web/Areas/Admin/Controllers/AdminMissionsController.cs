@@ -1,5 +1,5 @@
-﻿// BountyHuntersBlog.Web/Areas/Admin/Controllers/AdminMissionsController.cs
-using AutoMapper;
+﻿using AutoMapper;
+using BountyHuntersBlog.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -59,7 +59,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
                 return View(vm);
             }
 
-            var dto = new MissionDto
+            var dto = new MissionEditDto()
             {
                 Title = vm.Title,
                 Description = vm.Description,
@@ -106,7 +106,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
                 return View(vm);
             }
 
-            var update = new MissionDto
+            var update = new MissionDto()
             {
                 Id = vm.Id,
                 Title = vm.Title,
@@ -118,8 +118,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
                 IsDeleted = vm.IsDeleted
             };
 
-            var ok = await _missions.UpdateAsync(update);
-            if (!ok) return NotFound();
+            await _missions.UpdateAsync(update);   
             TempData["Success"] = "Mission updated.";
             return RedirectToAction(nameof(Index));
         }
@@ -128,8 +127,8 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var ok = await _missions.SoftDeleteAsync(id);
-            TempData[ok ? "Success" : "Error"] = ok ? "Mission deleted." : "Mission not found.";
+            await _missions.SoftDeleteAsync(id);
+            TempData["Success"] = "Mission deleted.";
             return RedirectToAction(nameof(Index));
         }
 

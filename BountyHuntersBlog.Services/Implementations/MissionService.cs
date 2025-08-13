@@ -287,6 +287,46 @@ namespace BountyHuntersBlog.Services.Implementations
 
             await _missionTags.SaveChangesAsync(); // или _missions.SaveChangesAsync() при общ DbContext
         }
+        public async Task<MissionDto?> GetByIdAsync(int id)
+        {
+            var e = await _missions.GetByIdWithIncludesAsync(id);
+            if (e == null) return null;
+            return new MissionDto
+            {
+                Id = e.Id,
+                Title = e.Title,
+                Description = e.Description,
+                ImageUrl = e.ImageUrl,
+                CategoryId = e.CategoryId,
+                IsDeleted = e.IsDeleted,
+                IsCompleted = e.IsCompleted,
+                CategoryName = e.Category?.Name ?? "",
+                TagIds = e.MissionTags.Select(mt => mt.TagId).ToList(),
+                TagNames = e.MissionTags.Select(mt => mt.Tag.Name).ToList()
+            };
+        }
+
+        public async Task UpdateAsync(MissionDto dto)
+        {
+            await EditAsync(new MissionEditDto
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Description = dto.Description,
+                ImageUrl = dto.ImageUrl,
+                CategoryId = dto.CategoryId,
+                TagIds = dto.TagIds,
+                IsCompleted = dto.IsCompleted
+            });
+        }
+
+        public async Task SoftDeleteAsync(int id)
+        {
+            var e = await _missions.GetByIdAsync(id) ?? throw new KeyNotFoundException();
+            e.IsDeleted = true;
+            _missions.Update(e);
+            await _missions.SaveChangesAsync();
+        }
 
     }
 }
