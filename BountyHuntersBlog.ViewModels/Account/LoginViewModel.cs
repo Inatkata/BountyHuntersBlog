@@ -3,7 +3,7 @@
     public class LoginViewModel
     {
         [System.ComponentModel.DataAnnotations.Required]
-        public string Email { get; set; } = null!;   
+        public string Username { get; set; } = null!;   
 
         [System.ComponentModel.DataAnnotations.Required,
          System.ComponentModel.DataAnnotations.DataType(System.ComponentModel.DataAnnotations.DataType.Password)]

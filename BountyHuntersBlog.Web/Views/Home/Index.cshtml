@@ -1,41 +1,14 @@
 @{
     ViewData["Title"] = "Home";
 }
-<div class="py-5 text-center">
-    <h1 class="display-5 fw-bold">Welcome to Bounty Hunters Blog</h1>
-    <p class="lead text-muted">Discover missions, tag them, and collaborate. Create missions and join the hunt!</p>
-    <div class="d-inline-flex gap-2 mt-3">
+
+<div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Welcome to Bounty Hunters Blog</h1>
+        <p class="col-md-8 fs-4">
+            Explore exciting missions, join the hunt, and connect with fellow bounty hunters.
+        </p>
         <a asp-controller="Missions" asp-action="Index" class="btn btn-primary btn-lg">Browse Missions</a>
-        <a asp-controller="Tags" asp-action="Index" class="btn btn-outline-secondary btn-lg">Browse Tags</a>
+        <a asp-controller="Categories" asp-action="Index" class="btn btn-secondary btn-lg">Browse Categories</a>
     </div>
 </div>
-
-<section class="row g-4">
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">Create Missions</h5>
-                <p class="card-text text-muted">Logged-in users can create and manage missions with categories and tags.</p>
-                <a asp-controller="Missions" asp-action="Create" class="btn btn-success">Start a Mission</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">Explore by Category</h5>
-                <p class="card-text text-muted">Find missions grouped by categories curated by the admins.</p>
-                <a asp-controller="Categories" asp-action="Index" class="btn btn-success">Categories</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">Tag your ideas</h5>
-                <p class="card-text text-muted">Use tags to connect related missions and discover new ones.</p>
-                <a asp-controller="Tags" asp-action="Index" class="btn btn-success">Tags</a>
-            </div>
-        </div>
-    </div>
-</section>
