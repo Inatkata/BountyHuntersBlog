@@ -27,5 +27,6 @@ namespace BountyHuntersBlog.ViewModels.Missions
         public string ImageUrl { get; set; } = "/img/placeholder.png";
         public int Likes { get; set; }
         public int Comments { get; set; }
+        public bool IsLikedByCurrentUser { get; set; }
     }
 }

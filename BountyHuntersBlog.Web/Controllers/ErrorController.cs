@@ -2,6 +2,9 @@
 
 public class ErrorController : Controller
 {
+    [Route("error/403")]
+    public IActionResult Forbidden() => View("Forbidden");
+
     [Route("error/404")]
     public IActionResult NotFoundPage() => View("NotFound");
 

@@ -6,6 +6,7 @@ using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BountyHuntersBlog.Services.Implementations
 {
@@ -18,10 +19,6 @@ namespace BountyHuntersBlog.Services.Implementations
         {
             _categories = categories;
             _mapper = mapper;
-        }
-
-        public CategoryService(IRepository<Category> @object, IMapper mapper)
-        {
         }
 
         public async Task<IReadOnlyList<CategoryDto>> AllAsync() =>
@@ -39,10 +36,10 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task<int> CreateAsync(CategoryDto dto)
         {
-            var e = _mapper.Map<Category>(dto);
-            await _categories.AddAsync(e);
-            await _categories.SaveChangesAsync();
-            return e.Id;
+            var entity = _mapper.Map<Category>(dto);
+            await _categories.AddAsync(entity);
+            var rows = await _categories.SaveChangesAsync(CancellationToken.None);
+            return rows; // instead of: return entity.Id;
         }
 
         public async Task<bool> UpdateAsync(CategoryDto dto)

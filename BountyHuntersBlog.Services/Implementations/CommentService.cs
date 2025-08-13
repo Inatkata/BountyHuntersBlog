@@ -57,15 +57,17 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task<IReadOnlyList<CommentDto>> GetForMissionAsync(int missionId)
         {
-            var query = _comments.AllReadonly()
+            var list = _comments.All() // <- вместо AllReadonly()
                 .Where(c => c.MissionId == missionId)
-                .OrderByDescending(c => c.CreatedOn);
-            return await query.ProjectTo<CommentDto>(_mapper.ConfigurationProvider).ToListAsync();
+                .OrderByDescending(c => c.CreatedOn)
+                .ToList(); // sync
+
+            return list.Select(c => _mapper.Map<CommentDto>(c)).ToList();
         }
 
         public async Task<CommentDto?> GetByIdAsync(int id)
         {
-            var entity = await _comments.GetByIdWithIncludesAsync(id);
+            var entity = await _comments.GetByIdWithIncludesAsync(id) ?? await _comments.GetByIdAsync(id);
             return entity == null ? null : _mapper.Map<CommentDto>(entity);
         }
 
@@ -81,14 +83,14 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task<IReadOnlyList<CommentDto>> AllAsync()
         {
-            var query = _comments.AllReadonly()          // IQueryable<Comment>
+            var list = _comments.All() // <- вместо AllReadonly()
                 .Where(c => !c.IsDeleted)
-                .OrderByDescending(c => c.CreatedOn);
+                .OrderByDescending(c => c.CreatedOn)
+                .ToList(); // sync
 
-            return await query
-                .ProjectTo<CommentDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+            return list.Select(c => _mapper.Map<CommentDto>(c)).ToList();
         }
+
 
     }
 }

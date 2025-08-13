@@ -1,47 +1,71 @@
 ﻿using AutoMapper;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
-using BountyHuntersBlog.Services.DTOs;            // MissionDto, MissionEditDto
-using BountyHuntersBlog.Services.Interfaces;      // IMissionService
-using BountyHuntersBlog.Services.Implementations; // MissionService
+using BountyHuntersBlog.Services.DTOs;
+using BountyHuntersBlog.Services.Implementations;
+using BountyHuntersBlog.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Moq;
-using NUnit.Framework;
-using System.Threading;
-using System.Threading.Tasks;
-
 [TestFixture]
 public class MissionServiceTests
 {
-    private Mock<IRepository<Mission>> _missionsRepo = null!;
+    private Mock<IMissionRepository> _missionsRepo = null!;
+    private Mock<ICommentRepository> _commentsRepo = null!;
+    private Mock<ILikeRepository> _likesRepo = null!;
+    private Mock<ICategoryRepository> _categoriesRepo = null!;
+    private Mock<ITagRepository> _tagsRepo = null!;
+    private Mock<IMissionTagRepository> _missionTagsRepo = null!;
     private IMissionService _service = null!;
-    private IMapper _mapper = null!;
 
     [SetUp]
     public void SetUp()
     {
-        _missionsRepo = new Mock<IRepository<Mission>>();
+        _missionsRepo = new Mock<IMissionRepository>();
+        _commentsRepo = new Mock<ICommentRepository>();
+        _likesRepo = new Mock<ILikeRepository>();
+        _categoriesRepo = new Mock<ICategoryRepository>();
+        _tagsRepo = new Mock<ITagRepository>();
+        _missionTagsRepo = new Mock<IMissionTagRepository>();
 
-        var profile = new MappingProfile(); // your AutoMapper profile
-        _mapper = AutoMapperFixture.CreateMapper(profile);
-
-        _service = new MissionService(_missionsRepo.Object, _mapper);
+        _service = new MissionService(
+            missions: _missionsRepo.Object,
+            comments: _commentsRepo.Object,
+            likes: _likesRepo.Object,
+            categories: _categoriesRepo.Object,
+            tags: _tagsRepo.Object,
+            missionTags: _missionTagsRepo.Object
+        );
     }
-
-    [Test]
-    public async Task CreateAsync_Should_Add_And_Save()
+[Test]
+public async Task CreateAsync_Should_AddMission_And_Save()
+{
+    var dto = new MissionEditDto
     {
-        var dto = new MissionEditDto
-        {
-            Title = "Test Mission",
-            ImageUrl = "https://img",
-            CategoryId = 1
-        };
+        Title = "Test Mission",
+        Description = "Desc",
+        CategoryId = 1,
+        TagIds = new List<int> { 2, 3 }
+    };
 
-        await _service.CreateAsync(dto);
+    // Arrange: при AddAsync -> нищо, при Save необходим е Id за тагове
+    _missionsRepo.Setup(r => r.AddAsync(It.IsAny<Mission>())).Returns(Task.CompletedTask);
+    _missionsRepo.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+        .ReturnsAsync(1);
 
-        _missionsRepo.Verify(r => r.AddAsync(It.IsAny<Mission>()), Times.Once);
-        _missionsRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-    }
+    // Act
+    await _service.CreateAsync(dto);
+
+    // Assert mission
+    _missionsRepo.Verify(r => r.AddAsync(It.Is<Mission>(m =>
+        m.Title == "Test Mission" && m.CategoryId == 1)), Times.Once);
+    _missionsRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+
+    // Assert tags
+    _missionTagsRepo.Verify(r => r.AddAsync(It.Is<MissionTag>(mt => mt.TagId == 2)), Times.Once);
+    _missionTagsRepo.Verify(r => r.AddAsync(It.Is<MissionTag>(mt => mt.TagId == 3)), Times.Once);
+    _missionTagsRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+}
+
 
     [Test]
     public async Task UpdateAsync_Should_NotUpdate_When_NotFound()
@@ -58,14 +82,18 @@ public class MissionServiceTests
     [Test]
     public async Task UpdateAsync_Should_Update_And_Save_When_Found()
     {
-        var entity = new Mission { Id = 5, Title = "Old" };
-        _missionsRepo.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(entity);
+        var entity = new Mission { Id = 5, Title = "Old", MissionTags = new List<MissionTag>() };
+        _missionsRepo.Setup(r => r.WithAllRelations())
+            .Returns(new List<Mission> { entity }.AsQueryable());
+        _missionsRepo.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
 
-        await _service.UpdateAsync(new MissionDto { Id = 5, Title = "New" });
+        await _service.UpdateAsync(new MissionDto { Id = 5, Title = "New", CategoryId = 1 });
 
-        _missionsRepo.Verify(r => r.Update(It.Is<Mission>(m => m.Title == "New")), Times.Once);
+        _missionsRepo.Verify(r => r.Update(It.Is<Mission>(m => m.Id == 5 && m.Title == "New")), Times.Once);
         _missionsRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+
 
     [Test]
     public async Task EditAsync_Should_Update_And_Save_When_Found()

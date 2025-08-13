@@ -1,7 +1,9 @@
-﻿using BountyHuntersBlog.Services.DTOs;
+﻿using BountyHuntersBlog.Data.Models;
+using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels.Missions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Web.Controllers
@@ -11,12 +13,18 @@ namespace BountyHuntersBlog.Web.Controllers
         private readonly IMissionService _missions;
         private readonly ICommentService _comments;
         private readonly ILikeService _likes;
+        private readonly UserManager<ApplicationUser> _userManager; // ADD
 
-        public MissionsController(IMissionService missions, ICommentService comments, ILikeService likes)
+        public MissionsController(
+            IMissionService missions,
+            ICommentService comments,
+            ILikeService likes,
+            UserManager<ApplicationUser> userManager) // ADD
         {
             _missions = missions;
             _comments = comments;
             _likes = likes;
+            _userManager = userManager; // ADD
         }
 
         [HttpGet]
@@ -104,18 +112,33 @@ namespace BountyHuntersBlog.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteComment(int id, int missionId)
         {
-            await _missions.DeleteCommentAsync(id, User);
-            return RedirectToAction(nameof(Details), new { id = missionId });
+            try
+            {
+                await _missions.DeleteCommentAsync(id, User);
+                TempData["Success"] = "Comment deleted.";
+                return RedirectToAction(nameof(Details), new { id = missionId });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                ViewBag.MissionId = missionId;
+                return View("~/Views/Error/Forbidden.cshtml"); // HTML view, не JSON
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("NotFoundPage", "Error");
+            }
         }
 
-        // ===== Likes (AJAX) =====
+
+
         [Authorize(Roles = "User,Administrator")]
-        [HttpPost]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleLike(int missionId)
         {
-            // Изпълняваме логиката; не зависим от име на поле (Total/Count/TotalLikes)
-            await _likes.ToggleMissionLikeAsync(missionId, User.Identity?.Name ?? "");
-            return Json(new { }); // JS в Details.cshtml проверява за data.likes и ще пропусне ако липсва
+            var userId = _userManager.GetUserId(User)!; 
+            var res = await _likes.ToggleMissionLikeAsync(missionId, userId);
+            return Json(new { liked = res.IsLiked, total = res.LikesCount });
         }
     }
 }

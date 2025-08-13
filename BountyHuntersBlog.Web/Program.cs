@@ -62,6 +62,7 @@ else
 
 // All status codes (404 etc.) -> ErrorController
 app.UseStatusCodePagesWithReExecute("/error/{0}");
+app.UseExceptionHandler("/error/500");
 
 // ===== DB migrate + seed =====
 using (var scope = app.Services.CreateScope())

@@ -1,0 +1,6 @@
+﻿@{
+    ViewData["Title"] = "Forbidden";
+}
+<h1 class="text-danger">403 – Forbidden</h1>
+<p>You do not have permission to delete this comment.</p>
+<a class="btn btn-primary" asp-controller="Missions" asp-action="Details" asp-route-id="@(ViewBag.MissionId)">Back</a>

@@ -1,8 +1,14 @@
-﻿using BountyHuntersBlog.UnitTests.TestData;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
 using Moq;
-using BountyHuntersBlog.Services.Implementations;
-using BountyHuntersBlog.Repositories.Interfaces;
+using NUnit.Framework;
 using BountyHuntersBlog.Data.Models;
+using BountyHuntersBlog.Repositories.Interfaces;
+using BountyHuntersBlog.Services.DTOs;
+using BountyHuntersBlog.Services.Implementations;
 
 namespace BountyHuntersBlog.UnitTests.Services
 {
@@ -11,12 +17,16 @@ namespace BountyHuntersBlog.UnitTests.Services
     {
         private Mock<ICommentRepository> _comments = null!;
         private CommentService _service = null!;
+        private IMapper _mapper = null!;
 
         [SetUp]
         public void Setup()
         {
             _comments = new Mock<ICommentRepository>();
-            _comments.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _mapper = AutoMapperFixture.CreateMapper(new TestMappingProfile());
+
+            // Ако твоят CommentService приема и други зависимости – добави ги тук.
+            _service = new CommentService(_comments.Object, _mapper);
         }
 
         [Test]
@@ -34,15 +44,15 @@ namespace BountyHuntersBlog.UnitTests.Services
         [Test]
         public async Task AddAsync_Adds_Comment_And_Saves()
         {
-            var comment = new Comment() { Content = "Hello" };
+            _comments.Setup(x => x.AddAsync(It.IsAny<Comment>())).Returns(Task.CompletedTask);
             _comments.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
             await _service.AddAsync(1, "u1", "Hello");
 
+            _comments.Verify(x => x.AddAsync(It.Is<Comment>(c =>
+                c.MissionId == 1 && c.UserId == "u1" && c.Content == "Hello")), Times.Once);
 
-
-            _comments.Verify(x => x.AddAsync(comment), Times.Once);
-           
+            _comments.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Test]
@@ -65,11 +75,10 @@ namespace BountyHuntersBlog.UnitTests.Services
             {
                 new Comment { Id = 1, MissionId = 100, Content = "A" },
                 new Comment { Id = 2, MissionId = 200, Content = "B" },
-                new Comment { Id = 3, MissionId = 100, Content = "C" }
+                new Comment { Id = 3, MissionId = 100, Content = "C" },
             };
-            _comments
-                .Setup(x => x.All())
-                .Returns(data.AsQueryable());
+
+            _comments.Setup(x => x.All()).Returns(data.AsQueryable());
 
             var result = await _service.GetForMissionAsync(100);
 
