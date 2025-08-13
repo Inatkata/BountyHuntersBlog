@@ -1,5 +1,4 @@
-﻿// BountyHuntersBlog.Data/Models/Comment.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using BountyHuntersBlog.Data.Constants;
 
 namespace BountyHuntersBlog.Data.Models
@@ -10,11 +9,11 @@ namespace BountyHuntersBlog.Data.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(ModelConstants.User.DisplayNameMaxLength)]
+        [MaxLength(ModelConstants.Comment.ContentMaxLength)]
         public string Content { get; set; } = null!;
 
         [Required]
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
         [Required]
         public string UserId { get; set; } = null!;
@@ -25,6 +24,6 @@ namespace BountyHuntersBlog.Data.Models
         public Mission Mission { get; set; } = null!;
 
         public ICollection<Like> Likes { get; set; } = new List<Like>();
-        public bool IsDeleted { get; set; }
+        public bool IsDeleted { get; set; } = false;
     }
 }

@@ -6,9 +6,8 @@ namespace BountyHuntersBlog.Data.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        [Required]
         [MaxLength(ModelConstants.User.DisplayNameMaxLength)]
-        public string DisplayName { get; set; } = null!;
+        public string? DisplayName { get; set; } = "Anonymous";
 
         public ICollection<Mission> Missions { get; set; } = new HashSet<Mission>();
         public ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();

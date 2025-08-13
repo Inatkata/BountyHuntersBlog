@@ -42,5 +42,34 @@ namespace BountyHuntersBlog.Repositories.Implementations
 
             return query;
         }
+        public IQueryable<Mission> WithCategoryAndTags()
+            => All()
+                .Include(m => m.Category)
+                .Include(m => m.MissionTags).ThenInclude(mt => mt.Tag);
+
+        public IQueryable<Mission> WithAllRelations()
+            => All()
+                .Include(m => m.Category)
+                .Include(m => m.MissionTags).ThenInclude(mt => mt.Tag)
+                .Include(m => m.Comments)
+                .Include(m => m.Likes);
+        public  async Task<Mission?> GetByIdAsync(int id)
+        {
+            return await _dbSet
+                .Include(m => m.Category)
+                .Include(m => m.MissionTags)
+                .ThenInclude(mt => mt.Tag)
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<IReadOnlyList<Mission>> AllAsync()
+        {
+            return await _dbSet
+                .Include(m => m.Category)
+                .Include(m => m.MissionTags)
+                .ThenInclude(mt => mt.Tag)
+                .ToListAsync();
+        }
+
     }
 }

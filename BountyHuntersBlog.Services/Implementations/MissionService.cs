@@ -1,127 +1,292 @@
-﻿// Services/Implementations/MissionService.cs
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+﻿using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace BountyHuntersBlog.Services.Implementations
 {
     public class MissionService : IMissionService
     {
         private readonly IMissionRepository _missions;
-        private readonly IMissionTagRepository _missionTags;
-        private readonly ILikeRepository _likes;
         private readonly ICommentRepository _comments;
-        private readonly IMapper _mapper;
+        private readonly ILikeRepository _likes;
+        private readonly ICategoryRepository _categories;
+        private readonly ITagRepository _tags;
+        private readonly IMissionTagRepository _missionTags;
 
-        public MissionService(IMissionRepository missions, IMissionTagRepository missionTags,
-                              ILikeRepository likes, ICommentRepository comments, IMapper mapper)
+        public MissionService(
+            IMissionRepository missions,
+            ICommentRepository comments,
+            ILikeRepository likes,
+            ICategoryRepository categories,
+            ITagRepository tags,
+            IMissionTagRepository missionTags)
         {
             _missions = missions;
-            _missionTags = missionTags;
-            _likes = likes;
             _comments = comments;
-            _mapper = mapper;
+            _likes = likes;
+            _categories = categories;
+            _tags = tags;
+            _missionTags = missionTags;
         }
 
+        private static string? GetUserId(ClaimsPrincipal user)
+            => user?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        // SEARCH / LIST
         public async Task<(IReadOnlyList<MissionDto> items, int totalCount)> SearchPagedAsync(
             string? q, int? categoryId, int? tagId, int page, int pageSize)
         {
-            var query = _missions.SearchQueryable(q, categoryId, tagId)
-                                 .OrderByDescending(m => m.CreatedOn);
+            // Use repository's SearchQueryable which already does ToLower().Contains() + Includes
+            var baseQuery = _missions.SearchQueryable(q, categoryId, tagId);
 
-            var total = await query.CountAsync();
-            var items = await query.Skip((page - 1) * pageSize)
-                                   .Take(pageSize)
-                                   .ProjectTo<MissionDto>(_mapper.ConfigurationProvider)
-                                   .ToListAsync();
+            var total = await baseQuery.CountAsync();
+
+            var items = await baseQuery
+                .OrderByDescending(m => m.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(m => new MissionDto
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    IsCompleted = m.IsCompleted,
+                    CategoryName = m.Category != null ? m.Category.Name : "",
+                    TagNames = m.MissionTags.Select(mt => mt.Tag.Name)
+                })
+                .ToListAsync();
 
             return (items, total);
         }
 
-        public async Task<MissionDto?> GetByIdAsync(int id)
+        // DETAILS
+        public async Task<MissionDetailsDto?> GetDetailsAsync(int id)
         {
-            var entity = await _missions.GetByIdAsync(id);
-            return entity == null ? null : _mapper.Map<MissionDto>(entity);
+            var mission = await _missions.GetByIdWithIncludesAsync(id);
+            if (mission == null) return null;
+
+            return new MissionDetailsDto
+            {
+                Id = mission.Id,
+                Title = mission.Title,
+                Description = mission.Description,
+                ImageUrl = mission.ImageUrl,
+                CategoryName = mission.Category?.Name ?? "",
+                TagNames = mission.MissionTags.Select(x => x.Tag.Name).ToList(),
+                LikesCount = mission.Likes?.Count(l => l.MissionId == mission.Id) ?? 0,
+                Comments = mission.Comments
+                    .OrderByDescending(c => c.CreatedOn)
+                    .Select(c => new MissionCommentDetailsDto
+                    {
+                        Id = c.Id,
+                        Content = c.Content,
+                        CreatedOn = c.CreatedOn,
+                        UserDisplayName = c.User?.UserName ?? "User",
+                        CanDelete = false // can be checked in controller if needed
+                    })
+                    .ToList()
+            };
         }
 
-        public async Task<MissionWithStatsDto?> GetDetailsAsync(int id)
+        // LIKE (MISSION)
+        public async Task ToggleMissionLikeAsync(int missionId, ClaimsPrincipal user)
         {
-            var entity = await _missions.GetByIdWithIncludesAsync(id);
-            if (entity == null) return null;
+            var userId = GetUserId(user) ?? throw new InvalidOperationException("Unauthenticated user.");
+            var mission = await _missions.GetByIdAsync(missionId)
+                          ?? throw new KeyNotFoundException("Mission not found.");
 
-            var dto = _mapper.Map<MissionWithStatsDto>(entity);
-            dto.LikesCount = await _likes.AllAsQueryable().CountAsync(l => l.MissionId == id);
-            dto.CommentsCount = await _comments.AllAsQueryable().CountAsync(c => c.MissionId == id);
-            return dto;
+            var existing = await _likes
+                .All()
+                .FirstOrDefaultAsync(l => l.MissionId == missionId && l.UserId == userId);
+
+            if (existing != null)
+            {
+                _likes.Delete(existing);
+            }
+            else
+            {
+                await _likes.AddAsync(new Like
+                {
+                    UserId = userId,
+                    MissionId = mission.Id,
+                    CommentId = null
+                });
+            }
+
+            await _likes.SaveChangesAsync();
         }
 
-        // Services/Implementations/MissionService.cs
-        public async Task<int> CreateAsync(MissionDto dto)
+        // COMMENTS
+        public async Task AddCommentAsync(int missionId, string content, ClaimsPrincipal user)
         {
-            var entity = _mapper.Map<Mission>(dto);
-            entity.CreatedOn = DateTime.UtcNow;
+            var userId = GetUserId(user) ?? throw new InvalidOperationException("Unauthenticated user.");
+            _ = await _missions.GetByIdAsync(missionId) ?? throw new KeyNotFoundException("Mission not found.");
 
-            // attach category
-            entity.CategoryId = dto.CategoryId;
+            if (string.IsNullOrWhiteSpace(content))
+                throw new ArgumentException("Content is required.", nameof(content));
 
-            // mission tags
-            entity.MissionTags = dto.TagIds?.Distinct()
-                .Select(tid => new MissionTag { TagId = tid })
-                .ToList() ?? new List<MissionTag>();
+            await _comments.AddAsync(new Comment
+            {
+                MissionId = missionId,
+                UserId = userId,
+                Content = content.Trim(),
+                CreatedOn = DateTime.UtcNow
+            });
 
-            // author
-            if (!string.IsNullOrEmpty(dto.UserId))
-                entity.UserId = dto.UserId;
+            await _comments.SaveChangesAsync();
+        }
 
-            await _missions.AddAsync(entity);
+        public async Task ToggleCommentLikeAsync(int commentId, ClaimsPrincipal user)
+        {
+            var userId = GetUserId(user) ?? throw new InvalidOperationException("Unauthenticated user.");
+            _ = await _comments.GetByIdAsync(commentId) ?? throw new KeyNotFoundException("Comment not found.");
+
+            var existing = await _likes
+                .All()
+                .FirstOrDefaultAsync(l => l.CommentId == commentId && l.UserId == userId);
+
+            if (existing != null)
+            {
+                _likes.Delete(existing);
+            }
+            else
+            {
+                await _likes.AddAsync(new Like
+                {
+                    UserId = userId,
+                    CommentId = commentId,
+                    MissionId = null
+                });
+            }
+
+            await _likes.SaveChangesAsync();
+        }
+
+        public async Task DeleteCommentAsync(int commentId, ClaimsPrincipal user)
+        {
+            var userId = GetUserId(user) ?? throw new InvalidOperationException("Unauthenticated user.");
+            var comment = await _comments.All().FirstOrDefaultAsync(c => c.Id == commentId)
+                          ?? throw new KeyNotFoundException("Comment not found.");
+
+            var isOwner = comment.UserId == userId;
+            var isAdmin = user.IsInRole("Admin") || user.IsInRole("Administrator");
+            if (!isOwner && !isAdmin)
+                throw new UnauthorizedAccessException("You cannot delete this comment.");
+
+            _comments.Delete(comment);
+            await _comments.SaveChangesAsync();
+        }
+
+        // EDIT
+        public async Task<MissionEditDto?> GetEditAsync(int id)
+        {
+            var mission = await _missions.WithAllRelations()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (mission == null) return null;
+
+            return new MissionEditDto
+            {
+                Id = mission.Id,
+                Title = mission.Title,
+                Description = mission.Description,
+                ImageUrl = mission.ImageUrl,
+                CategoryId = mission.CategoryId,
+                TagIds = mission.MissionTags.Select(mt => mt.TagId).ToList(),
+                IsCompleted = mission.IsCompleted
+            };
+        }
+
+        public async Task EditAsync(MissionEditDto dto)
+        {
+            var mission = await _missions.WithAllRelations()
+                              .FirstOrDefaultAsync(m => m.Id == dto.Id)
+                          ?? throw new KeyNotFoundException("Mission not found.");
+
+            // basic validation (optional but safe)
+            if (string.IsNullOrWhiteSpace(dto.Title)) throw new ArgumentException("Title is required.");
+            if (string.IsNullOrWhiteSpace(dto.Description)) throw new ArgumentException("Description is required.");
+
+            mission.Title = dto.Title.Trim();
+            mission.Description = dto.Description.Trim();
+            mission.ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl) ? null : dto.ImageUrl.Trim();
+            mission.CategoryId = dto.CategoryId;
+            mission.IsCompleted = dto.IsCompleted;
+
+            var newTagIds = (dto.TagIds ?? Enumerable.Empty<int>()).Distinct().ToHashSet();
+
+            // remove old
+            var toRemove = mission.MissionTags.Where(mt => !newTagIds.Contains(mt.TagId)).ToList();
+            foreach (var r in toRemove)
+                _missionTags.Delete(r);
+
+            // add new
+            var existingTagIds = mission.MissionTags.Select(mt => mt.TagId).ToHashSet();
+            var toAdd = newTagIds.Except(existingTagIds);
+            foreach (var tagId in toAdd)
+            {
+                await _missionTags.AddAsync(new MissionTag { MissionId = mission.Id, TagId = tagId });
+            }
+
+            _missions.Update(mission);
+
+            // IMPORTANT: persist changes (shared DbContext => един SaveChanges стига)
             await _missions.SaveChangesAsync();
+        
 
-            return entity.Id;
+        await _missions.SaveChangesAsync();
         }
 
-
-
-        public async Task<bool> UpdateAsync(MissionDto dto)
+        // SELECT LISTS
+        public async Task<IEnumerable<SelectListItem>> GetCategoriesSelectListAsync()
         {
-            var entity = await _missions.GetByIdAsync(dto.Id);
-            if (entity == null) return false;
+            var items = await _categories.All()
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
+                .ToListAsync();
 
-            // simple fields
-            entity.Title = dto.Title;
-            entity.Description = dto.Description;
-            entity.ImageUrl = dto.ImageUrl;
-            entity.IsCompleted = dto.IsCompleted;
-            entity.IsDeleted = dto.IsDeleted;
-            entity.CategoryId = dto.CategoryId;
-
-            // sync MissionTags (remove missing; add new)
-            var newSet = (dto.TagIds ?? Enumerable.Empty<int>()).Distinct().ToHashSet();
-            var currentSet = entity.MissionTags?.Select(mt => mt.TagId).ToHashSet() ?? new HashSet<int>();
-
-            // remove
-            foreach (var mt in entity.MissionTags.Where(mt => !newSet.Contains(mt.TagId)).ToList())
-                entity.MissionTags.Remove(mt);
-
-            // add
-            foreach (var tid in newSet.Except(currentSet))
-                entity.MissionTags.Add(new MissionTag { MissionId = entity.Id, TagId = tid });
-
-            await _missions.SaveChangesAsync();
-            return true;
+            return items;
         }
 
-        public async Task<bool> SoftDeleteAsync(int id)
+        public async Task<IEnumerable<SelectListItem>> GetTagsSelectListAsync()
         {
-            var entity = await _missions.GetByIdAsync(id);
-            if (entity == null) return false;
-            entity.IsDeleted = true;
-            _missions.Update(entity);
-            await _missions.SaveChangesAsync();
-            return true;
+            var items = await _tags.All()
+                .AsNoTracking()
+                .OrderBy(t => t.Name)
+                .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name })
+                .ToListAsync();
+
+            return items;
         }
+        public async Task CreateAsync(MissionEditDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Title)) throw new ArgumentException("Title is required.");
+            if (string.IsNullOrWhiteSpace(dto.Description)) throw new ArgumentException("Description is required.");
+
+            var mission = new Mission
+            {
+                Title = dto.Title.Trim(),
+                Description = dto.Description.Trim(),
+                ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl) ? null : dto.ImageUrl.Trim(),
+                CategoryId = dto.CategoryId,
+                IsCompleted = dto.IsCompleted,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            await _missions.AddAsync(mission);
+            await _missions.SaveChangesAsync(); // need Id for tags
+
+            var tagIds = (dto.TagIds ?? Enumerable.Empty<int>()).Distinct();
+            foreach (var tagId in tagIds)
+                await _missionTags.AddAsync(new MissionTag { MissionId = mission.Id, TagId = tagId });
+
+            await _missionTags.SaveChangesAsync(); // или _missions.SaveChangesAsync() при общ DbContext
+        }
+
     }
 }

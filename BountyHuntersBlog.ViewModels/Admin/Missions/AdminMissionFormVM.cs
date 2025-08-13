@@ -1,7 +1,8 @@
 ﻿// ViewModels/Admin/Missions/AdminMissionFormVM.cs
+using BountyHuntersBlog.Data.Constants;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BountyHuntersBlog.ViewModels.Admin.Missions
 {
@@ -9,7 +10,8 @@ namespace BountyHuntersBlog.ViewModels.Admin.Missions
     {
         public int Id { get; set; }
 
-        [Required, StringLength(150)]
+        [Required, MaxLength(ModelConstants.Category.NameMaxLength)]
+
         public string Title { get; set; } = null!;
 
         [Required, StringLength(4000)]

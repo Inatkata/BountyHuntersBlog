@@ -1,12 +1,12 @@
-﻿@model BountyHuntersBlog.ViewModels.Admin.Missions.AdminMissionFormVM
+﻿@* Areas/Admin/Views/AdminMissions/Create.cshtml *@
+@model BountyHuntersBlog.ViewModels.Admin.Missions.AdminMissionFormVM
 @{
     ViewData["Title"] = "Create Mission";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-
+<a class="btn btn-link p-0 mb-2" asp-area="Admin" asp-controller="AdminMissions" asp-action="Index">← Back to list</a>
 <h2>Create Mission</h2>
 <hr />
-
 <form asp-area="Admin" asp-controller="AdminMissions" asp-action="Create" method="post" class="mt-3">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -51,3 +51,6 @@
         <a asp-area="Admin" asp-controller="AdminMissions" asp-action="Index" class="btn btn-secondary">Cancel</a>
     </div>
 </form>
+@section Scripts {
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}

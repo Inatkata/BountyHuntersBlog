@@ -1,53 +1,44 @@
+@* Views/Account/Register.cshtml *@
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @model BountyHuntersBlog.ViewModels.Account.RegisterViewModel
 @{
     ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
-        <div class="card shadow-sm border-0 mt-5">
-            <div class="card-body p-4">
-                <h3 class="mb-4 text-center">Register</h3>
-                <form asp-action="Register" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="mb-3">
-                        <label asp-for="UserName" class="form-label"></label>
-                        <input asp-for="UserName" class="form-control" placeholder="Enter username" />
-                        <span asp-validation-for="UserName" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="DisplayName" class="form-label"></label>
-                        <input asp-for="DisplayName" class="form-control" placeholder="Display name" />
-                        <span asp-validation-for="DisplayName" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label"></label>
-                        <input asp-for="Email" class="form-control" placeholder="Enter email" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" placeholder="Enter password" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="ConfirmPassword" class="form-label"></label>
-                        <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm password" />
-                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                    </div>
-                    <input type="hidden" asp-for="ReturnUrl" />
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success">Register</button>
-                    </div>
-                </form>
-                <div class="text-center mt-3">
-                    <span>Already have an account?</span> <a asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl">Login</a>
-                </div>
+        <h2 class="mb-3 text-center">Register</h2>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <form asp-controller="Account" asp-action="Register" method="post" class="card shadow-sm p-4">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" autocomplete="username" />
+                <span asp-validation-for="Username" class="text-danger"></span>
             </div>
-        </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Create account</button>
+
+            <div class="text-center mt-3">
+                <span class="text-muted">Already have an account?</span>
+                <a asp-controller="Account" asp-action="Login">Login</a>
+            </div>
+        </form>
     </div>
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+@section Scripts { <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" /> }

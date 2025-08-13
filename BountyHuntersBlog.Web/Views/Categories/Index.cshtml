@@ -1,7 +1,9 @@
-@model IEnumerable<BountyHuntersBlog.ViewModels.CategoryViewModel>
+@model IEnumerable<BountyHuntersBlog.ViewModels.Category.CategoryViewModel>
+
 @{
     ViewData["Title"] = "Categories";
 }
+
 <h2 class="mb-3">Categories</h2>
 
 @if (!Model.Any())
@@ -11,12 +13,18 @@
 else
 {
     <ul class="list-group">
-    @foreach (var cat in Model)
-    {
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span>@cat.Name</span>
-            <a asp-action="Details" asp-route-id="@cat.Id" class="btn btn-sm btn-info">View</a>
-        </li>
-    }
+        @foreach (var cat in Model)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>@cat.Name</span>
+                <span>
+                    <span class="badge bg-secondary me-2">@cat.MissionsCount missions</span>
+                    <a class="btn btn-sm btn-primary"
+                       asp-controller="Categories" asp-action="Details" asp-route-id="@cat.Id">
+                        View
+                    </a>
+                </span>
+            </li>
+        }
     </ul>
 }

@@ -21,7 +21,8 @@ namespace BountyHuntersBlog.Services.Implementations
         }
 
         public async Task<IReadOnlyList<CategoryDto>> AllAsync() =>
-            await _categories.AllAsQueryable()
+            await _categories.AllReadonly()
+
                 .OrderBy(c => c.Name)
                 .ProjectTo<CategoryDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();

@@ -1,6 +1,4 @@
-﻿// BountyHuntersBlog.ViewModels/Shared/PagedResult.cs
-using System.Collections.Generic;
-
+﻿
 namespace BountyHuntersBlog.ViewModels.Shared
 {
     public class PagedResult<T>

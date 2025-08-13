@@ -4,6 +4,7 @@ using BountyHuntersBlog.Repositories.Extensions;
 using BountyHuntersBlog.Services.Extensions;
 using BountyHuntersBlog.Web.Infrastructure;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,11 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<BountyHuntersDbContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
+
 builder.Services.ConfigureApplicationCookie(opt =>
 {
     opt.LoginPath = "/Account/Login";
@@ -37,7 +43,7 @@ builder.Services.AddRepositories();
 builder.Services.AddApplicationServices();
 
 // AutoMapper + MVC
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 

@@ -1,4 +1,4 @@
-﻿gmodel BountyHuntersBlog.Web.Areas.Admin.Models.AdminHomeViewModel
+﻿@model BountyHuntersBlog.ViewModels.Admin.Home.AdminHomeIndexVM
 @{
     ViewData["Title"] = "Dashboard";
 }
@@ -9,7 +9,7 @@
             <div class="card-body">
                 <h5 class="card-title">Users</h5>
                 <p class="card-text text-muted">Manage application users & roles.</p>
-                <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminHome" asp-action="Index">Open</a>
+                <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminUsers" asp-action="Index">Open</a>
             </div>
         </div>
     </div>

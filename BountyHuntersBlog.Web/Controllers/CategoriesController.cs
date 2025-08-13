@@ -1,32 +1,41 @@
 ﻿using AutoMapper;
 using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.Services.DTOs;
-using BountyHuntersBlog.ViewModels;
-using Microsoft.AspNetCore.Authorization;
+using BountyHuntersBlog.ViewModels.Category;
 using Microsoft.AspNetCore.Mvc;
 
 public class CategoriesController : Controller
 {
     private readonly ICategoryService _categories;
+    private readonly IMissionService _missions; // за да покажем мисиите в категорията
     private readonly IMapper _mapper;
 
-    public CategoriesController(ICategoryService categories, IMapper mapper)
+    public CategoriesController(ICategoryService categories, IMissionService missions, IMapper mapper)
     {
         _categories = categories;
+        _missions = missions;
         _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
-        => View((await _categories.AllAsync()).Select(_mapper.Map<CategoryViewModel>).ToList());
+    {
+        var list = await _categories.AllAsync();
+        var vmList = list.Select(_mapper.Map<CategoryViewModel>).ToList();
+        return View(vmList);
+    }
 
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
         var dto = await _categories.GetAsync(id);
         if (dto == null) return NotFound();
-        return View(_mapper.Map<CategoryViewModel>(dto));
-    }
 
-   
+        var vm = _mapper.Map<CategoryViewModel>(dto);
+
+        // вземаме и мисиите в тази категория (ако искаме да ги покажем)
+        var (items, _) = await _missions.SearchPagedAsync(null, id, null, 1, 100);
+        vm.Missions = items;
+
+        return View(vm);
+    }
 }

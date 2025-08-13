@@ -18,8 +18,9 @@ namespace BountyHuntersBlog.Services.Implementations
         public async Task UpdateTagsAsync(int missionId, IEnumerable<int> tagIds)
         {
             var desired = tagIds?.Distinct().ToHashSet() ?? new HashSet<int>();
-            var existing = await _missionTags.AllAsQueryable()
-                .Where(x => x.MissionId == missionId)
+            var existing = await _missionTags.AllReadonly()
+
+                  .Where(x => x.MissionId == missionId)
                 .ToListAsync();
 
             foreach (var mt in existing.Where(x => !desired.Contains(x.TagId)))

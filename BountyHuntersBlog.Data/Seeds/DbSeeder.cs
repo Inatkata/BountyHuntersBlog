@@ -1,131 +1,142 @@
-﻿using System.Security.Claims;
+﻿using BountyHuntersBlog.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using BountyHuntersBlog.Data.Models;
 
-namespace BountyHuntersBlog.Data.Seeds
+namespace BountyHuntersBlog.Data.Seeding
 {
     public static class DbSeeder
     {
-        public static async Task SeedAsync(IServiceProvider services)
+        public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
-            using var scope = services.CreateScope();
-            var sp = scope.ServiceProvider;
+            using var scope = serviceProvider.CreateScope();
+            var services = scope.ServiceProvider;
 
-            var db = sp.GetRequiredService<BountyHuntersDbContext>();
-            var roleManager = sp.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+            var dbContext = services.GetRequiredService<BountyHuntersDbContext>();
 
-            // 1) Roles
-            foreach (var role in new[] { "Admin", "User" })
+            // 1) Seed Roles
+            string[] roles = { "Admin", "User" };
+            foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
+                {
                     await roleManager.CreateAsync(new IdentityRole(role));
+                }
             }
 
-            // 2) Admin user (с DisplayName)
-            const string adminUserName = "admin";
-            const string adminEmail = "admin@bountyhunters.local";
-            const string adminPass = "Admin!234"; // смени след първи старт
-
-            var admin = await userManager.FindByNameAsync(adminUserName);
-            if (admin == null)
+            // 2) Seed Admin User
+            string adminEmail = "admin@bh.local";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
             {
-                admin = new ApplicationUser
+                adminUser = new ApplicationUser
                 {
-                    UserName = adminUserName,
+                    UserName = "admin",
                     Email = adminEmail,
-                    EmailConfirmed = true,
-                    DisplayName = "Administrator"
+                    DisplayName = "Administrator",
+                    EmailConfirmed = true
                 };
 
-                var create = await userManager.CreateAsync(admin, adminPass);
-                if (!create.Succeeded)
-                    throw new InvalidOperationException(string.Join("; ", create.Errors.Select(e => e.Description)));
-
-                await userManager.AddToRoleAsync(admin, "Admin");
-                // Няма нужда от допълнителен Role claim – ролята е достатъчна
+                await userManager.CreateAsync(adminUser, "Admin!234");
+                await userManager.AddToRoleAsync(adminUser, "Admin");
             }
 
-            // 3) Categories (idempotent по име, case-insensitive)
-            if (!await db.Categories.AnyAsync())
+            // 3) Seed Normal User
+            string userEmail = "user@bh.local";
+            var normalUser = await userManager.FindByEmailAsync(userEmail);
+            if (normalUser == null)
             {
-                db.Categories.AddRange(
-                    new Category { Name = "Stealth Ops" },
-                    new Category { Name = "Assault" },
-                    new Category { Name = "Recon" }
-                );
-                await db.SaveChangesAsync();
-            }
-
-            // 4) Tags
-            if (!await db.Tags.AnyAsync())
-            {
-                db.Tags.AddRange(
-                    new Tag { Name = "urgent" },
-                    new Tag { Name = "stealth" },
-                    new Tag { Name = "longterm" }
-                );
-                await db.SaveChangesAsync();
-            }
-
-            // 5) Missions (CreatedOn идва от DB default)
-            if (!await db.Missions.AnyAsync())
-            {
-                var anyCategory = await db.Categories.OrderBy(c => c.Id).FirstAsync();
-                var adminId = admin.Id;
-
-                var m1 = new Mission
+                normalUser = new ApplicationUser
                 {
-                    Title = "Silent Run in Old Town",
-                    Description = "Plant trackers on targets. Avoid cameras; exfil via north alley.",
-                    UserId = adminId,
-                    CategoryId = anyCategory.Id
-                };
-                var m2 = new Mission
-                {
-                    Title = "Convoy Intercept",
-                    Description = "Stop and scan cargo. Use EMP drone; minimal collateral.",
-                    UserId = adminId,
-                    CategoryId = anyCategory.Id
+                    UserName = "user",
+                    Email = userEmail,
+                    DisplayName = "HunterJoe",
+                    EmailConfirmed = true
                 };
 
-                db.Missions.AddRange(m1, m2);
-                await db.SaveChangesAsync();
-
-                // 6) MissionTags
-                var tagStealth = await db.Tags.FirstOrDefaultAsync(t => t.Name == "stealth");
-                var tagUrgent = await db.Tags.FirstOrDefaultAsync(t => t.Name == "urgent");
-                if (tagStealth != null) db.MissionTags.Add(new MissionTag { MissionId = m1.Id, TagId = tagStealth.Id });
-                if (tagUrgent != null) db.MissionTags.Add(new MissionTag { MissionId = m2.Id, TagId = tagUrgent.Id });
-                await db.SaveChangesAsync();
+                await userManager.CreateAsync(normalUser, "User!234");
+                await userManager.AddToRoleAsync(normalUser, "User");
             }
 
-            // 7) Sample comment + like
-            if (!await db.Comments.AnyAsync())
+            // 4) Seed Categories
+            if (!await dbContext.Categories.AnyAsync())
             {
-                var mission = await db.Missions.FirstAsync();
-                db.Comments.Add(new Comment
+                var categories = new[]
                 {
+                    new Category { Name = "Bounty", CreatedOn = DateTime.UtcNow },
+                    new Category { Name = "Rescue", CreatedOn = DateTime.UtcNow },
+                    new Category { Name = "Tracking", CreatedOn = DateTime.UtcNow }
+                };
+                await dbContext.Categories.AddRangeAsync(categories);
+                await dbContext.SaveChangesAsync();
+            }
+
+            // 5) Seed Tags
+            if (!await dbContext.Tags.AnyAsync())
+            {
+                var tags = new[]
+                {
+                    new Tag { Name = "High Priority", CreatedOn = DateTime.UtcNow },
+                    new Tag { Name = "Covert", CreatedOn = DateTime.UtcNow },
+                    new Tag { Name = "Long Range", CreatedOn = DateTime.UtcNow },
+                    new Tag { Name = "Urban", CreatedOn = DateTime.UtcNow },
+                    new Tag { Name = "Night Ops", CreatedOn = DateTime.UtcNow }
+                };
+                await dbContext.Tags.AddRangeAsync(tags);
+                await dbContext.SaveChangesAsync();
+            }
+
+            // 6) Seed Missions
+            if (!await dbContext.Missions.AnyAsync())
+            {
+                var firstCategoryId = await dbContext.Categories.Select(c => c.Id).FirstAsync();
+                var tagIds = await dbContext.Tags.Select(t => t.Id).Take(2).ToListAsync();
+
+                var mission = new Mission
+                {
+                    Title = "Capture Rogue Droid",
+                    Description = "Locate and capture the rogue droid last seen in sector 7.",
+                    ImageUrl = "/images/missions/droid.jpg",
+                    UserId = adminUser.Id,
+                    CategoryId = firstCategoryId,
+                    CreatedOn = DateTime.UtcNow,
+                    IsCompleted = false
+                };
+
+                foreach (var tagId in tagIds)
+                {
+                    mission.MissionTags.Add(new MissionTag
+                    {
+                        TagId = tagId,
+                        CreatedOn = DateTime.UtcNow
+                    });
+                }
+
+                await dbContext.Missions.AddAsync(mission);
+                await dbContext.SaveChangesAsync();
+
+                // 7) Seed Comments
+                var comment = new Comment
+                {
+                    Content = "This mission is dangerous, proceed with caution.",
+                    UserId = normalUser.Id,
                     MissionId = mission.Id,
-                    UserId = admin.Id,
-                    Content = "Initial briefing acknowledged."
-                    // CreatedOn -> DB default
-                });
-                await db.SaveChangesAsync();
-            }
+                    CreatedOn = DateTime.UtcNow
+                };
+                await dbContext.Comments.AddAsync(comment);
+                await dbContext.SaveChangesAsync();
 
-            if (!await db.Likes.AnyAsync())
-            {
-                var mission = await db.Missions.FirstAsync();
-                db.Likes.Add(new Like
+                // 8) Seed Likes
+                var like = new Like
                 {
+                    UserId = normalUser.Id,
                     MissionId = mission.Id,
-                    UserId = admin.Id
-                    // CreatedOn -> DB default; XOR правило спазено (CommentId null)
-                });
-                await db.SaveChangesAsync();
+                    CreatedOn = DateTime.UtcNow
+                };
+                await dbContext.Likes.AddAsync(like);
+                await dbContext.SaveChangesAsync();
             }
         }
     }

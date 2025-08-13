@@ -1,9 +1,9 @@
-﻿@model IReadOnlyList<BountyHuntersBlog.ViewModels.Admin.Comments.AdminCommentListItemVM>
+﻿@* Areas/Admin/Views/AdminComments/Index.cshtml *@
+@model IReadOnlyList<BountyHuntersBlog.ViewModels.Admin.Comments.AdminCommentListItemVM>
 @{
     ViewData["Title"] = "Comments";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-
 <h2 class="mb-3">Comments</h2>
 
 @if (Model == null || !Model.Any())
@@ -42,6 +42,10 @@ else
                         }
                     </td>
                     <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           asp-area="Admin" asp-controller="AdminComments" asp-action="Details" asp-route-id="@c.Id">
+                            Details
+                        </a>
                         @if (!c.IsDeleted)
                         {
                             <form method="post" class="d-inline"

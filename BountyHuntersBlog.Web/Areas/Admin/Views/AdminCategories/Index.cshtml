@@ -1,9 +1,9 @@
-﻿@model IReadOnlyList<BountyHuntersBlog.ViewModels.Admin.Categories.AdminCategoryListItemVM>
+﻿@* Areas/Admin/Views/AdminCategories/Index.cshtml *@
+@model IReadOnlyList<BountyHuntersBlog.ViewModels.Admin.Categories.AdminCategoryListItemVM>
 @{
     ViewData["Title"] = "Categories";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-
 <div class="d-flex align-items-center justify-content-between mb-3">
     <h2 class="m-0">Categories</h2>
     <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminCategories" asp-action="Create">Create</a>
@@ -21,7 +21,7 @@ else
                 <th style="width:80px">Id</th>
                 <th>Name</th>
                 <th style="width:120px">Status</th>
-                <th style="width:160px" class="text-end">Actions</th>
+                <th style="width:200px" class="text-end">Actions</th>
             </tr>
         </thead>
         <tbody>

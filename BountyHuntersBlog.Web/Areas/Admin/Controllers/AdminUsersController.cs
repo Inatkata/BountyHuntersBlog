@@ -32,50 +32,38 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? search, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(string? search, int page = 1, int pageSize = 20)
         {
-            var query = _userManager.Users.AsNoTracking();
+            var q = _userManager.Users.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                search = search.Trim().ToLower();
-                query = query.Where(u =>
-                    (u.UserName != null && u.UserName.ToLower().Contains(search)) ||
-                    (u.Email != null && u.Email.ToLower().Contains(search)));
+                var s = search.Trim();
+                q = q.Where(u => (u.UserName ?? "").Contains(s)
+                                 || (u.Email ?? "").Contains(s)
+                                 || (u.DisplayName ?? "").Contains(s));
             }
 
-            var totalCount = await query.CountAsync();
-            var users = await query
-                .OrderBy(u => u.UserName)
+            var total = await q.CountAsync();
+            var items = await q.OrderBy(u => u.UserName)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
-
-            var list = new List<AdminUserListItemVM>(users.Count);
-            foreach (var u in users)
-            {
-                var roles = await _userManager.GetRolesAsync(u);
-                list.Add(new AdminUserListItemVM
+                .Select(u => new AdminUserListItemVM
                 {
                     Id = u.Id,
-                    UserName = u.UserName ?? string.Empty,
-                    DisplayName = u.DisplayName,
-                    Email = u.Email ?? string.Empty,
-                    Roles = roles,
-                    MissionsCount = await _db.Missions.CountAsync(m => m.UserId == u.Id),
-                    CommentsCount = await _db.Comments.CountAsync(c => c.UserId == u.Id),
-                    LikesCount = await _db.Likes.CountAsync(l => l.UserId == u.Id),
-                    IsLockedOut = u.LockoutEnd.HasValue && u.LockoutEnd.Value.UtcDateTime > DateTime.UtcNow
-                });
-            }
+                    UserName = u.UserName ?? "",
+                    Email = u.Email ?? "",
+                    DisplayName = u.DisplayName
+                })
+                .ToListAsync();
 
-            ViewBag.TotalCount = totalCount;
-            ViewBag.Page = page;
+            ViewBag.TotalCount = total;
             ViewBag.PageSize = pageSize;
-            ViewBag.Search = search;
+            ViewBag.Page = page;
 
-            return View(list);
+            return View(items);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Details(string id)

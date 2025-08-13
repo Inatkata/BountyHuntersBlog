@@ -31,7 +31,8 @@ namespace BountyHuntersBlog.Services.Implementations
             }
             await _likes.SaveChangesAsync();
 
-            var count = await _likes.AllAsQueryable().CountAsync(l => l.MissionId == missionId);
+            var count = await _likes.AllReadonly().CountAsync(l => l.MissionId == missionId);
+
             return new LikeResultDto { TargetType = "mission", TargetId = missionId, IsLiked = liked, LikesCount = count };
         }
 
@@ -51,7 +52,8 @@ namespace BountyHuntersBlog.Services.Implementations
             }
             await _likes.SaveChangesAsync();
 
-            var count = await _likes.AllAsQueryable().CountAsync(l => l.CommentId == commentId);
+            var count = await _likes.AllReadonly().CountAsync(l => l.CommentId == commentId);
+
             return new LikeResultDto { TargetType = "comment", TargetId = commentId, IsLiked = liked, LikesCount = count };
         }
     }

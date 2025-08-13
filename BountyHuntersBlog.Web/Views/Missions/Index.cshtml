@@ -1,4 +1,5 @@
 @model BountyHuntersBlog.ViewModels.Missions.MissionIndexViewModel
+
 @{
     ViewData["Title"] = "Missions";
 }
@@ -42,7 +43,9 @@ else
                         <span class="badge bg-success">Completed</span>
                     }
                 </div>
-                <small class="text-muted">@m.CategoryId</small>
+                <small class="text-muted">
+                    @(!string.IsNullOrEmpty(m.CategoryName) ? m.CategoryName : "No category")
+                </small>
                 <div class="mt-1">
                     @if (m.TagNames?.Any() == true)
                     {
@@ -56,18 +59,30 @@ else
         }
     </div>
 
-    <nav>
-        <ul class="pagination">
-            @{
-                var totalPages = (int)Math.Ceiling((decimal)Model.TotalCount / Model.PageSize);
-                for (int i = 1; i <= totalPages; i++)
+    @{
+        var totalPages = (int)Math.Ceiling((decimal)Model.TotalCount / Model.PageSize);
+    
+
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Missions pages">
+            <ul class="pagination">
+                @for (int i = 1; i <= totalPages; i++)
                 {
                     <li class="page-item @(i == Model.Page ? "active" : "")">
                         <a class="page-link"
-                           href="?q=@Model.Q&categoryId=@Model.CategoryId&tagId=@Model.TagId&page=@i&pageSize=@Model.PageSize">@i</a>
+                           asp-action="Index"
+                           asp-route-q="@Model.Q"
+                           asp-route-categoryId="@(Model.CategoryId)"
+                           asp-route-tagId="@(Model.TagId)"
+                           asp-route-page="@i"
+                           asp-route-pageSize="@Model.PageSize">
+                            @i
+                        </a>
                     </li>
                 }
-            }
-        </ul>
-    </nav>
+            </ul>
+        </nav>
+    }
+}
 }

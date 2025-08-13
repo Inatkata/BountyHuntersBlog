@@ -1,7 +1,43 @@
-@model BountyHuntersBlog.ViewModels.CategoryViewModel
+@model BountyHuntersBlog.ViewModels.Category.CategoryViewModel
+
 @{
     ViewData["Title"] = "Category Details";
 }
+
 <h2>@Model.Name</h2>
-<p>Category ID: @Model.Id</p>
+
+@if (Model.Missions != null && Model.Missions.Any())
+{
+    <h5 class="mt-4">Missions in this category (@Model.Missions.Count)</h5>
+    <div class="list-group">
+        @foreach (var m in Model.Missions)
+        {
+            <a class="list-group-item list-group-item-action"
+               asp-controller="Missions" asp-action="Details" asp-route-id="@m.Id">
+                <div class="d-flex w-100 justify-content-between">
+                    <strong>@m.Title</strong>
+                    @if (m.IsCompleted)
+                    {
+                        <span class="badge bg-success">Completed</span>
+                    }
+                </div>
+                <small class="text-muted">@m.CategoryName</small>
+                <div class="mt-1">
+                    @if (m.TagNames?.Any() == true)
+                    {
+                        foreach (var t in m.TagNames)
+                        {
+                            <span class="badge bg-secondary me-1">@t</span>
+                        }
+                    }
+                </div>
+            </a>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-secondary mt-3">No missions in this category yet.</div>
+}
+
 <a asp-action="Index" class="btn btn-secondary mt-3">Back to Categories</a>

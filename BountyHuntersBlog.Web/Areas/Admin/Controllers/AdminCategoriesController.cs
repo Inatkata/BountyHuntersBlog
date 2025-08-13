@@ -1,7 +1,8 @@
-﻿using AutoMapper;
+﻿// Areas/Admin/Controllers/AdminCategoriesController.cs
+using AutoMapper;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.ViewModels.Admin.Categories; // <-- Admin VMs
+using BountyHuntersBlog.ViewModels.Admin.Categories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +23,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
         {
             var items = (await _categories.AllAsync())
                 .Select(_mapper.Map<AdminCategoryListItemVM>)
+                .OrderBy(x => x.Name)
                 .ToList();
             return View(items);
         }
@@ -34,6 +36,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid) return View(vm);
             await _categories.CreateAsync(new CategoryDto { Name = vm.Name, IsDeleted = vm.IsDeleted });
+            TempData["Success"] = "Category created.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -51,13 +54,15 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
             if (!ModelState.IsValid) return View(vm);
             var ok = await _categories.UpdateAsync(new CategoryDto { Id = vm.Id, Name = vm.Name, IsDeleted = vm.IsDeleted });
             if (!ok) return NotFound();
+            TempData["Success"] = "Category updated.";
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            await _categories.SoftDeleteAsync(id);
+            var ok = await _categories.SoftDeleteAsync(id);
+            TempData[ok ? "Success" : "Error"] = ok ? "Category deleted." : "Category not found.";
             return RedirectToAction(nameof(Index));
         }
     }

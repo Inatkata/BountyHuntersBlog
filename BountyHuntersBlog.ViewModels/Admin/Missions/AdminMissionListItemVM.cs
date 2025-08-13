@@ -8,6 +8,7 @@ namespace BountyHuntersBlog.ViewModels.Admin.Missions
         public int Id { get; set; }
         public string Title { get; set; } = null!;
         public string CategoryName { get; set; } = null!;
+        public int PageSize { get; set; }
         public string Description { get; set; }
         public bool IsCompleted { get; set; }
         public int LikesCount { get; set; }

@@ -57,7 +57,7 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task<IReadOnlyList<CommentDto>> GetForMissionAsync(int missionId)
         {
-            var query = _comments.AllAsQueryable()
+            var query = _comments.AllReadonly()
                 .Where(c => c.MissionId == missionId)
                 .OrderByDescending(c => c.CreatedOn);
             return await query.ProjectTo<CommentDto>(_mapper.ConfigurationProvider).ToListAsync();
@@ -81,7 +81,7 @@ namespace BountyHuntersBlog.Services.Implementations
 
         public async Task<IReadOnlyList<CommentDto>> AllAsync()
         {
-            var query = _comments.AllAsQueryable()          // IQueryable<Comment>
+            var query = _comments.AllReadonly()          // IQueryable<Comment>
                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.CreatedOn);
 

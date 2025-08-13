@@ -35,9 +35,10 @@ namespace BountyHuntersBlog.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Anonymous");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -106,24 +107,22 @@ namespace BountyHuntersBlog.Data.Migrations
                         .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("ModifiedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.Comment", b =>
@@ -136,28 +135,31 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("CreatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MissionId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("UserId");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("MissionId", "CreatedOn");
+                    b.HasIndex("MissionId", "CreatedOn")
+                        .HasDatabaseName("IX_Comments_MissionId_CreatedOn");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.Like", b =>
@@ -187,22 +189,11 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.HasIndex("CreatedOn");
-
                     b.HasIndex("MissionId");
 
-                    b.HasIndex("UserId", "CommentId")
-                        .IsUnique()
-                        .HasFilter("[CommentId] IS NOT NULL");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("UserId", "MissionId")
-                        .IsUnique()
-                        .HasFilter("[MissionId] IS NOT NULL");
-
-                    b.ToTable("Likes", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Like_Target_XOR", "((MissionId IS NULL AND CommentId IS NOT NULL) OR (MissionId IS NOT NULL AND CommentId IS NULL))");
-                        });
+                    b.ToTable("Likes");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.Mission", b =>
@@ -223,8 +214,11 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
@@ -234,8 +228,8 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -243,13 +237,11 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Title");
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("CategoryId", "CreatedOn");
-
-                    b.ToTable("Missions", (string)null);
+                    b.ToTable("Missions");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.MissionTag", b =>
@@ -267,11 +259,9 @@ namespace BountyHuntersBlog.Data.Migrations
 
                     b.HasKey("MissionId", "TagId");
 
-                    b.HasIndex("MissionId");
-
                     b.HasIndex("TagId");
 
-                    b.ToTable("MissionTags", (string)null);
+                    b.ToTable("MissionTags");
                 });
 
             modelBuilder.Entity("BountyHuntersBlog.Data.Models.Tag", b =>
@@ -288,24 +278,22 @@ namespace BountyHuntersBlog.Data.Migrations
                         .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("ModifiedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -446,7 +434,7 @@ namespace BountyHuntersBlog.Data.Migrations
                     b.HasOne("BountyHuntersBlog.Data.Models.Mission", "Mission")
                         .WithMany("Comments")
                         .HasForeignKey("MissionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("BountyHuntersBlog.Data.Models.ApplicationUser", "User")
@@ -490,7 +478,7 @@ namespace BountyHuntersBlog.Data.Migrations
                     b.HasOne("BountyHuntersBlog.Data.Models.Category", "Category")
                         .WithMany("Missions")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("BountyHuntersBlog.Data.Models.ApplicationUser", "User")
@@ -509,7 +497,7 @@ namespace BountyHuntersBlog.Data.Migrations
                     b.HasOne("BountyHuntersBlog.Data.Models.Mission", "Mission")
                         .WithMany("MissionTags")
                         .HasForeignKey("MissionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("BountyHuntersBlog.Data.Models.Tag", "Tag")

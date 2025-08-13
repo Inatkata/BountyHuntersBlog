@@ -1,11 +1,13 @@
-﻿@{
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
     Layout = null;
+    var title = (string?)ViewData["Title"] ?? "Admin";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewData["Title"] - Admin</title>
+    <title>@title - Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -30,7 +32,7 @@
                             Manage Mission Tags
                         </a>
                     </li>
-
+                    <li class="nav-item"><a class="nav-link" asp-area="Admin" asp-controller="AdminComments" asp-action="Index">Comments</a></li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Back to Site</a></li>
@@ -41,10 +43,21 @@
     </nav>
 
     <main class="container my-4">
+        @if (TempData["Success"] is string s && !string.IsNullOrWhiteSpace(s))
+        {
+            <div class="alert alert-success">@s</div>
+        }
+        @if (TempData["Error"] is string e && !string.IsNullOrWhiteSpace(e))
+        {
+            <div class="alert alert-danger">@e</div>
+        }
+
         @RenderBody()
     </main>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

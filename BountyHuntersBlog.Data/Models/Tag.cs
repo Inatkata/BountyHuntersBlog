@@ -1,5 +1,4 @@
-﻿// BountyHuntersBlog.Data/Models/Tag.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using BountyHuntersBlog.Data.Constants;
 
 namespace BountyHuntersBlog.Data.Models
@@ -10,12 +9,12 @@ namespace BountyHuntersBlog.Data.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(ModelConstants.User.DisplayNameMaxLength)]
+        [MaxLength(ModelConstants.Tag.NameMaxLength)]
         public string Name { get; set; } = null!;
 
         public bool IsDeleted { get; set; } = false;
 
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public DateTime? ModifiedOn { get; set; }
 
         public ICollection<MissionTag> MissionTags { get; set; } = new List<MissionTag>();

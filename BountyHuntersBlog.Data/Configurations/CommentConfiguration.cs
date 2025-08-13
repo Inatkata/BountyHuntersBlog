@@ -1,32 +1,38 @@
 ﻿// BountyHuntersBlog.Data/Configurations/CommentConfiguration.cs
+using BountyHuntersBlog.Data.Constants;
 using BountyHuntersBlog.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using BountyHuntersBlog.Data.Constants;
 
-public class CommentConfiguration : IEntityTypeConfiguration<Comment>
+namespace BountyHuntersBlog.Data.Configurations
 {
-    public void Configure(EntityTypeBuilder<Comment> b)
+    public class CommentConfiguration : IEntityTypeConfiguration<Comment>
     {
-        b.Property(c => c.Content)
-            .IsRequired()
-            .HasMaxLength(ModelConstants.User.DisplayNameMaxLength);
+        public void Configure(EntityTypeBuilder<Comment> builder)
+        {
+            builder.HasKey(c => c.Id);
 
-        b.Property(c => c.CreatedOn)
-            .HasDefaultValueSql("GETUTCDATE()");
+            builder.Property(c => c.Content)
+                .IsRequired()
+                .HasMaxLength(ModelConstants.Comment.ContentMaxLength);
 
-        b.HasOne(c => c.User)
-            .WithMany(u => u.Comments)
-            .HasForeignKey(c => c.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            // user
+            builder.Property(c => c.UserId)
+                .HasColumnName("UserId"); 
 
-        b.HasOne(c => c.Mission)
-            .WithMany(m => m.Comments)
-            .HasForeignKey(c => c.MissionId)
-            .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-        b.HasQueryFilter(c => !c.Mission.IsDeleted);
+            // mission
+            builder.HasOne(c => c.Mission)
+                .WithMany(m => m.Comments)
+                .HasForeignKey(c => c.MissionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-        b.HasIndex(c => new { c.MissionId, c.CreatedOn });
+            // индекси
+            builder.HasIndex(c => new { c.MissionId, c.CreatedOn }).HasDatabaseName("IX_Comments_MissionId_CreatedOn");
+        }
     }
 }

@@ -9,11 +9,11 @@ namespace BountyHuntersBlog.Data.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(ModelConstants.User.DisplayNameMaxLength)]
+        [MaxLength(ModelConstants.Mission.TitleMaxLength)]
         public string Title { get; set; } = null!;
 
         [Required]
-        [MaxLength(ModelConstants.User.DisplayNameMaxLength)]
+        [MaxLength(ModelConstants.Mission.DescriptionMaxLength)]
         public string Description { get; set; } = null!;
 
         public string? ImageUrl { get; set; }
@@ -23,7 +23,7 @@ namespace BountyHuntersBlog.Data.Models
         public ApplicationUser User { get; set; } = null!;
 
         [Required]
-        public DateTime CreatedOn { get; set; } 
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
         [Required]
         public int CategoryId { get; set; }

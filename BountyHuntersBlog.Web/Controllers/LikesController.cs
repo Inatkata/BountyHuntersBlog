@@ -10,7 +10,7 @@ public class LikesController : Controller
     public LikesController(ILikeService likes) => _likes = likes;
 
     [Authorize]
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleMission(int missionId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -19,7 +19,7 @@ public class LikesController : Controller
     }
 
     [Authorize]
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleComment(int commentId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;

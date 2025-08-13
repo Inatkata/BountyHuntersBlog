@@ -20,13 +20,18 @@ namespace BountyHuntersBlog.Data
         {
             base.OnModelCreating(builder);
 
-            // Apply all IEntityTypeConfiguration<T> in this assembly
             builder.ApplyConfigurationsFromAssembly(typeof(BountyHuntersDbContext).Assembly);
 
-            // Global query filters for soft-delete
             builder.Entity<Mission>().HasQueryFilter(m => !m.IsDeleted);
             builder.Entity<Category>().HasQueryFilter(c => !c.IsDeleted);
             builder.Entity<Tag>().HasQueryFilter(t => !t.IsDeleted);
+            builder.Entity<Comment>().HasQueryFilter(c => !c.IsDeleted);
+
+            // избегни EF warning за required навигации + филтри
+            builder.Entity<MissionTag>()
+                .HasQueryFilter(mt => !mt.Mission.IsDeleted && !mt.Tag.IsDeleted);
+
+
         }
     }
 }

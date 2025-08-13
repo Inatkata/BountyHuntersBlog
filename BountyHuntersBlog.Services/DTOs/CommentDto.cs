@@ -8,7 +8,6 @@ namespace BountyHuntersBlog.Services.DTOs
         public DateTime CreatedOn { get; set; }
 
         public bool IsDeleted { get; set; } = false;
-
         public string UserId { get; set; } = null!;
         public string UserDisplayName { get; set; } = null!;
 

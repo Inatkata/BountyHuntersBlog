@@ -1,5 +1,5 @@
 ﻿using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.ViewModels;
+using BountyHuntersBlog.ViewModels.Comments;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -69,7 +69,7 @@ namespace BountyHuntersBlog.Web.Controllers
             return RedirectToAction("Details", "Missions", new { id = missionId });
         }
 
-        [HttpPost]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleLike(int id, int missionId)
         {
             await _likes.ToggleCommentLikeAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier)!);

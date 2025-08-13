@@ -21,7 +21,8 @@ namespace BountyHuntersBlog.Services.Implementations
         }
 
         public async Task<IReadOnlyList<TagDto>> AllAsync() =>
-            await _tags.AllAsQueryable()
+            await _tags.AllReadonly()
+
                 .OrderBy(t => t.Name)
                 .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();

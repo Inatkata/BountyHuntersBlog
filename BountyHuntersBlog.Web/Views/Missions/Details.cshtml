@@ -1,34 +1,49 @@
 @model BountyHuntersBlog.ViewModels.Missions.MissionDetailsViewModel
+
 @{
     ViewData["Title"] = Model.Title;
 }
 
 <h2>@Model.Title</h2>
+
 @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
 {
     <img src="@Model.ImageUrl" class="img-fluid mb-3" alt="@Model.Title" />
 }
-<p>@Model.Description</p>
 
-<p>
-    <strong>Category:</strong> @Model.CategoryName
-    <span class="ms-2">
-        @if (Model.TagNames?.Any() == true)
+<p class="mb-2"><strong>Category:</strong> @Model.CategoryName</p>
+
+@if (Model.TagNames?.Any() == true)
+{
+    <div class="mb-3">
+        @foreach (var t in Model.TagNames)
         {
-            foreach (var t in Model.TagNames)
-            {
-                <span class="badge bg-secondary me-1">@t</span>
-            }
+            <span class="badge bg-secondary me-1">@t</span>
         }
-    </span>
-</p>
+    </div>
+}
 
-<form method="post" asp-action="ToggleMissionLike" asp-route-id="@Model.Id" class="d-inline">
-    @Html.AntiForgeryToken()
-    <button class="btn btn-outline-primary btn-sm" type="submit">
-        Like (@Model.LikesCount)
-    </button>
-</form>
+<div class="mb-3" style="white-space: pre-line;">
+    @Model.Description
+</div>
+
+<div class="mb-4">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <form method="post" asp-action="ToggleMissionLike" asp-route-id="@Model.Id" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-primary btn-sm" type="submit">
+                Like (@Model.LikesCount)
+            </button>
+        </form>
+    }
+    else
+    {
+        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-sm">
+            Like (@Model.LikesCount)
+        </a>
+    }
+</div>
 
 <hr />
 <h4>Comments (@Model.Comments.Count)</h4>
@@ -44,35 +59,55 @@
         <button class="btn btn-primary btn-sm" type="submit">Add Comment</button>
     </form>
 }
+else
+{
+    <div class="alert alert-info">
+        Please <a asp-controller="Account" asp-action="Login">login</a> to comment.
+    </div>
+}
 
-<ul class="list-group mt-3">
-    @foreach (var c in Model.Comments)
-    {
-        <li class="list-group-item">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <strong>@c.UserDisplayName</strong>
-                    <small class="text-muted"> — @c.CreatedOn.ToLocalTime()</small>
-                    <div>@c.Content</div>
-                </div>
-                <div>
-                    <form method="post" asp-action="ToggleCommentLike" asp-route-id="@c.Id" asp-route-missionId="@Model.Id" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-outline-primary btn-sm">Like</button>
-                    </form>
+@if (Model.Comments?.Any() != true)
+{
+    <div class="alert alert-secondary mt-3">No comments yet.</div>
+}
+else
+{
+    <ul class="list-group mt-3">
+        @foreach (var c in Model.Comments)
+        {
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>@c.UserDisplayName</strong>
+                        <small class="text-muted"> — @c.CreatedOn.ToLocalTime()</small>
+                        <div class="mt-1" style="white-space: pre-line;">@c.Content</div>
+                    </div>
+                    <div class="ms-3">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <form method="post" asp-action="ToggleCommentLike" asp-route-id="@c.Id" asp-route-missionId="@Model.Id" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Like</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-sm">Like</a>
+                        }
 
-                    @if (c.CanDelete)
-                    {
-                        <form method="post" asp-action="DeleteComment" asp-route-id="@c.Id" asp-route-missionId="@Model.Id" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-danger btn-sm"
-                                    onclick="return confirm('Delete this comment?');">
-                                Delete
-                            </button>
-                        </form>
-                    }
+                        @if (c.CanDelete)
+                        {
+                            <form method="post" asp-action="DeleteComment" asp-route-id="@c.Id" asp-route-missionId="@Model.Id" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('Delete this comment?');">
+                                    Delete
+                                </button>
+                            </form>
+                        }
+                    </div>
                 </div>
-            </div>
-        </li>
-    }
-</ul>
+            </li>
+        }
+    </ul>
+}

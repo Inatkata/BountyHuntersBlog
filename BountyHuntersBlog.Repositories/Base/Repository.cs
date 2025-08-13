@@ -16,13 +16,21 @@ namespace BountyHuntersBlog.Repositories.Base
             _dbSet = _ctx.Set<T>();
         }
 
-        public Task<List<T>> AllAsync() => _dbSet.ToListAsync();
-        public IQueryable<T> AllAsQueryable() => _dbSet.AsQueryable();
+        // Returns tracked entities (for updates)
+        public IQueryable<T> All() => _dbSet.AsQueryable();
+
+        // Returns read-only entities (no tracking)
+        public IQueryable<T> AllReadonly() => _dbSet.AsNoTracking();
+
+        public async Task<List<T>> AllAsync() => await _dbSet.ToListAsync();
+
+        public async Task<List<T>> AllReadonlyAsync() =>
+            await _dbSet.AsNoTracking().ToListAsync();
 
         public Task<T?> GetByIdAsync(object id) => _dbSet.FindAsync(id).AsTask();
 
-        public Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
-            => _dbSet.AnyAsync(predicate);
+        public Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate) =>
+            _dbSet.AnyAsync(predicate);
 
         public Task AddAsync(T entity) => _dbSet.AddAsync(entity).AsTask();
         public Task AddRangeAsync(IEnumerable<T> entities) => _dbSet.AddRangeAsync(entities);
@@ -30,7 +38,7 @@ namespace BountyHuntersBlog.Repositories.Base
         public void Update(T entity) => _dbSet.Update(entity);
         public void Delete(T entity) => _dbSet.Remove(entity);
 
-        public Task<int> SaveChangesAsync(CancellationToken ct = default)
-            => _ctx.SaveChangesAsync(ct);
+        public Task<int> SaveChangesAsync(CancellationToken ct = default) =>
+            _ctx.SaveChangesAsync(ct);
     }
 }

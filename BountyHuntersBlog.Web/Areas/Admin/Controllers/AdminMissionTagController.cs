@@ -1,4 +1,5 @@
-﻿using BountyHuntersBlog.Services.Interfaces;
+﻿// Areas/Admin/Controllers/AdminMissionTagsController.cs
+using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels.Missions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +13,7 @@ public class AdminMissionTagsController : Controller
     private readonly IMissionService _missions;
     private readonly ITagService _tags;
 
-    public AdminMissionTagsController(
-        IMissionTagService missionTags,
-        IMissionService missions,
-        ITagService tags)
+    public AdminMissionTagsController(IMissionTagService missionTags, IMissionService missions, ITagService tags)
     {
         _missionTags = missionTags;
         _missions = missions;
@@ -38,11 +36,7 @@ public class AdminMissionTagsController : Controller
             Description = mission.Description,
             CategoryId = mission.CategoryId,
             TagIds = mission.TagIds.ToList(),
-            Tags = allTags.Select(t => new SelectListItem(
-                text: t.Name,
-                value: t.Id.ToString(),
-                selected: selected.Contains(t.Id)
-            )).ToList()
+            Tags = allTags.Select(t => new SelectListItem(text: t.Name, value: t.Id.ToString(), selected: selected.Contains(t.Id))).ToList()
         };
 
         return View(vm);
@@ -53,6 +47,6 @@ public class AdminMissionTagsController : Controller
     {
         await _missionTags.UpdateTagsAsync(missionId, tagIds ?? Array.Empty<int>());
         TempData["Success"] = "Tags updated.";
-        return RedirectToAction("Edit", "AdminMissions", new { id = missionId });
+        return RedirectToAction("Edit", "AdminMissions", new { area = "Admin", id = missionId });
     }
 }

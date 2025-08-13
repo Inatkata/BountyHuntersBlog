@@ -1,9 +1,9 @@
-﻿@model IReadOnlyList<BountyHuntersBlog.Services.DTOs.MissionDto>
+﻿@* Areas/Admin/Views/AdminMissions/Index.cshtml *@
+@model IReadOnlyList<BountyHuntersBlog.Services.DTOs.MissionDto>
 @{
     ViewData["Title"] = "Missions";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-
 <div class="d-flex align-items-center justify-content-between mb-3">
     <h2 class="m-0">Missions</h2>
     <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminMissions" asp-action="Create">Create</a>
@@ -23,7 +23,7 @@ else
                 <th>Category</th>
                 <th>Tags</th>
                 <th style="width:120px">Completed</th>
-                <th style="width:200px" class="text-end">Actions</th>
+                <th style="width:220px" class="text-end">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -32,18 +32,29 @@ else
                 <tr>
                     <td>@m.Id</td>
                     <td>@m.Title</td>
-                    <td>@m.CategoryName</td>
+                    <td>@(string.IsNullOrWhiteSpace(m.CategoryName) ? m.CategoryId.ToString() : m.CategoryName)</td>
                     <td>
-                        @if (m.TagNames?.Any() == true)
-                        {
-                            foreach (var tag in m.TagNames)
+                        @{
+                            var tagNames = (m.TagNames ?? Enumerable.Empty<string>()).ToList();
+                            if (tagNames.Any())
                             {
-                                <span class="badge bg-secondary me-1">@tag</span>
+                                foreach (var tn in tagNames)
+                                {
+                                    <span class="badge bg-secondary me-1">@tn</span>
+                                }
                             }
-                        }
-                        else
-                        {
-                            <span class="text-muted">No tags</span>
+                            else if (m.TagIds?.Any() == true)
+                            {
+                                foreach (var id in m.TagIds)
+                                {
+
+                                    <span class="badge bg-secondary me-1">#@id</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">No tags</span>
+                            }
                         }
                     </td>
                     <td>
@@ -53,25 +64,20 @@ else
                         }
                         else
                         {
+
                             <span class="badge bg-warning text-dark">No</span>
                         }
                     </td>
                     <td class="text-end">
                         <a class="btn btn-sm btn-outline-info"
-                           asp-area="Admin" asp-controller="AdminMissions" asp-action="Details" asp-route-id="@m.Id">
-                            Details
-                        </a>
+                           asp-area="Admin" asp-controller="AdminMissions" asp-action="Details" asp-route-id="@m.Id">Details</a>
                         <a class="btn btn-sm btn-outline-secondary"
-                           asp-area="Admin" asp-controller="AdminMissions" asp-action="Edit" asp-route-id="@m.Id">
-                            Edit
-                        </a>
+                           asp-area="Admin" asp-controller="AdminMissions" asp-action="Edit" asp-route-id="@m.Id">Edit</a>
                         <form method="post" class="d-inline"
                               asp-area="Admin" asp-controller="AdminMissions" asp-action="Delete" asp-route-id="@m.Id">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-sm btn-outline-danger"
-                                    onclick="return confirm('Delete this mission?');">
-                                Delete
-                            </button>
+                                    onclick="return confirm('Delete this mission?');">Delete</button>
                         </form>
                     </td>
                 </tr>

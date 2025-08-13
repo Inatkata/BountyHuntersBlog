@@ -9,12 +9,12 @@ namespace BountyHuntersBlog.Data.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(ModelConstants.User.DisplayNameMaxLength)]
+        [MaxLength(ModelConstants.Category.NameMaxLength)]
         public string Name { get; set; } = null!;
 
         public bool IsDeleted { get; set; } = false;
 
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public DateTime? ModifiedOn { get; set; }
 
         public ICollection<Mission> Missions { get; set; } = new List<Mission>();

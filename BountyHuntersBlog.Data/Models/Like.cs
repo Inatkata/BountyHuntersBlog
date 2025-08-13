@@ -1,5 +1,4 @@
-﻿// BountyHuntersBlog.Data/Models/Like.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BountyHuntersBlog.Data.Models
 {
@@ -9,7 +8,7 @@ namespace BountyHuntersBlog.Data.Models
         public int Id { get; set; }
 
         [Required]
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
         [Required]
         public string UserId { get; set; } = null!;

@@ -1,7 +1,7 @@
-﻿using AutoMapper;
-using BountyHuntersBlog.Services.DTOs;
+﻿// Areas/Admin/Controllers/AdminCommentsController.cs
+using AutoMapper;
 using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.ViewModels.Admin.Comments; // <-- admin VMs
+using BountyHuntersBlog.ViewModels.Admin.Comments;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,15 +25,27 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
         {
             var list = (await _comments.AllAsync())
                 .Select(_mapper.Map<AdminCommentListItemVM>)
+                .OrderByDescending(x => x.CreatedOn)
                 .ToList();
             return View(list);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        // NEW: Details preview before delete / moderation
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var dto = await _comments.GetByIdAsync(id);
+            if (dto == null) return NotFound();
+
+            var vm = _mapper.Map<AdminCommentListItemVM>(dto);
+            return View(vm);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            await _comments.SoftDeleteAsync(id);
+            var result = await _comments.SoftDeleteAsync(id);
+            TempData[result != null ? "Success" : "Error"] = result != null ? "Comment deleted." : "Comment not found.";
             return RedirectToAction(nameof(Index));
         }
     }
