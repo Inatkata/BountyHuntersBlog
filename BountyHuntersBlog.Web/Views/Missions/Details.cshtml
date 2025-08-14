@@ -1,50 +1,102 @@
-@model BountyHuntersBlog.ViewModels.Missions.MissionDetailsViewModel
-
-<h2>@Model.Title</h2>
-
-@if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
-{
-    <img src="@Model.ImageUrl" class="img-fluid rounded mb-3" alt="@Model.Title" />
+@model BountyHuntersBlog.ViewModels.Missions.MissionDetailsVM
+@{
+    ViewData["Title"] = Model.Title;
 }
-<p>@Model.Description</p>
-<p class="text-muted">
-    @Model.CategoryName · @string.Join(", ", Model.TagNames ?? Enumerable.Empty<string>())
-</p>
+<section class="container py-4">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <img src="@Model.ImageUrl" class="img-fluid rounded" alt="@Model.Title" />
+        </div>
+        <div class="col-md-6">
+            <h2 class="mb-2">@Model.Title</h2>
+            <div class="mb-2">
+                @if (!string.IsNullOrEmpty(Model.CategoryName))
+                {
+                    <span class="badge bg-secondary">@Model.CategoryName</span>
+                }
+                @foreach (var t in Model.Tags)
+                {
+                    <span class="badge bg-light text-dark border">@t</span>
+                }
+            </div>
+            <p>@Model.Description</p>
 
-<div class="d-flex align-items-center gap-2 mb-3">
-    <form asp-controller="Likes" asp-action="ToggleMission" method="post" class="d-inline">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="missionId" value="@Model.Id" />
-        <button type="submit" class="btn btn-outline-primary btn-sm">Like</button>
-    </form>
-    <span>@Model.LikesCount</span> likes
-</div>
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <form asp-action="ToggleLike" method="post" class="d-inline" data-like-form>
+                    <input type="hidden" name="missionId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-outline-primary" id="likeBtn">
+                        <i class="fa-regular fa-thumbs-up"></i> <span id="likesCount">@Model.Likes</span>
+                    </button>
+                </form>
 
-<hr />
-<h4>Comments</h4>
+                @if (User.IsInRole("User") || User.IsInRole("Administrator"))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+                    <form asp-action="Delete" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-outline-danger">Delete</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
 
-@if (User.Identity?.IsAuthenticated ?? false)
-{
-    <form asp-action="AddComment" method="post" class="mb-3">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="MissionId" value="@Model.Id" />
-        <div class="mb-2"><textarea name="Content" class="form-control" rows="3" required></textarea></div>
-        <button class="btn btn-primary btn-sm" type="submit">Add Comment</button>
-    </form>
-}
-else
-{
-    <div class="alert alert-warning">Login to add a comment.</div>
-}
+    <hr class="my-4" />
+    <h4>Comments (@Model.Comments.Count)</h4>
 
-@if (Model.Comments.Any())
-{
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <form asp-action="AddComment" method="post" class="mb-3">
+            <input type="hidden" name="missionId" value="@Model.Id" />
+            <div class="input-group">
+                <input name="content" class="form-control" placeholder="Write a comment..." required />
+                <button class="btn btn-primary" type="submit">Post</button>
+            </div>
+        </form>
+    }
+    else
+    {
+        <div class="alert alert-light border">Log in to add a comment.</div>
+    }
+
     <ul class="list-group">
-        @foreach (var c in Model.Comments)
-        { @await Html.PartialAsync("_CommentItem", c, new ViewDataDictionary(ViewData) { { "MissionId", Model.Id } }) }
+        @foreach (var c in Model.Comments.OrderByDescending(x => x.CreatedOn))
+        {
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <strong>@c.AuthorName</strong>
+                    <small class="text-muted">@c.CreatedOn.ToUniversalTime().ToString("yyyy-MM-dd HH:mm 'UTC'")</small>
+                </div>
+                <div>@c.Content</div>
+
+                @if (User.IsInRole("User") || User.IsInRole("Administrator"))
+                {
+                    <form asp-action="DeleteComment" method="post" class="mt-2">
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <input type="hidden" name="missionId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                }
+            </li>
+        }
     </ul>
-}
-else
-{
-    <div class="text-muted">No comments yet.</div>
+</section>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('form[data-like-form]')?.forEach(f=>{
+          f.addEventListener('submit', async (e)=>{
+            e.preventDefault();
+            const fd = new FormData(f);
+            const resp = await fetch(f.action, { method:'POST', body: fd, headers: {'X-Requested-With':'XMLHttpRequest'} });
+            if(resp.ok){
+              const data = await resp.json();
+              const span = document.getElementById('likesCount');
+              if (data?.likes !== undefined && span) span.textContent = data.likes;
+            } else {
+              // ignore errors silently for demo
+            }
+          });
+        });
+    </script>
 }

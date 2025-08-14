@@ -1,42 +1,22 @@
-@model IEnumerable<BountyHuntersBlog.ViewModels.Missions.MissionListItemVm>
+@model BountyHuntersBlog.ViewModels.Missions.MissionsPagedVM
 @{
-    ViewData["Title"] = "Home";
-    ViewData["BodyClass"] = "home-light";
+    ViewData["Title"] = "Missions";
 }
+<section class="container py-4">
+    @await Html.PartialAsync("_Filters", Model)
 
-<section class="py-5">
-    <div class="container">
-        <div class="row align-items-center gy-3">
-            <div class="col-lg-7">
-                <h1 class="display-5 fw-bold mb-3">Bounty Hunters Blog</h1>
-                <p class="lead mb-4">Track, discuss, and complete missions. Join the hunt.</p>
-                <a class="btn btn-primary btn-lg me-2" asp-controller="Missions" asp-action="Index">Browse Missions</a>
-                <a class="btn btn-outline-secondary btn-lg" asp-controller="Tags" asp-action="Index">Explore Tags</a>
-            </div>
-            <div class="col-lg-5 text-center">
-                <img src="~/img/placeholder.png" class="img-fluid rounded-3 shadow-sm" alt="Hero">
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0">Latest missions</h2>
-        <a class="btn btn-sm btn-outline-primary" asp-controller="Missions" asp-action="Index">See all</a>
-    </div>
-
-    @if (!(Model?.Any() ?? false))
+    @if (!Model.Items.Any())
     {
-        <div class="alert alert-info">No missions yet.</div>
+        <div class="alert alert-info">No missions found.</div>
     }
     else
     {
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
-            @foreach (var m in Model)
+        <div class="row g-3">
+            @foreach (var m in Model.Items)
             {
-                @await Html.PartialAsync("~/Views/Missions/_MissionCard.cshtml", m)
+                @await Html.PartialAsync("_MissionCard", m)
             }
         </div>
+        @await Html.PartialAsync("_Pagination", Model)
     }
-</div>
+</section>

@@ -1,0 +1,19 @@
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionsPagedVM
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input name="q" value="@Model.Q" class="form-control" placeholder="Search..." />
+    </div>
+    <div class="col-md-3">
+        <select name="categoryId" class="form-select" asp-items="Model.Categories">
+            <option value="">All categories</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="tagId" class="form-select" asp-items="Model.Tags">
+            <option value="">All tags</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Filter</button>
+    </div>
+</form>

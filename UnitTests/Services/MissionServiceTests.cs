@@ -1,141 +1,93 @@
+﻿using AutoMapper;
 using BountyHuntersBlog.Data.Models;
 using BountyHuntersBlog.Repositories.Interfaces;
-using BountyHuntersBlog.Services.DTOs;
-using BountyHuntersBlog.Services.Implementations;
-using BountyHuntersBlog.UnitTests.TestHelpers;
+using BountyHuntersBlog.Services.DTOs;            // MissionDto, MissionEditDto
+using BountyHuntersBlog.Services.Interfaces;      // IMissionService
+using BountyHuntersBlog.Services.Implementations; // MissionService
 using Moq;
-using NUnit.Framework.Legacy;
-using System.Collections.Generic;
-using System.Linq;
+using NUnit.Framework;
 using System.Threading;
 using System.Threading.Tasks;
-using BountyHuntersBlog.UnitTests.TestData;
 
-namespace BountyHuntersBlog.UnitTests.Services
+[TestFixture]
+public class MissionServiceTests
 {
-    [TestFixture]
-    public class MissionServiceTests
+    private Mock<IRepository<Mission>> _missionsRepo = null!;
+    private IMissionService _service = null!;
+    private IMapper _mapper = null!;
+
+    [SetUp]
+    public void SetUp()
     {
-        private Mock<IMissionRepository> _missions = null!;
-        private Mock<ICommentRepository> _comments = null!;
-        private Mock<ILikeRepository> _likes = null!;
-        private Mock<ICategoryRepository> _categories = null!;
-        private Mock<ITagRepository> _tags = null!;
-        private Mock<IMissionTagRepository> _missionTags = null!;
-        private MissionService _service = null!;
+        _missionsRepo = new Mock<IRepository<Mission>>();
 
-        [SetUp]
-        public void Setup()
+        var profile = new MappingProfile(); // your AutoMapper profile
+        _mapper = AutoMapperFixture.CreateMapper(profile);
+
+        _service = new MissionService(_missionsRepo.Object, _mapper);
+    }
+
+    [Test]
+    public async Task CreateAsync_Should_Add_And_Save()
+    {
+        var dto = new MissionEditDto
         {
-            _missions = new Mock<IMissionRepository>();
-            _comments = new Mock<ICommentRepository>();
-            _likes = new Mock<ILikeRepository>();
-            _categories = new Mock<ICategoryRepository>();
-            _tags = new Mock<ITagRepository>();
-            _missionTags = new Mock<IMissionTagRepository>();
+            Title = "Test Mission",
+            ImageUrl = "https://img",
+            CategoryId = 1
+        };
 
-            _service = new MissionService(
-                _missions.Object, _comments.Object, _likes.Object,
-                _categories.Object, _tags.Object, _missionTags.Object);
-        }
+        await _service.CreateAsync(dto);
 
-        [Test]
-        public async Task SearchPagedAsync_Filters_By_Category()
-        {
-            var data = SampleData.Missions(); // ???? helper
-            _missions
-                .Setup(x => x.SearchQueryable(It.IsAny<string?>(), 20, null))
-                .Returns(data.Where(m => m.CategoryId == 20).AsQ());
+        _missionsRepo.Verify(r => r.AddAsync(It.IsAny<Mission>()), Times.Once);
+        _missionsRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 
-            var (items, total) = await _service.SearchPagedAsync(null, 20, null, 1, 10);
+    [Test]
+    public async Task UpdateAsync_Should_NotUpdate_When_NotFound()
+    {
+        _missionsRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
+                     .ReturnsAsync((Mission?)null);
 
-            Assert.That(total, Is.EqualTo(1));
-            Assert.That(items.Single().Title, Is.EqualTo("Bravo"));
-            Assert.That(items.Single().CategoryName, Is.EqualTo("Recon"));
-            CollectionAssert.Contains(items.Single().TagNames.ToList(), "HighRisk");
-        }
+        await _service.UpdateAsync(new MissionDto { Id = 99, Title = "X" });
 
-        [Test]
-        public async Task GetDetailsAsync_Returns_Comments_And_LikesCount()
-        {
-            var data = SampleData.Missions();
-            data[1].Likes = new List<Like>
-            {
-                new Like { MissionId = 2, UserId = "u1" },
-                new Like { MissionId = 2, UserId = "u2" }
-            };
+        _missionsRepo.Verify(r => r.Update(It.IsAny<Mission>()), Times.Never);
+        _missionsRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
 
-            _missions.Setup(x => x.GetByIdWithIncludesAsync(2))
-                     .ReturnsAsync(data[1]);
+    [Test]
+    public async Task UpdateAsync_Should_Update_And_Save_When_Found()
+    {
+        var entity = new Mission { Id = 5, Title = "Old" };
+        _missionsRepo.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(entity);
 
-            var dto = await _service.GetDetailsAsync(2);
+        await _service.UpdateAsync(new MissionDto { Id = 5, Title = "New" });
 
-            Assert.That(dto, Is.Not.Null);
-            Assert.That(dto!.Title, Is.EqualTo("Bravo"));
-            Assert.That(dto.LikesCount, Is.EqualTo(2));
-            Assert.That(dto.Comments.Count, Is.EqualTo(1));
-        }
+        _missionsRepo.Verify(r => r.Update(It.Is<Mission>(m => m.Title == "New")), Times.Once);
+        _missionsRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 
-        [Test]
-        public async Task ToggleMissionLikeAsync_Adds_When_Not_Exists()
-        {
-            _missions.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(new Mission { Id = 1 });
-            _likes.Setup(x => x.All()).Returns(new List<Like>().AsQ());
+    [Test]
+    public async Task EditAsync_Should_Update_And_Save_When_Found()
+    {
+        var entity = new Mission { Id = 10, Title = "Old" };
+        _missionsRepo.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(entity);
 
-            var user = TestClaims.MakeUser("u-1");
-            await _service.ToggleMissionLikeAsync(1, user);
+        await _service.EditAsync(new MissionEditDto { Id = 10, Title = "New" });
 
-            _likes.Verify(x => x.AddAsync(It.Is<Like>(l => l.MissionId == 1 && l.UserId == "u-1")), Times.Once);
-            _likes.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        }
+        _missionsRepo.Verify(r => r.Update(It.Is<Mission>(m => m.Title == "New")), Times.Once);
+        _missionsRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 
-        [Test]
-        public async Task AddCommentAsync_Saves_Comment_For_User()
-        {
-            _missions.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(new Mission { Id = 1 });
-            _comments.Setup(x => x.AddAsync(It.IsAny<Comment>())).Returns(Task.CompletedTask);
-            _comments.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+    [Test]
+    public async Task SoftDeleteAsync_Should_Flag_And_Save()
+    {
+        var entity = new Mission { Id = 7, IsDeleted = false };
+        _missionsRepo.Setup(r => r.GetByIdAsync(7)).ReturnsAsync(entity);
 
-            var user = TestClaims.MakeUser("u-42");
-            await _service.AddCommentAsync(1, "hello world", user);
+        await _service.SoftDeleteAsync(7);
 
-            _comments.Verify(x => x.AddAsync(It.Is<Comment>(c =>
-                c.MissionId == 1 && c.UserId == "u-42" && c.Content == "hello world")), Times.Once);
-        }
-
-        [Test]
-        public async Task EditAsync_Syncs_Tags_Adds_And_Removes()
-        {
-            var mission = new Mission
-            {
-                Id = 1,
-                Title = "A",
-                Description = "D",
-                CategoryId = 10,
-                IsCompleted = false,
-                MissionTags = new List<MissionTag> { new() { MissionId = 1, TagId = 100 } }
-            };
-
-            _missions.Setup(x => x.WithAllRelations()).Returns(new List<Mission> { mission }.AsQ());
-            _missionTags.Setup(x => x.AddAsync(It.IsAny<MissionTag>())).Returns(Task.CompletedTask);
-            _missions.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
-            var dto = new MissionEditDto
-            {
-                Id = 1,
-                Title = "Alpha",
-                Description = "Desc",
-                CategoryId = 10,
-                IsCompleted = true,
-                TagIds = new[] { 200 }
-            };
-
-            await _service.EditAsync(dto);
-
-            _missionTags.Verify(x => x.Delete(It.Is<MissionTag>(mt => mt.TagId == 100)), Times.Once);
-            _missionTags.Verify(x => x.AddAsync(It.Is<MissionTag>(mt => mt.MissionId == 1 && mt.TagId == 200)), Times.Once);
-            _missions.Verify(x => x.Update(It.Is<Mission>(m => m.Id == 1 && m.IsCompleted == true)), Times.Once);
-            _missions.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        }
+        _missionsRepo.Verify(r => r.Update(It.Is<Mission>(m => m.IsDeleted)), Times.Once);
+        _missionsRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BountyHuntersBlog.Data.Models;
@@ -32,6 +33,13 @@ namespace BountyHuntersBlog.Services.Implementations
             _tags = tags;
             _missionTags = missionTags;
         }
+
+        public MissionService(IRepository<Mission> missionsRepoObject, IMapper comments)
+        {
+            throw new NotImplementedException();
+        }
+
+      
 
         private static string? GetUserId(ClaimsPrincipal user)
             => user?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;

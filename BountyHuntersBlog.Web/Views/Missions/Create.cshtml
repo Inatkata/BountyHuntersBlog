@@ -1,9 +1,11 @@
-@model BountyHuntersBlog.ViewModels.Missions.MissionEditViewModel
-<h2>Create Mission</h2>
-<form method="post">
-    @Html.AntiForgeryToken()
-    <partial name="_MissionForm" model="Model" />
-    <button class="btn btn-primary" type="submit">Save</button>
-    <a class="btn btn-secondary" asp-action="Index">Back</a>
-</form>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+@model BountyHuntersBlog.Services.DTOs.MissionEditDto
+@{
+    ViewData["Title"] = "Create Mission";
+}
+<section class="container py-4">
+    <form asp-action="Create" method="post">
+        @await Html.PartialAsync("_Form", Model)
+        <button class="btn btn-primary">Create</button>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-link">Cancel</a>
+    </form>
+</section>

@@ -1,68 +1,82 @@
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@using Microsoft.AspNetCore.Http
-@inject IHttpContextAccessor HttpContextAccessor
-@model IEnumerable<BountyHuntersBlog.ViewModels.Admin.Users.AdminUserListItemVM>
-
+@model List<BountyHuntersBlog.ViewModels.Admin.Users.AdminUserListItemVM>
 @{
     ViewData["Title"] = "Users";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-    var searchValue = HttpContextAccessor.HttpContext?.Request.Query["search"].ToString() ?? string.Empty;
 }
-
-<h2 class="mb-3">Users</h2>
-
-<form method="get" class="mb-3">
-    <div class="input-group">
-        <input type="text" name="search" value="@searchValue" class="form-control" placeholder="Search by username, email, display name..." />
-        <button class="btn btn-primary" type="submit">Search</button>
+<section class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Users</h2>
+        <form method="get" class="d-flex gap-2">
+            <input class="form-control" name="q" value="@((string?)ViewBag.Q)" placeholder="Search user/email..." />
+            <button class="btn btn-outline-primary">Search</button>
+        </form>
     </div>
-</form>
 
-@if (!Model.Any())
-{
-    <div class="alert alert-info">No users found.</div>
-}
-else
-{
-    <table class="table table-striped align-middle">
-        <thead>
-            <tr>
-                <th>UserName</th>
-                <th>Email</th>
-                <th>Display Name</th>
-                <th style="width:200px;"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var u in Model)
-            {
+    @if (TempData["Msg"] is string msg)
+    {
+        <div class="alert alert-success">@msg</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No users.</div>
+    }
+    else
+    {
+        <table class="table table-striped align-middle">
+            <thead>
                 <tr>
-                    <td>@u.UserName</td>
-                    <td>@u.Email</td>
-                    <td>@u.DisplayName</td>
-                    <td class="text-end">
-                        <a asp-area="Admin" asp-controller="AdminUsers" asp-action="Details" asp-route-id="@u.Id"
-                           class="btn btn-sm btn-outline-primary">Details</a>
-                    </td>
+                    <th>UserName</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td>@u.UserName</td>
+                        <td>@u.Email</td>
+                        <td>@string.Join(", ", u.Roles)</td>
+                        <td>
+                            @if (u.IsLockedOut)
+                            {
+                                <span class="badge bg-danger">Locked</span>
+                            }
+                            else
+                            {
 
-<div class="mt-3">
-    <nav>
-        <ul class="pagination">
-            @{
-                int totalPages = (int)Math.Ceiling((double)ViewBag.TotalCount / (int)ViewBag.PageSize);
-                int currentPage = (int)ViewBag.Page;
-            }
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(i == currentPage ? "active" : "")">
-                    <a class="page-link" href="?page=@i&search=@searchValue">@i</a>
-                </li>
-            }
-        </ul>
-    </nav>
-</div>
+                                <span class="badge bg-success">Active</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="EditRoles" asp-route-id="@u.Id" class="btn btn-sm btn-outline-secondary">Roles</a>
+
+                            @if (u.IsLockedOut)
+                            {
+                                <form asp-action="Unlock" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <button class="btn btn-sm btn-outline-success" type="submit">Unlock</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="Lock" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <button class="btn btn-sm btn-outline-warning" type="submit">Lock</button>
+                                </form>
+                            }
+
+                            <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Delete user?')">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>

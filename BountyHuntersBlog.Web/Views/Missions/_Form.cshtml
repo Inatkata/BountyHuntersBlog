@@ -1,0 +1,24 @@
+﻿@model BountyHuntersBlog.Services.DTOs.MissionEditDto
+<div class="mb-3">
+    <label class="form-label">Title</label>
+    <input asp-for="Title" class="form-control" />
+    <span asp-validation-for="Title" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea asp-for="Description" rows="5" class="form-control"></textarea>
+</div>
+<div class="mb-3">
+    <label class="form-label">Image URL</label>
+    <input asp-for="ImageUrl" class="form-control" />
+</div>
+<div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Category</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories"></select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Tags</label>
+        <select asp-for="TagIds" class="form-select" asp-items="ViewBag.Tags" multiple size="6"></select>
+    </div>
+</div>

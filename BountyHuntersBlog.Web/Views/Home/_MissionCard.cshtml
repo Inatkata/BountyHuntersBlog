@@ -1,0 +1,15 @@
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionCardVM
+<div class="col-12 col-sm-6 col-lg-4">
+    <div class="card h-100 shadow-sm">
+        <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Title">
+        <div class="card-body">
+            <h5 class="card-title">@Model.Title</h5>
+            <p class="card-text text-truncate">@Model.ShortDescription</p>
+            <div class="d-flex justify-content-between small text-muted mb-2">
+                <span><i class="fa-regular fa-thumbs-up"></i> @Model.Likes</span>
+                <span><i class="fa-regular fa-comments"></i> @Model.Comments</span>
+            </div>
+            <a asp-controller="Missions" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary w-100">Open</a>
+        </div>
+    </div>
+</div>

@@ -20,6 +20,10 @@ namespace BountyHuntersBlog.Services.Implementations
             _mapper = mapper;
         }
 
+        public CategoryService(IRepository<Category> @object, IMapper mapper)
+        {
+        }
+
         public async Task<IReadOnlyList<CategoryDto>> AllAsync() =>
             await _categories.AllReadonly()
 

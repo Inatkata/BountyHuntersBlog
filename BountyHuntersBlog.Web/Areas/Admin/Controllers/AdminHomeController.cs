@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
 {
-    public class AdminHomeController : BaseAdminController
+    [Area("Admin")]
+    [Authorize(Roles = "Administrator")]
+    public class AdminHomeController : Controller
     {
         [HttpGet]
-        public IActionResult Index() => View();
+        public IActionResult Index() => View(); // simple dashboard links
     }
 }

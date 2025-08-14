@@ -1,39 +1,74 @@
-﻿using BountyHuntersBlog.Data.Models;
+﻿using System.Security.Claims;
+using BountyHuntersBlog.Data.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-public static class IdentitySeeder
+namespace BountyHuntersBlog.Web.Infrastructure
 {
-    public static async Task SeedAsync(IServiceProvider services)
+    public static class IdentitySeeder
     {
-        using var scope = services.CreateScope();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        public const string RoleUser = "User";
+        public const string RoleAdmin = "Administrator";
 
-        // Roles
-        foreach (var role in new[] { "Admin", "User" })
+        public static async Task SeedAsync(IServiceProvider services)
+        {
+            using var scope = services.CreateScope();
+            var provider = scope.ServiceProvider;
+
+            var userManager = provider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = provider.GetRequiredService<RoleManager<IdentityRole>>();
+            var config = provider.GetRequiredService<IConfiguration>();
+
+            // 1) Ensure roles
+            await EnsureRoleAsync(roleManager, RoleUser);
+            await EnsureRoleAsync(roleManager, RoleAdmin);
+
+            // 2) Admin user (from config or defaults)
+            var adminUserName = config["Seed:Admin:UserName"] ?? "admin";
+            var adminEmail = config["Seed:Admin:Email"] ?? "admin@bountyhunters.local";
+            var adminPass = config["Seed:Admin:Password"] ?? "Admin!234";
+
+            var admin = await userManager.FindByNameAsync(adminUserName);
+            if (admin == null)
+            {
+                admin = new ApplicationUser
+                {
+                    UserName = adminUserName,
+                    Email = adminEmail,
+                    EmailConfirmed = true
+                };
+                var createRes = await userManager.CreateAsync(admin, adminPass);
+                if (!createRes.Succeeded)
+                    throw new InvalidOperationException("Failed to create admin user: " + string.Join("; ", createRes.Errors.Select(e => e.Description)));
+            }
+
+            // 3) Ensure admin has roles
+            var roles = await userManager.GetRolesAsync(admin);
+            if (!roles.Contains(RoleAdmin))
+                await userManager.AddToRoleAsync(admin, RoleAdmin);
+            if (!roles.Contains(RoleUser))
+                await userManager.AddToRoleAsync(admin, RoleUser);
+
+            // 4) (optional) admin claims
+            await EnsureClaimAsync(userManager, admin, new Claim("display_name", "System Admin"));
+        }
+
+        private static async Task EnsureRoleAsync(RoleManager<IdentityRole> roleManager, string role)
+        {
             if (!await roleManager.RoleExistsAsync(role))
-                await roleManager.CreateAsync(new IdentityRole(role));
-
-        // Admin
-        var adminEmail = "admin@site.local";
-        var admin = await userManager.FindByEmailAsync(adminEmail);
-        if (admin == null)
-        {
-            admin = new ApplicationUser { UserName = "admin", Email = adminEmail, DisplayName = "Admin" };
-            await userManager.CreateAsync(admin, "Admin!123"); // TODO: move to secrets
+            {
+                var res = await roleManager.CreateAsync(new IdentityRole(role));
+                if (!res.Succeeded)
+                    throw new InvalidOperationException($"Failed to create role '{role}': " + string.Join("; ", res.Errors.Select(e => e.Description)));
+            }
         }
-        if (!await userManager.IsInRoleAsync(admin, "Admin"))
-            await userManager.AddToRoleAsync(admin, "Admin");
 
-        // Demo user
-        var userEmail = "demo@site.local";
-        var demo = await userManager.FindByEmailAsync(userEmail);
-        if (demo == null)
+        private static async Task EnsureClaimAsync(UserManager<ApplicationUser> userManager, ApplicationUser user, Claim claim)
         {
-            demo = new ApplicationUser { UserName = "demo", Email = userEmail, DisplayName = "Demo User" };
-            await userManager.CreateAsync(demo, "User!123"); // TODO: move to secrets
+            var claims = await userManager.GetClaimsAsync(user);
+            if (!claims.Any(c => c.Type == claim.Type && c.Value == claim.Value))
+                await userManager.AddClaimAsync(user, claim);
         }
-        if (!await userManager.IsInRoleAsync(demo, "User"))
-            await userManager.AddToRoleAsync(demo, "User");
     }
 }

@@ -1,145 +1,121 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using AutoMapper;
+﻿using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.ViewModels.Missions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
-    public class MissionsController : BaseController
+    public class MissionsController : Controller
     {
         private readonly IMissionService _missions;
-        private readonly ICategoryService _categories;
-        private readonly ITagService _tags;
-        private readonly IMapper _mapper;
+        private readonly ICommentService _comments;
+        private readonly ILikeService _likes;
 
-        public MissionsController(
-            IMissionService missions,
-            ICategoryService categories,
-            ITagService tags,
-            IMapper mapper)
+        public MissionsController(IMissionService missions, ICommentService comments, ILikeService likes)
         {
             _missions = missions;
-            _categories = categories;
-            _tags = tags;
-            _mapper = mapper;
+            _comments = comments;
+            _likes = likes;
         }
 
-        [AllowAnonymous]
-        [HttpGet]
-        public async Task<IActionResult> Index(string? q, int? categoryId, int? tagId, int page = 1, int pageSize = 10)
-        {
-            var (items, total) = await _missions.SearchPagedAsync(q, categoryId, tagId, page, pageSize);
-
-            var vm = new MissionIndexViewModel
-            {
-                Q = q,
-                CategoryId = categoryId,
-                TagId = tagId,
-                // FIX: map DTO -> VM
-                Items = _mapper.Map<List<MissionListItemVm>>(items),
-                Page = page,
-                PageSize = pageSize,
-                TotalCount = total
-            };
-            return View(vm);
-        }
-
-        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            var dto = await _missions.GetByIdAsync(id);
+            var dto = await _missions.GetDetailsAsync(id);
             if (dto == null) return NotFound();
 
-            
-            var vm = _mapper.Map<MissionDetailsViewModel>(dto);
+            var vm = MissionDetailsVM.FromDto(dto); // виж т.2 долу
             return View(vm);
         }
 
-        [Authorize]
+        // ===== Create =====
+        [Authorize(Roles = "User,Administrator")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var vm = new MissionEditViewModel();
-            await PopulateListsAsync(vm);
-            return View(vm);
+            ViewBag.Categories = await _missions.GetCategoriesSelectListAsync();
+            ViewBag.Tags = await _missions.GetTagsSelectListAsync();
+            return View(new MissionEditDto());
         }
 
-        [Authorize]
+        [Authorize(Roles = "User,Administrator")]
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(MissionEditViewModel vm)
+        public async Task<IActionResult> Create(MissionEditDto dto)
         {
             if (!ModelState.IsValid)
             {
-                await PopulateListsAsync(vm);
-                return View(vm);
+                ViewBag.Categories = await _missions.GetCategoriesSelectListAsync();
+                ViewBag.Tags = await _missions.GetTagsSelectListAsync();
+                return View(dto);
             }
 
-            // FIX: без ToEditDto() – ползваме AutoMapper
-            var editDto = _mapper.Map<MissionEditDto>(vm);
-            await _missions.CreateAsync(editDto);
-
-            TempData["Success"] = "Mission created.";
-            return RedirectToAction(nameof(Index));
+            await _missions.CreateAsync(dto);
+            return RedirectToAction("Index", "Home");
         }
 
-        [Authorize]
+        // ===== Edit =====
+        [Authorize(Roles = "User,Administrator")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var dto = await _missions.GetByIdAsync(id);
-            if (dto == null) return NotFound();
+            var edit = await _missions.GetEditAsync(id);
+            if (edit == null) return NotFound();
 
-            // FIX: без FromDto() – ползваме AutoMapper
-            var vm = _mapper.Map<MissionEditViewModel>(dto);
-            await PopulateListsAsync(vm);
-            return View(vm);
+            ViewBag.Categories = await _missions.GetCategoriesSelectListAsync();
+            ViewBag.Tags = await _missions.GetTagsSelectListAsync();
+            return View(edit);
         }
 
-        [Authorize]
+        [Authorize(Roles = "User,Administrator")]
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(MissionEditViewModel vm)
+        public async Task<IActionResult> Edit(MissionEditDto dto)
         {
             if (!ModelState.IsValid)
             {
-                await PopulateListsAsync(vm);
-                return View(vm);
+                ViewBag.Categories = await _missions.GetCategoriesSelectListAsync();
+                ViewBag.Tags = await _missions.GetTagsSelectListAsync();
+                return View(dto);
             }
 
-            // FIX: без ToDto() – ползваме AutoMapper
-            var updateDto = _mapper.Map<MissionDto>(vm);
-            await _missions.UpdateAsync(updateDto);
-
-            TempData["Success"] = "Mission updated.";
-            return RedirectToAction(nameof(Details), new { id = vm.Id });
+            await _missions.EditAsync(dto);
+            return RedirectToAction(nameof(Details), new { id = dto.Id });
         }
 
-        [Authorize]
+        // ===== Delete =====
+        [Authorize(Roles = "User,Administrator")]
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             await _missions.SoftDeleteAsync(id);
-            TempData["Success"] = "Mission deleted.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Home");
         }
 
-        // helpers
-        private async Task PopulateListsAsync(MissionEditViewModel vm)
+        // ===== Comments =====
+        [Authorize(Roles = "User,Administrator")]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment(int missionId, string content)
         {
-            var categories = (await _categories.AllAsync()).ToList();
-            var tags = (await _tags.AllAsync()).ToList();
-            var selected = vm.TagIds?.ToHashSet() ?? new HashSet<int>();
+            await _missions.AddCommentAsync(missionId, content, User);
+            return RedirectToAction(nameof(Details), new { id = missionId });
+        }
 
-            vm.Categories = categories
-                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name, Selected = c.Id == vm.CategoryId })
-                .ToList();
+        [Authorize(Roles = "User,Administrator")]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteComment(int id, int missionId)
+        {
+            await _missions.DeleteCommentAsync(id, User);
+            return RedirectToAction(nameof(Details), new { id = missionId });
+        }
 
-            vm.Tags = tags
-                .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name, Selected = selected.Contains(t.Id) })
-                .ToList();
+        // ===== Likes (AJAX) =====
+        [Authorize(Roles = "User,Administrator")]
+        [HttpPost]
+        public async Task<IActionResult> ToggleLike(int missionId)
+        {
+            // Изпълняваме логиката; не зависим от име на поле (Total/Count/TotalLikes)
+            await _likes.ToggleMissionLikeAsync(missionId, User.Identity?.Name ?? "");
+            return Json(new { }); // JS в Details.cshtml проверява за data.likes и ще пропусне ако липсва
         }
     }
 }

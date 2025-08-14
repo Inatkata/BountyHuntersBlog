@@ -3,8 +3,6 @@ using Moq;
 using BountyHuntersBlog.Services.Implementations;
 using BountyHuntersBlog.Repositories.Interfaces;
 using BountyHuntersBlog.Data.Models;
-using BountyHuntersBlog.Services.DTOs;
-using BountyHuntersBlog.UnitTests.TestHelpers;
 
 namespace BountyHuntersBlog.UnitTests.Services
 {
@@ -69,7 +67,9 @@ namespace BountyHuntersBlog.UnitTests.Services
                 new Comment { Id = 2, MissionId = 200, Content = "B" },
                 new Comment { Id = 3, MissionId = 100, Content = "C" }
             };
-            _comments.Setup(x => x.All()).Returns(data.AsQ());
+            _comments
+                .Setup(x => x.All())
+                .Returns(data.AsQueryable());
 
             var result = await _service.GetForMissionAsync(100);
 

@@ -9,88 +9,86 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DB
+// ===== Database =====
 builder.Services.AddDbContext<BountyHuntersDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         sql => sql.EnableRetryOnFailure()));
 
-// Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.User.RequireUniqueEmail = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireDigit = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-})
-.AddEntityFrameworkStores<BountyHuntersDbContext>()
-.AddDefaultTokenProviders();
+// ===== Identity =====
+builder.Services
+    .AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireDigit = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+    })
+    .AddEntityFrameworkStores<BountyHuntersDbContext>()
+    .AddDefaultTokenProviders();
 
+builder.Services.ConfigureApplicationCookie(opt =>
+{
+    opt.LoginPath = "/Account/Login";
+    opt.AccessDeniedPath = "/error/403"; // unified error handling
+});
+
+// ===== MVC + Anti-forgery =====
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 
-builder.Services.ConfigureApplicationCookie(opt =>
-{
-    opt.LoginPath = "/Account/Login";
-    opt.AccessDeniedPath = "/Account/AccessDenied";
-});
-
-// Repos & Services
+// ===== Repositories & Services =====
 builder.Services.AddRepositories();
 builder.Services.AddApplicationServices();
 
-// AutoMapper + MVC
+// ===== AutoMapper =====
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// Exception handling / HSTS
+// ===== Error handling / HSTS =====
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler("/error/500");
     app.UseHsts();
 }
 else
 {
-    // по избор: detailed errors в Dev
     app.UseDeveloperExceptionPage();
 }
 
-// DB migrate + seed
+// All status codes (404 etc.) -> ErrorController
+app.UseStatusCodePagesWithReExecute("/error/{0}");
+
+// ===== DB migrate + seed =====
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<BountyHuntersDbContext>();
     await db.Database.MigrateAsync();
-    await IdentitySeeder.SeedAsync(scope.ServiceProvider);
-    await DataSeeder.SeedAsync(scope.ServiceProvider);
+
+    await IdentitySeeder.SeedAsync(scope.ServiceProvider); // roles + admin
+    await DataSeeder.SeedAsync(scope.ServiceProvider);     // categories/tags/missions
 }
 
-// Pipeline
+// ===== Pipeline =====
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Routes
-
+// ===== Routes =====
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=AdminHome}/{action=Index}/{id?}");
 
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.MapRazorPages();
 
 app.Run();

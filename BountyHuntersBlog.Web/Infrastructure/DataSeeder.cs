@@ -1,7 +1,7 @@
 ﻿using BountyHuntersBlog.Data;
 using BountyHuntersBlog.Data.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BountyHuntersBlog.Web.Infrastructure
 {
@@ -11,93 +11,118 @@ namespace BountyHuntersBlog.Web.Infrastructure
         {
             using var scope = services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<BountyHuntersDbContext>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-            await db.Database.MigrateAsync();
+            // Ensure DB
+            await db.Database.EnsureCreatedAsync();
 
-            // users to attach content to
-            var admin = await userManager.FindByEmailAsync("admin@site.local");
-            var demo = await userManager.FindByEmailAsync("demo@site.local");
-            var userIds = new[] { admin?.Id, demo?.Id }
-                .Where(x => !string.IsNullOrEmpty(x))
-                .Cast<string>()
-                .ToList();
-            if (userIds.Count == 0) return; // no users yet
-
-            // ---- Categories (5) ----
+            // === Categories ===
             var categories = new[]
             {
-                "Bounty Missions","Exploration","Rescue","Recon","Intel"
+                new Category { Name = "Bounty" },
+                new Category { Name = "Rescue" },
+                new Category { Name = "Investigation" },
+                new Category { Name = "Escort" }
             };
-            foreach (var name in categories)
-                if (!await db.Categories.AnyAsync(c => c.Name == name))
-                    db.Categories.Add(new Category { Name = name });
+            foreach (var c in categories)
+            {
+                if (!await db.Categories.AnyAsync(x => x.Name == c.Name))
+                    db.Categories.Add(c);
+            }
             await db.SaveChangesAsync();
 
-            // ---- Tags (8) ----
+            // === Tags ===
             var tags = new[]
             {
-                "Urgent","Dangerous","Stealth","NightOp","HighRisk","Recon","Long-term","Urban"
+                new Tag { Name = "HighRisk" },
+                new Tag { Name = "Stealth" },
+                new Tag { Name = "Urban" },
+                new Tag { Name = "Wilderness" },
+                new Tag { Name = "MostWanted" }
             };
-            foreach (var name in tags)
-                if (!await db.Tags.AnyAsync(t => t.Name == name))
-                    db.Tags.Add(new Tag { Name = name });
+            foreach (var t in tags)
+            {
+                if (!await db.Tags.AnyAsync(x => x.Name == t.Name))
+                    db.Tags.Add(t);
+            }
             await db.SaveChangesAsync();
 
-            // helpers
-            async Task<int> CatId(string name) => (await db.Categories.FirstAsync(c => c.Name == name)).Id;
-            async Task<int> TagId(string name) => (await db.Tags.FirstAsync(t => t.Name == name)).Id;
+            // Resolve IDs
+            var catMap = await db.Categories.ToDictionaryAsync(c => c.Name, c => c.Id);
+            var tagMap = await db.Tags.ToDictionaryAsync(t => t.Name, t => t.Id);
 
-            // ---- Missions (10) + comments + likes (идемпотентно по Title) ----
-            var missions = new (string Title, string Desc, string Cat, string[] TagNames)[]
+            // === Default author (admin) ===
+            var admin = await db.Users.OrderBy(u => u.Id).FirstOrDefaultAsync(u => u.UserName == "admin");
+            var authorId = admin?.Id ?? await db.Users.Select(u => u.Id).FirstOrDefaultAsync();
+
+            // === Missions (only if none) ===
+            if (!await db.Missions.AnyAsync())
             {
-                ("Silent Run in Old Town", "Plant trackers on targets. Avoid cameras; exfil via north alley.", "Bounty Missions", new[]{"Urgent","Dangerous","Urban"}),
-                ("Locate Lost Drone", "Scan sector 7 and retrieve downed UAV core.", "Recon", new[]{"Recon","Long-term"}),
-                ("Extract Hostage Zeta", "Infiltrate compound and extract VIP. Use night vision.", "Rescue", new[]{"NightOp","Urgent"}),
-                ("Map Sewer Network", "Create updated map for smuggling counter-ops.", "Intel", new[]{"Long-term","Urban"}),
-                ("Trail Smuggler Route", "Shadow convoy without engaging.", "Exploration", new[]{"Stealth","Recon"}),
-                ("Disable Signal Tower", "EMP charge on tower, minimize collateral.", "Bounty Missions", new[]{"Dangerous","HighRisk"}),
-                ("Recover Hard Drive", "Obtain drive from safehouse attic.", "Intel", new[]{"Stealth","Urban"}),
-                ("Test Perimeter Drones", "Night patrol of zone C with drones.", "Recon", new[]{"NightOp","Long-term"}),
-                ("Escort Medic Team", "Protect medics entering hot zone.", "Rescue", new[]{"Urgent","HighRisk"}),
-                ("Survey Desert Ruins", "Capture imagery and mark hazards.", "Exploration", new[]{"Long-term","Recon"})
-            };
-
-            foreach (var m in missions)
-            {
-                if (await db.Missions.AnyAsync(x => x.Title == m.Title)) continue;
-
-                var mission = new Mission
+                var sample = new[]
                 {
-                    Title = m.Title,
-                    Description = m.Desc,
-                    CategoryId = await CatId(m.Cat),
-                    UserId = userIds[0],
-                    IsCompleted = false,
-                    CreatedOn = DateTime.UtcNow
+                    new Mission
+                    {
+                        Title = "Capture the Desert Outlaw",
+                        Description = "Locate and capture the outlaw roaming the desert canyons.",
+                        ImageUrl = "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200",
+                        CategoryId = catMap["Bounty"],
+                        UserId = authorId!
+                    },
+                    new Mission
+                    {
+                        Title = "Rescue at Frozen Peak",
+                        Description = "A team is stranded at the peak. Bring them back safely.",
+                        ImageUrl = "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200",
+                        CategoryId = catMap["Rescue"],
+                        UserId = authorId!
+                    },
+                    new Mission
+                    {
+                        Title = "Undercover in Night City",
+                        Description = "Go undercover and gather intel on gang activity downtown.",
+                        ImageUrl = "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?q=80&w=1200",
+                        CategoryId = catMap["Investigation"],
+                        UserId = authorId!
+                    },
+                    new Mission
+                    {
+                        Title = "Convoy Escort South",
+                        Description = "Escort a precious cargo through hostile territory.",
+                        ImageUrl = "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1200",
+                        CategoryId = catMap["Escort"],
+                        UserId = authorId!
+                    }
                 };
 
-                mission.MissionTags = new List<MissionTag>();
-                foreach (var tn in m.TagNames.Distinct())
-                    mission.MissionTags.Add(new MissionTag { TagId = await TagId(tn) });
-
-                db.Missions.Add(mission);
+                db.Missions.AddRange(sample);
                 await db.SaveChangesAsync();
 
-                // comments (2..3)
-                var c1 = new Comment { MissionId = mission.Id, UserId = userIds[0], Content = "Noted. Preparing gear.", CreatedOn = DateTime.UtcNow.AddMinutes(-30) };
-                var c2 = new Comment { MissionId = mission.Id, UserId = userIds[^1], Content = "Copy. I will handle recon.", CreatedOn = DateTime.UtcNow.AddMinutes(-20) };
-                db.Comments.AddRange(c1, c2);
-                if (m.TagNames.Contains("HighRisk"))
+                // Attach tags (MissionTag)
+                var allMissions = await db.Missions.ToListAsync();
+                foreach (var m in allMissions)
                 {
-                    db.Comments.Add(new Comment { MissionId = mission.Id, UserId = userIds[0], Content = "High risk confirmed. Request backup.", CreatedOn = DateTime.UtcNow.AddMinutes(-10) });
+                    var attach = new List<int>();
+                    if (m.Title.Contains("Outlaw")) attach.Add(tagMap["MostWanted"]);
+                    if (m.Title.Contains("Rescue")) attach.Add(tagMap["Wilderness"]);
+                    if (m.Title.Contains("Undercover")) attach.Add(tagMap["Urban"]);
+                    if (m.Title.Contains("Escort")) attach.Add(tagMap["HighRisk"]);
+
+                    foreach (var tagId in attach.Distinct())
+                    {
+                        if (!await db.MissionTags.AnyAsync(mt => mt.MissionId == m.Id && mt.TagId == tagId))
+                            db.MissionTags.Add(new MissionTag { MissionId = m.Id, TagId = tagId });
+                    }
                 }
+
                 await db.SaveChangesAsync();
 
-                // likes (1..2)
-                db.Likes.Add(new Like { MissionId = mission.Id, UserId = userIds[0] });
-                if (userIds.Count > 1) db.Likes.Add(new Like { MissionId = mission.Id, UserId = userIds[1] });
-                await db.SaveChangesAsync();
+                // Optional comments
+                if (authorId != null)
+                {
+                    var c1 = new Comment { MissionId = allMissions[0].Id, UserId = authorId, Content = "Proceed with caution." };
+                    var c2 = new Comment { MissionId = allMissions[1].Id, UserId = authorId, Content = "Weather looks tough, prepare ropes." };
+                    db.Comments.AddRange(c1, c2);
+                    await db.SaveChangesAsync();
+                }
             }
         }
     }

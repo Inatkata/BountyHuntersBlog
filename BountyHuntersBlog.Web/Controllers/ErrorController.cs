@@ -1,14 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace BountyHuntersBlog.Web.Controllers
+public class ErrorController : Controller
 {
-    public class ErrorController : Controller
-    {
-        [Route("Error/{code:int}")]
-        public IActionResult Status(int code)
-            => code == 404 ? View("NotFound") : View("ServerError");
+    [Route("error/404")]
+    public IActionResult NotFoundPage() => View("NotFound");
 
-        [Route("Error")]
-        public IActionResult Index() => View("ServerError");
-    }
-} 
+    [Route("error/500")]
+    public IActionResult ServerError() => View("ServerError");
+}
