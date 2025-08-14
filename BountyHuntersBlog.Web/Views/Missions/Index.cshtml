@@ -1,88 +1,41 @@
 @model BountyHuntersBlog.ViewModels.Missions.MissionIndexViewModel
 
-@{
-    ViewData["Title"] = "Missions";
-}
-
 <h2 class="mb-3">Missions</h2>
 
-<form method="get" class="row g-2 mb-3">
-    <div class="col-md-4">
-        <input class="form-control" name="q" value="@Model.Q" placeholder="Search..." />
-    </div>
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-4"><input asp-for="Q" class="form-control" placeholder="Search..." /></div>
     <div class="col-md-3">
-        <select class="form-select" name="categoryId" asp-items="Model.Categories">
-            <option value="">All categories</option>
+        <select asp-for="CategoryId" class="form-select" asp-items="Model.Categories">
+            <option value="">-- All categories --</option>
         </select>
     </div>
     <div class="col-md-3">
-        <select class="form-select" name="tagId" asp-items="Model.Tags">
-            <option value="">All tags</option>
+        <select asp-for="TagId" class="form-select" asp-items="Model.Tags">
+            <option value="">-- All tags --</option>
         </select>
     </div>
-    <div class="col-md-2 d-grid">
-        <button class="btn btn-primary" type="submit">Filter</button>
-    </div>
+    <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Filter</button></div>
 </form>
 
-@if (Model.Items == null || !Model.Items.Any())
+@if (!Model.Items.Any())
 {
     <div class="alert alert-info">No missions found.</div>
 }
 else
 {
-    <div class="list-group mb-3">
+    <div class="row row-cols-1 row-cols-md-3 g-3">
         @foreach (var m in Model.Items)
         {
-            <a class="list-group-item list-group-item-action"
-               asp-controller="Missions" asp-action="Details" asp-route-id="@m.Id">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">@m.Title</h5>
-                    @if (m.IsCompleted)
-                    {
-                        <span class="badge bg-success">Completed</span>
-                    }
-                </div>
-                <small class="text-muted">
-                    @(!string.IsNullOrEmpty(m.CategoryName) ? m.CategoryName : "No category")
-                </small>
-                <div class="mt-1">
-                    @if (m.TagNames?.Any() == true)
-                    {
-                        foreach (var t in m.TagNames)
-                        {
-                            <span class="badge bg-secondary me-1">@t</span>
-                        }
-                    }
-                </div>
-            </a>
+            @await Html.PartialAsync("_MissionCard", m)
         }
     </div>
-        var totalPages = (int)Math.Ceiling((decimal)Model.TotalCount / Model.PageSize);
 
-        if (totalPages > 1)
-        {
-            <nav aria-label="Missions pages">
-                <ul class="pagination">
-                    @for (int i = 1; i <= totalPages; i++)
-                    {
-                        <li class="page-item @(i == Model.Page ? "active" : "")">
-                            <a class="page-link"
-                               asp-action="Index"
-                               asp-route-q="@Model.Search"
-                               asp-route-categoryId="@Model.CategoryId"
-                               asp-route-tagId="@Model.TagId"
-                               asp-route-page="@i"
-                               asp-route-pageSize="@Model.PageSize">
-                                @i
-                            </a>
-                        </li>
-                    }
-                </ul>
-            </nav>
-        }
+    @{
+        var pager = new BountyHuntersBlog.ViewModels.Shared.PaginationViewModel {
+            Page = Model.Page, PageSize = Model.PageSize, TotalCount = Model.TotalCount,
+            Action = "Index", Controller = "Missions",
+            RouteValues = new { q = Model.Q, categoryId = Model.CategoryId, tagId = Model.TagId }
+        };
     }
-
-
-
-
+    <partial name="~/Views/Shared/_Pagination.cshtml" model="pager" />
+}

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BountyHuntersBlog.Data.Migrations
 {
     [DbContext(typeof(BountyHuntersDbContext))]
-    [Migration("20250813120947_UserIdCorrection")]
-    partial class UserIdCorrection
+    [Migration("20250814112848_InitialDb")]
+    partial class InitialDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

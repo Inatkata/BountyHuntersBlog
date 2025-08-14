@@ -1,17 +1,14 @@
-﻿// ViewModels/Admin/Missions/AdminMissionListItemVM.cs
-using System;
-
+﻿// BountyHuntersBlog.ViewModels/Admin/Missions/AdminMissionListItemVM.cs
 namespace BountyHuntersBlog.ViewModels.Admin.Missions
 {
     public class AdminMissionListItemVM
     {
         public int Id { get; set; }
         public string Title { get; set; } = null!;
-        public string CategoryName { get; set; } = null!;
-        public int PageSize { get; set; }
-        public string Description { get; set; }
+        public string CategoryName { get; set; } = "";
         public bool IsCompleted { get; set; }
+        public bool IsDeleted { get; set; }
+        public int CommentsCount { get; set; }
         public int LikesCount { get; set; }
-        public DateTime CreatedOn { get; set; }
     }
 }

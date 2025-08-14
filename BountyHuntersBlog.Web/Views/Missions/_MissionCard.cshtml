@@ -1,0 +1,23 @@
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionListItemVm
+@{
+    var prop = Model.GetType().GetProperty("ImageUrl");
+    var img = prop != null ? (prop.GetValue(Model) as string) : null;
+    var imgSrc = string.IsNullOrWhiteSpace(img) ? Url.Content("~/img/placeholder.png") : img;
+}
+<div class="col">
+    <div class="card h-100 shadow-sm">
+        <img src="@imgSrc" class="card-img-top" alt="@Model.Title" style="object-fit:cover;height:180px;">
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">@Model.Title</h5>
+            <p class="card-text text-muted small mb-2">
+                @Model.CategoryName · @string.Join(", ", Model.TagNames ?? Enumerable.Empty<string>())
+                @if (Model.IsCompleted) { <span class="badge bg-success ms-2">Completed</span> }
+            </p>
+            @if (!string.IsNullOrWhiteSpace(Model.ShortDescription)) { <p class="card-text">@Model.ShortDescription</p> }
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+                <a class="btn btn-sm btn-primary" asp-action="Details" asp-route-id="@Model.Id">Open</a>
+                <span class="text-muted small">@Model.LikesCount ❤️ · @Model.CommentsCount 💬</span>
+            </div>
+        </div>
+    </div>
+</div>

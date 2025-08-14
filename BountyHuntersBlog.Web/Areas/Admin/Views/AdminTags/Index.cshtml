@@ -1,62 +1,47 @@
-@model IReadOnlyList<BountyHuntersBlog.ViewModels.Admin.Tags.AdminTagListItemVM>
-@{
-    ViewData["Title"] = "Tags";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-}
-<div class="d-flex align-items-center justify-content-between mb-3">
-    <h2 class="m-0">Tags</h2>
-    <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminTags" asp-action="Create">Create</a>
-</div>
+@model IEnumerable<BountyHuntersBlog.ViewModels.Admin.Tags.AdminTagListItemVM>
 
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-info">No tags found.</div>
-}
-else
-{
-    <table class="table table-striped align-middle">
-        <thead>
-            <tr>
-                <th style="width:80px">Id</th>
-                <th>Name</th>
-                <th style="width:120px">Status</th>
-                <th style="width:160px" class="text-end">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var t in Model)
-            {
-                <tr>
-                    <td>@t.Id</td>
-                    <td>@t.Name</td>
-                    <td>
-                        @if (t.IsDeleted)
-                        {
-                            <span class="badge bg-danger">Deleted</span>
-                        }
-                        else
-                        {
+<h2 class="mb-3">Tags (Admin)</h2>
 
-                            <span class="badge bg-success">Active</span>
-                        }
-                    </td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary"
-                           asp-area="Admin" asp-controller="AdminTags" asp-action="Edit" asp-route-id="@t.Id">Edit</a>
-                        @if (!t.IsDeleted)
-                        {
-                            <form method="post" class="d-inline"
-                                  asp-area="Admin" asp-controller="AdminTags" asp-action="Delete" asp-route-id="@t.Id">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Soft delete this tag?');">
-                                    Delete
-                                </button>
-                            </form>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<p>
+    <a class="btn btn-primary" asp-action="Create">New Tag</a>
+</p>
+
+@if (TempData["Success"] is string s)
+{
+    <div class="alert alert-success">@s</div>
 }
+@if (TempData["Error"] is string e)
+{
+    <div class="alert alert-danger">@e</div>
+}
+
+<table class="table table-striped align-middle">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Deleted</th>
+        <th class="text-end"></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var t in Model)
+    {
+        <tr>
+            <td>@t.Id</td>
+            <td>@t.Name</td>
+            <td>@t.IsDeleted</td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@t.Id">Edit</a>
+                <form asp-action="Delete" asp-route-id="@t.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-danger"
+                            onclick="return confirm('Delete tag @t.Name ?');">
+                        Delete
+                    </button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

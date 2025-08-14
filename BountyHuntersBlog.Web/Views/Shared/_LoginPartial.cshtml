@@ -1,24 +1,35 @@
-﻿@inject SignInManager<ApplicationUser> SignInManager
+﻿@using Microsoft.AspNetCore.Identity
+@using BountyHuntersBlog.Data.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav ms-auto">
     @if (SignInManager.IsSignedIn(User))
     {
-        <li class="nav-item me-2">
-            <span class="navbar-text">Hello, @User.Identity?.Name!</span>
-        </li>
+        if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">Admin</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="AdminHome" asp-action="Index">Dashboard</a></li>
+                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="AdminMissions" asp-action="Index">Missions</a></li>
+                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="AdminCategories" asp-action="Index">Categories</a></li>
+                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="AdminTags" asp-action="Index">Tags</a></li>
+                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="AdminComments" asp-action="Index">Comments</a></li>
+                </ul>
+            </li>
+        }
+
         <li class="nav-item">
-            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="nav-link btn btn-link">Logout</button>
             </form>
         </li>
     }
     else
     {
-        <li class="nav-item me-2">
-            <a class="btn btn-outline-light btn-sm" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-        </li>
-        <li class="nav-item">
-            <a class="btn btn-light btn-sm" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
-        </li>
+        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Login</a></li>
+        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Register">Register</a></li>
     }
 </ul>

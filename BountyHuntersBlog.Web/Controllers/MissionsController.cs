@@ -1,26 +1,30 @@
-﻿using BountyHuntersBlog.Services.DTOs;
+﻿using AutoMapper;
+using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels.Comments;
 using BountyHuntersBlog.ViewModels.Missions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using AddCommentRequest = BountyHuntersBlog.ViewModels.Comments.AddCommentRequest;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
     public class MissionsController : Controller
     {
-        private readonly IMissionService _service;
+        private readonly IMissionService _missions;
+        private readonly IMapper _mapper;
 
-        public MissionsController(IMissionService service)
-            => _service = service;
+        public MissionsController(IMissionService missions, IMapper mapper)
+        {
+            _missions = missions;
+            _mapper = mapper;
+        }
 
         [HttpGet]
         public async Task<IActionResult> Index(string? q, int? categoryId, int? tagId, int page = 1, int pageSize = 10)
         {
-            var (items, total) = await _service.SearchPagedAsync(q, categoryId, tagId, page, pageSize);
+            var (items, total) = await _missions.SearchPagedAsync(q, categoryId, tagId, page, pageSize);
 
-            var vm = new MissionIndexViewModel
+            var vm = new MissionIndexViewModel()
             {
                 Q = q,
                 CategoryId = categoryId,
@@ -28,16 +32,9 @@ namespace BountyHuntersBlog.Web.Controllers
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = total,
-                Items = items.Select(m => new MissionListItemVm
-                {
-                    Id = m.Id,
-                    Title = m.Title,
-                    IsCompleted = m.IsCompleted,
-                    CategoryName = m.CategoryName,
-                    TagNames = m.TagNames
-                }).ToList(),
-                Categories = await _service.GetCategoriesSelectListAsync(),
-                Tags = await _service.GetTagsSelectListAsync()
+                Items = _mapper.Map<List<MissionListItemVm>>(items),
+                Categories = await _missions.GetCategoriesSelectListAsync(),
+                Tags = await _missions.GetTagsSelectListAsync()
             };
 
             return View(vm);
@@ -46,37 +43,14 @@ namespace BountyHuntersBlog.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            var dto = await _service.GetDetailsAsync(id);
+            var dto = await _missions.GetDetailsAsync(id);
             if (dto == null) return NotFound();
 
-            var vm = new MissionDetailsViewModel
-            {
-                Id = dto.Id,
-                Title = dto.Title,
-                Description = dto.Description,
-                ImageUrl = dto.ImageUrl,
-                CategoryName = dto.CategoryName,
-                TagNames = dto.TagNames,
-                LikesCount = dto.LikesCount,
-                Comments = dto.Comments.Select(c => new MissionCommentVm
-                {
-                    Id = c.Id,
-                    Content = c.Content,
-                    CreatedOn = c.CreatedOn,
-                    UserDisplayName = c.UserDisplayName,
-                    CanDelete = c.CanDelete
-                }).ToList()
-            };
-
+            var vm = _mapper.Map<MissionDetailsViewModel>(dto);
             return View(vm);
         }
 
-        [Authorize, HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleMissionLike(int id)
-        {
-            await _service.ToggleMissionLikeAsync(id, User);
-            return RedirectToAction(nameof(Details), new { id });
-        }
+        // Likes се обработват през LikesController (AJAX). Тук няма like actions.
 
         [Authorize, HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> AddComment(AddCommentRequest model)
@@ -84,75 +58,24 @@ namespace BountyHuntersBlog.Web.Controllers
             if (!ModelState.IsValid)
                 return RedirectToAction(nameof(Details), new { id = model.MissionId });
 
-            await _service.AddCommentAsync(model.MissionId, model.Content, User);
+            await _missions.AddCommentAsync(model.MissionId, model.Content, User);
             return RedirectToAction(nameof(Details), new { id = model.MissionId });
-        }
-
-        [Authorize, HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleCommentLike(int id, int missionId)
-        {
-            await _service.ToggleCommentLikeAsync(id, User);
-            return RedirectToAction(nameof(Details), new { id = missionId });
         }
 
         [Authorize, HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteComment(int id, int missionId)
         {
-            await _service.DeleteCommentAsync(id, User);
+            await _missions.DeleteCommentAsync(id, User);
             return RedirectToAction(nameof(Details), new { id = missionId });
         }
 
-        [Authorize, HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var dto = await _service.GetEditAsync(id);
-            if (dto == null) return NotFound();
-
-            var vm = new MissionEditViewModel
-            {
-                Id = dto.Id,
-                Title = dto.Title,
-                Description = dto.Description,
-                ImageUrl = dto.ImageUrl,
-                CategoryId = dto.CategoryId,
-                TagIds = dto.TagIds.ToList(),
-                IsCompleted = dto.IsCompleted,
-                Categories = await _service.GetCategoriesSelectListAsync(),
-                Tags = await _service.GetTagsSelectListAsync()
-            };
-            return View(vm);
-        }
-
-        [Authorize, HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(MissionEditViewModel vm)
-        {
-            if (!ModelState.IsValid)
-            {
-                vm.Categories = await _service.GetCategoriesSelectListAsync();
-                vm.Tags = await _service.GetTagsSelectListAsync();
-                return View(vm);
-            }
-
-            await _service.EditAsync(new()
-            {
-                Id = vm.Id,
-                Title = vm.Title,
-                Description = vm.Description,
-                ImageUrl = vm.ImageUrl,
-                CategoryId = vm.CategoryId,
-                TagIds = vm.TagIds ?? new List<int>(),
-                IsCompleted = vm.IsCompleted
-            });
-
-            return RedirectToAction(nameof(Details), new { id = vm.Id });
-        }
         [Authorize, HttpGet]
         public async Task<IActionResult> Create()
         {
             var vm = new MissionEditViewModel
             {
-                Categories = await _service.GetCategoriesSelectListAsync(),
-                Tags = await _service.GetTagsSelectListAsync()
+                Categories = await _missions.GetCategoriesSelectListAsync(),
+                Tags = await _missions.GetTagsSelectListAsync()
             };
             return View(vm);
         }
@@ -162,24 +85,43 @@ namespace BountyHuntersBlog.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                vm.Categories = await _service.GetCategoriesSelectListAsync();
-                vm.Tags = await _service.GetTagsSelectListAsync();
+                vm.Categories = await _missions.GetCategoriesSelectListAsync();
+                vm.Tags = await _missions.GetTagsSelectListAsync();
                 return View(vm);
             }
 
-            // ако имаш метод CreateAsync в сервиса
-            await _service.CreateAsync(new MissionEditDto
-            {
-                Title = vm.Title,
-                Description = vm.Description,
-                ImageUrl = vm.ImageUrl,
-                CategoryId = vm.CategoryId,
-                TagIds = vm.TagIds ?? new List<int>(),
-                IsCompleted = vm.IsCompleted
-            });
+            var dto = _mapper.Map<MissionEditDto>(vm);
+            await _missions.CreateAsync(dto);
 
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize, HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var dto = await _missions.GetEditAsync(id);
+            if (dto == null) return NotFound();
+
+            var vm = _mapper.Map<MissionEditViewModel>(dto);
+            vm.Categories = await _missions.GetCategoriesSelectListAsync();
+            vm.Tags = await _missions.GetTagsSelectListAsync();
+            return View(vm);
+        }
+
+        [Authorize, HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(MissionEditViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                vm.Categories = await _missions.GetCategoriesSelectListAsync();
+                vm.Tags = await _missions.GetTagsSelectListAsync();
+                return View(vm);
+            }
+
+            var dto = _mapper.Map<MissionEditDto>(vm);
+            await _missions.EditAsync(dto);
+
+            return RedirectToAction(nameof(Details), new { id = vm.Id });
+        }
     }
 }

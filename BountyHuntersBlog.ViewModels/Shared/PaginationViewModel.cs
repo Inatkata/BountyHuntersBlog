@@ -1,4 +1,6 @@
-﻿namespace BountyHuntersBlog.ViewModels.Shared
+﻿using Microsoft.AspNetCore.Routing;
+
+namespace BountyHuntersBlog.ViewModels.Shared
 {
     public class PaginationViewModel
     {
@@ -7,6 +9,13 @@
         public int TotalCount { get; set; }
         public string? BaseUrl { get; set; }
         public string? Query { get; set; }
+
+        public RouteValueDictionary GetRouteValues()
+        {
+            var dict = new RouteValueDictionary(RouteValues ?? new { });
+            dict["pageSize"] = PageSize;
+            return dict;
+        }
 
         public int TotalPages => PageSize <= 0 ? 0 : (int)System.Math.Ceiling((double)TotalCount / PageSize);
 

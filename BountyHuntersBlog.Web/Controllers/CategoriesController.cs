@@ -3,6 +3,8 @@ using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels.Category;
 using Microsoft.AspNetCore.Mvc;
 
+namespace BountyHuntersBlog.Web
+{
 public class CategoriesController : Controller
 {
     private readonly ICategoryService _categories;
@@ -35,8 +37,9 @@ public class CategoriesController : Controller
 
         // вземаме и мисиите в тази категория (ако искаме да ги покажем)
         var (items, _) = await _missions.SearchPagedAsync(null, id, null, 1, 100);
-        vm.Missions = (List<BountyHuntersBlog.Services.DTOs.MissionDto>)items;
+        vm.Missions = items.ToList();
 
         return View(vm);
     }
+}
 }

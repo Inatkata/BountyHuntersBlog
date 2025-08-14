@@ -1,30 +1,12 @@
-@model IEnumerable<BountyHuntersBlog.ViewModels.Category.CategoryViewModel>
+@model List<BountyHuntersBlog.ViewModels.Category.CategoryViewModel>
 
-@{
-    ViewData["Title"] = "Categories";
-}
-
-<h2 class="mb-3">Categories</h2>
-
-@if (!Model.Any())
-{
-    <div class="alert alert-info">No categories found.</div>
-}
-else
-{
-    <ul class="list-group">
-        @foreach (var cat in Model)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>@cat.Name</span>
-                <span>
-                    <span class="badge bg-secondary me-2">@cat.MissionsCount missions</span>
-                    <a class="btn btn-sm btn-primary"
-                       asp-controller="Categories" asp-action="Details" asp-route-id="@cat.Id">
-                        View
-                    </a>
-                </span>
-            </li>
-        }
-    </ul>
-}
+<h2>Categories</h2>
+<ul class="list-group">
+    @foreach (var cat in Model)
+    {
+        <li class="list-group-item d-flex justify-content-between">
+            <span>@cat.Name</span>
+            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@cat.Id">Open</a>
+        </li>
+    }
+</ul>

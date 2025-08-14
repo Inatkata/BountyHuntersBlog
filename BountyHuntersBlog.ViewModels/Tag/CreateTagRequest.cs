@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using BountyHuntersBlog.Data.Constants;
 
-namespace BountyHuntersBlog.ViewModels.Tags
+namespace BountyHuntersBlog.ViewModels.Tag
 {
     public class CreateTagRequest
     {

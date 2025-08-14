@@ -1,0 +1,12 @@
+﻿@model BountyHuntersBlog.ViewModels.Admin.Tags.AdminTagFormVM
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+
+<div class="form-check mb-3">
+    <input class="form-check-input" asp-for="IsDeleted" />
+    <label class="form-check-label" asp-for="IsDeleted"></label>
+</div>

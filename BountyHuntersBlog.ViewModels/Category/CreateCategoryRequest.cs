@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using BountyHuntersBlog.Data.Constants;
 
-namespace BountyHuntersBlog.ViewModels.Categories
+namespace BountyHuntersBlog.ViewModels.Category
 {
     public class CreateCategoryRequest
     {

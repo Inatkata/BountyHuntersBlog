@@ -69,11 +69,5 @@ namespace BountyHuntersBlog.Web.Controllers
             return RedirectToAction("Details", "Missions", new { id = missionId });
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleLike(int id, int missionId)
-        {
-            await _likes.ToggleCommentLikeAsync(id, User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            return RedirectToAction("Details", "Missions", new { id = missionId });
-        }
     }
 }

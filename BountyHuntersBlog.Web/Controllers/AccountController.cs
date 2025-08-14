@@ -8,94 +8,82 @@ namespace BountyHuntersBlog.Web.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<AccountController> _logger;
+        private readonly UserManager<ApplicationUser> _users;
+        private readonly SignInManager<ApplicationUser> _signIn;
 
-        public AccountController(
-            SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager,
-            ILogger<AccountController> logger)
+        public AccountController(UserManager<ApplicationUser> users, SignInManager<ApplicationUser> signIn)
         {
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _logger = logger;
+            _users = users;
+            _signIn = signIn;
         }
 
-        [AllowAnonymous]
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
-     => View(new LoginViewModel { ReturnUrl = returnUrl });
-
-        [AllowAnonymous]
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            ViewData["ReturnUrl"] = returnUrl;
+            return View(new LoginViewModel());
+        }
 
-            // приемаме и email, и username
-            ApplicationUser? user = await _userManager.FindByEmailAsync(model.Username)
-                                     ?? await _userManager.FindByNameAsync(model.Username);
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel vm, string? returnUrl = null)
+        {
+            if (!ModelState.IsValid) return View(vm);
 
+            var user = await _users.FindByEmailAsync(vm.Email) ?? await _users.FindByNameAsync(vm.Email);
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Invalid username or password.");
-                return View(model);
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return View(vm);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(
-                user.UserName!, model.Password, model.RememberMe, lockoutOnFailure: false);
-
+            var result = await _signIn.PasswordSignInAsync(user, vm.Password, vm.RememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
-                    return Redirect(model.ReturnUrl);
+                if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid username or password.");
-            return View(model);
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return View(vm);
         }
 
-        [AllowAnonymous]
         [HttpGet]
         public IActionResult Register() => View(new RegisterViewModel());
 
-        [AllowAnonymous]
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel vm)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return View(vm);
 
             var user = new ApplicationUser
             {
-                UserName = model.UserName,
-                Email = model.Email,
-                DisplayName = model.DisplayName
+                UserName = vm.Email,
+                Email = vm.Email,
+                DisplayName = vm.DisplayName
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _users.CreateAsync(user, vm.Password);
             if (result.Succeeded)
             {
-                if (!await _userManager.IsInRoleAsync(user, "User"))
-                    await _userManager.AddToRoleAsync(user, "User");
-
-                await _signInManager.SignInAsync(user, isPersistent: false);
+                await _users.AddToRoleAsync(user, "User");
+                await _signIn.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("Index", "Home");
             }
 
-            foreach (var e in result.Errors)
-                ModelState.AddModelError(string.Empty, e.Description);
-
-            return View(model);
+            foreach (var e in result.Errors) ModelState.AddModelError(string.Empty, e.Description);
+            return View(vm);
         }
 
-
+        [Authorize]
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await _signIn.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
+
+        [HttpGet]
+        public IActionResult AccessDenied() => View();
     }
 }

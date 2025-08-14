@@ -1,29 +1,14 @@
-﻿@using BountyHuntersBlog.ViewModels.Comments
-@model CommentViewModel
-@{
-    ViewData["Title"] = "Edit Comment";
-}
+﻿@model BountyHuntersBlog.ViewModels.Comments.CommentViewModel
 <h2>Edit Comment</h2>
-
-<div class="card shadow-sm border-0 mt-4">
-    <div class="card-body">
-        <form asp-action="Edit" method="post">
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="MissionId" />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="mb-3">
-                <label asp-for="Content" class="form-label"></label>
-                <textarea asp-for="Content" class="form-control" rows="4"></textarea>
-                <span asp-validation-for="Content" class="text-danger"></span>
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-        </form>
-        <a asp-action="Details" asp-controller="Missions" asp-route-id="@Model.MissionId" class="btn btn-secondary mt-3">Back to Mission</a>
+<form method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="MissionId" />
+    <div class="mb-3">
+        <textarea asp-for="Content" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
     </div>
-</div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-secondary" asp-controller="Missions" asp-action="Details" asp-route-id="@Model.MissionId">Back</a>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

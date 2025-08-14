@@ -1,23 +1,11 @@
-@using BountyHuntersBlog.ViewModels.Tag
-@model IEnumerable<TagViewModel>
-@{
-    ViewData["Title"] = "Tags";
-}
-<h2 class="mb-3">Tags</h2>
-
-@if (!Model.Any())
-{
-    <div class="alert alert-info">No tags found.</div>
-}
-else
-{
-    <ul class="list-group">
-        @foreach (var tag in Model)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>@tag.Name</span>
-                <a asp-action="Details" asp-route-id="@tag.Id" class="btn btn-sm btn-info">View Missions</a>
-            </li>
-        }
-    </ul>
-}
+@model List<BountyHuntersBlog.ViewModels.Tag.TagViewModel>
+<h2>Tags</h2>
+<ul class="list-group">
+    @foreach (var t in Model)
+    {
+        <li class="list-group-item d-flex justify-content-between">
+            <span>@t.Name</span>
+            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@t.Id">Open</a>
+        </li>
+    }
+</ul>

@@ -1,10 +1,10 @@
-﻿// BountyHuntersBlog.ViewModels/Admin/Missions/AdminMissionFormVM.cs
+﻿// BountyHuntersBlog.ViewModels/Missions/MissionEditViewModel.cs
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
-namespace BountyHuntersBlog.ViewModels.Admin.Missions
+namespace BountyHuntersBlog.ViewModels.Missions
 {
-    public class AdminMissionFormVM
+    public class MissionEditViewModel
     {
         public int Id { get; set; }
 
@@ -21,6 +21,7 @@ namespace BountyHuntersBlog.ViewModels.Admin.Missions
         public int CategoryId { get; set; }
 
         public List<int>? TagIds { get; set; }
+
         public bool IsCompleted { get; set; }
         public bool IsDeleted { get; set; }
 

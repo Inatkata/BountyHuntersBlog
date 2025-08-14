@@ -1,0 +1,29 @@
+﻿@model BountyHuntersBlog.ViewModels.Missions.MissionCommentVm
+@{
+    var missionId = (int)ViewContext.ViewData["MissionId"];
+}
+<li class="list-group-item">
+    <div class="d-flex justify-content-between">
+        <div>
+            <strong>@Model.UserDisplayName</strong>
+            <span class="text-muted small">· @Model.CreatedOn.ToLocalTime()</span>
+            <div>@Model.Content</div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <form asp-controller="Likes" asp-action="ToggleComment" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="commentId" value="@Model.Id" />
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Like</button>
+            </form>
+            @if (Model.CanDelete)
+            {
+                <form asp-controller="Missions" asp-action="DeleteComment" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <input type="hidden" name="missionId" value="@missionId" />
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            }
+        </div>
+    </div>
+</li>

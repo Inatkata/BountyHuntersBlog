@@ -1,65 +1,29 @@
-﻿@* Areas/Admin/Views/AdminCategories/Index.cshtml *@
-@model IReadOnlyList<BountyHuntersBlog.ViewModels.Admin.Categories.AdminCategoryListItemVM>
-@{
-    ViewData["Title"] = "Categories";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-}
-<div class="d-flex align-items-center justify-content-between mb-3">
-    <h2 class="m-0">Categories</h2>
-    <a class="btn btn-primary" asp-area="Admin" asp-controller="AdminCategories" asp-action="Create">Create</a>
-</div>
+﻿@model List<AdminCategoryListItemVM>
 
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-info">No categories found.</div>
-}
-else
-{
-    <table class="table table-striped align-middle">
-        <thead>
-            <tr>
-                <th style="width:80px">Id</th>
-                <th>Name</th>
-                <th style="width:120px">Status</th>
-                <th style="width:200px" class="text-end">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var c in Model)
-            {
-                <tr>
-                    <td>@c.Id</td>
-                    <td>@c.Name</td>
-                    <td>
-                        @if (c.IsDeleted)
-                        {
-                            <span class="badge bg-danger">Deleted</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-success">Active</span>
-                        }
-                    </td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary"
-                           asp-area="Admin" asp-controller="AdminCategories" asp-action="Edit" asp-route-id="@c.Id">
-                            Edit
-                        </a>
-                        @if (!c.IsDeleted)
-                        {
-                            <form method="post" class="d-inline"
-                                  asp-area="Admin" asp-controller="AdminCategories" asp-action="Delete"
-                                  asp-route-id="@c.Id">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Soft delete this category?');">
-                                    Delete
-                                </button>
-                            </form>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<h2>Categories</h2>
+<a asp-action="Create" class="btn btn-primary mb-2">Add Category</a>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Is Deleted</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var cat in Model)
+    {
+        <tr>
+            <td>@cat.Name</td>
+            <td>@cat.IsDeleted</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@cat.Id" class="btn btn-warning btn-sm">Edit</a>
+                <form asp-action="Delete" asp-route-id="@cat.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

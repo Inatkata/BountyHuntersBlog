@@ -1,26 +1,25 @@
 ﻿@model BountyHuntersBlog.ViewModels.Shared.PaginationViewModel
-@if (Model.TotalPages > 1)
-{
-    <nav aria-label="Pagination">
-        <ul class="pagination justify-content-center mt-4">
-            <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
-                <a class="page-link" href="@(Model.BuildUrl(Model.Page - 1))" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-
-            @for (var p = 1; p <= Model.TotalPages; p++)
-            {
-                <li class="page-item @(p == Model.Page ? "active" : "")">
-                    <a class="page-link" href="@(Model.BuildUrl(p))">@p</a>
-                </li>
-            }
-
-            <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
-                <a class="page-link" href="@(Model.BuildUrl(Model.Page + 1))" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+@{
+    int totalPages = (int)Math.Ceiling((double)Model.TotalCount / Math.Max(1, Model.PageSize));
+    if (totalPages < 2) { return; }
+    var route = Html.ViewContext.HttpContext.Request.Query
+        .ToDictionary(kvp => kvp.Key, kvp => (string?)kvp.Value)
+        .ToDictionary(k => k.Key, v => (object?)v.Value);
+    if (Model.RouteValues != null)
+        foreach (var p in Model.RouteValues.GetType().GetProperties())
+            route[p.Name] = p.GetValue(Model);
 }
+<nav aria-label="pagination">
+    <ul class="pagination mt-3">
+        @for (int p = 1; p <= totalPages; p++)
+        {
+            route["page"] = p.ToString();
+            <li class="page-item @(p == Model.Page ? "active" : "")">
+                <a class="page-link"
+                   asp-controller="@Model.Controller"
+                   asp-action="@Model.Action"
+                   asp-all-route-data="route">@p</a>
+            </li>
+        }
+    </ul>
+</nav>
