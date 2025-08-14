@@ -1,11 +1,20 @@
-﻿@* Areas/Admin/Views/AdminMissions/Create.cshtml *@
-@model BountyHuntersBlog.ViewModels.Admin.Missions.AdminMissionFormVM
+﻿@model BountyHuntersBlog.ViewModels.Admin.Missions.AdminMissionFormVM
+@{
+    ViewData["Title"] = "Create Mission";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
 
-<h2>Create Mission (Admin)</h2>
-<form method="post">
+<h2 class="mb-3">Create Mission</h2>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form asp-area="Admin" asp-controller="AdminMissions" asp-action="Create" method="post" class="card p-3">
     @Html.AntiForgeryToken()
-    <partial name="_Form" model="Model" />
-    <button class="btn btn-primary" type="submit">Save</button>
-    <a class="btn btn-secondary" asp-action="Index">Back</a>
+    @await Html.PartialAsync("_Form", Model)
+    <div class="d-flex gap-2 mt-2">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-area="Admin" asp-controller="AdminMissions" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </div>
 </form>
-@section Scripts { <partial name="~/Areas/Admin/Views/Shared/_ValidationScriptPartial.cshtml" /> }
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

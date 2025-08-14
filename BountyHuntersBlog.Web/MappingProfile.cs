@@ -52,6 +52,8 @@ public class MappingProfile : Profile
                 ? (string.IsNullOrWhiteSpace(s.User.DisplayName) ? s.User.UserName : s.User.DisplayName)
                 : "User"))
             .ForMember(d => d.LikesCount, o => o.MapFrom(s => s.Likes.Count));
+        CreateMap<CommentDto, AdminCommentListItemVM>()
+            .ForMember(d => d.UserName, o => o.MapFrom(s => s.UserDisplayName));
 
         // ===== Missions: Entity <-> DTO =====
         CreateMap<Mission, MissionDto>()
@@ -75,15 +77,37 @@ public class MappingProfile : Profile
         CreateMap<MissionDto, MissionEditViewModel>()
             .ForMember(d => d.TagIds, o => o.MapFrom(s => s.TagIds ?? Enumerable.Empty<int>()));
         CreateMap<MissionEditViewModel, MissionDto>();
+        // Comments inside mission details
+        CreateMap<MissionCommentDetailsDto, MissionCommentVm>()
+            .ForMember(d => d.UserDisplayName, o => o.MapFrom(s => s.UserDisplayName));
+
+        // Mission details + its comments
+        CreateMap<MissionDetailsDto, MissionDetailsViewModel>()
+            .ForMember(d => d.TagNames, o => o.MapFrom(s => s.TagNames ?? Enumerable.Empty<string>()))
+            .ForMember(d => d.Comments, o => o.MapFrom(s => s.Comments ?? new List<MissionCommentDetailsDto>()));
+
+        // Public details (ако услугата ти връща MissionDto за Details)
+        CreateMap<MissionDto, MissionDetailsViewModel>()
+            .ForMember(d => d.TagNames, o => o.MapFrom(s => s.TagNames ?? Enumerable.Empty<string>()));
+
+        // Create: VM -> MissionEditDto (ако CreateAsync очаква MissionEditDto)
+        CreateMap<MissionEditViewModel, MissionEditDto>()
+            .ForMember(d => d.TagIds, o => o.MapFrom(s => s.TagIds ?? Enumerable.Empty<int>()));
+
+        // Edit: VM <-> MissionDto
+        CreateMap<MissionEditViewModel, MissionDto>()
+            .ForMember(d => d.TagIds, o => o.MapFrom(s => s.TagIds ?? Enumerable.Empty<int>()));
+        CreateMap<MissionDto, MissionEditViewModel>()
+            .ForMember(d => d.TagIds, o => o.MapFrom(s => s.TagIds ?? Enumerable.Empty<int>()));
 
         // ===== Details =====
+        // --- Comments inside mission details ---
+        CreateMap<MissionCommentDetailsDto, MissionCommentVm>()
+            .ForMember(d => d.UserDisplayName, o => o.MapFrom(s => s.UserDisplayName));
+
         CreateMap<MissionDetailsDto, MissionDetailsViewModel>()
-            .ForMember(d => d.TagNames, m => m.MapFrom(s => s.TagNames ?? Enumerable.Empty<string>()));
-        // Ако вместо това ползваш MissionWithStatsDto в проекта ти, можеш да запазиш и този мап:
-        // CreateMap<MissionWithStatsDto, MissionDetailsViewModel>()
-        //     .ForMember(d => d.TagNames,    m => m.MapFrom(s => s.TagNames ?? Enumerable.Empty<string>()))
-        //     .ForMember(d => d.CategoryName,m => m.MapFrom(s => s.CategoryName))
-        //     .ForMember(d => d.LikesCount,  m => m.MapFrom(s => s.LikesCount))
-        //     .ForMember(d => d.ImageUrl,    m => m.MapFrom(s => s.ImageUrl));
+            .ForMember(d => d.TagNames, o => o.MapFrom(s => s.TagNames ?? Enumerable.Empty<string>()))
+            .ForMember(d => d.Comments, o => o.MapFrom(s => s.Comments ?? new List<MissionCommentDetailsDto>()));
+
     }
 }

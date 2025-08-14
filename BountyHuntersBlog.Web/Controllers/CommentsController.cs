@@ -1,73 +1,38 @@
-﻿using BountyHuntersBlog.Services.Interfaces;
-using BountyHuntersBlog.ViewModels.Comments;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using BountyHuntersBlog.Services.Interfaces;
+using BountyHuntersBlog.Services.DTOs;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
-    [Authorize]
-    public class CommentsController : Controller
+    public class CommentsController : BaseController
     {
         private readonly ICommentService _comments;
-        private readonly ILikeService _likes;
 
-        public CommentsController(ICommentService comments, ILikeService likes)
+        public CommentsController(ICommentService comments) => _comments = comments;
+
+        [Authorize]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(int missionId, string content)
         {
-            _comments = comments;
-            _likes = likes;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var comment = await _comments.GetByIdAsync(id);
-            if (comment == null) return NotFound();
-
-            // Автор или админ
-            if (!User.IsInRole("Admin") && comment.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
-                return Forbid();
-
-            var vm = new CommentViewModel
+            if (string.IsNullOrWhiteSpace(content))
             {
-                Id = comment.Id,
-                Content = comment.Content,
-                MissionId = comment.MissionId,
-                CreatedOn = comment.CreatedOn,
-                UserName = comment.UserDisplayName
-            };
+                TempData["Error"] = "Comment cannot be empty.";
+                return RedirectToAction("Details", "Missions", new { id = missionId });
+            }
 
-            return View(vm);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(CommentViewModel vm)
-        {
-            if (!ModelState.IsValid)
-                return View(vm);
-
-            var comment = await _comments.GetByIdAsync(vm.Id);
-            if (comment == null) return NotFound();
-
-            if (!User.IsInRole("Admin") && comment.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
-                return Forbid();
-
-            await _comments.EditAsync(vm.Id, vm.Content);
-            return RedirectToAction("Details", "Missions", new { id = vm.MissionId });
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, int missionId)
-        {
-            var comment = await _comments.GetByIdAsync(id);
-            if (comment == null) return NotFound();
-
-            if (!User.IsInRole("Admin") && comment.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
-                return Forbid();
-
-            await _comments.DeleteAsync(id);
+            await _comments.CreateAsync(new CommentDto { MissionId = missionId, Content = content });
+            TempData["Success"] = "Comment added.";
             return RedirectToAction("Details", "Missions", new { id = missionId });
         }
 
+        [Authorize]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id, int missionId)
+        {
+            await _comments.SoftDeleteAsync(id);
+            TempData["Success"] = "Comment deleted.";
+            return RedirectToAction("Details", "Missions", new { id = missionId });
+        }
     }
 }

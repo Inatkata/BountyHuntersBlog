@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using BountyHuntersBlog.Data.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BountyHuntersBlog.Services.Interfaces;
@@ -9,9 +7,7 @@ using BountyHuntersBlog.ViewModels.Admin.Missions;
 
 namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class AdminMissionsController : Controller
+    public class AdminMissionsController : BaseAdminController
     {
         private readonly IMissionService _missions;
         private readonly ICategoryService _categories;
@@ -30,7 +26,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var (items, _) = await _missions.SearchPagedAsync(null, null, null, page: 1, pageSize: 50);
+            var (items, _) = await _missions.SearchPagedAsync(null, null, null, 1, 50);
             return View(items);
         }
 
@@ -39,7 +35,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
         {
             var dto = await _missions.GetByIdAsync(id);
             if (dto == null) return NotFound();
-            return View(dto); // uses MissionDto with CategoryName/TagNames
+            return View(dto);
         }
 
         [HttpGet]
@@ -59,7 +55,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
                 return View(vm);
             }
 
-            var dto = new MissionEditDto()
+            var dto = new MissionEditDto
             {
                 Title = vm.Title,
                 Description = vm.Description,
@@ -106,7 +102,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
                 return View(vm);
             }
 
-            var update = new MissionDto()
+            var update = new MissionDto
             {
                 Id = vm.Id,
                 Title = vm.Title,
@@ -118,12 +114,15 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
                 IsDeleted = vm.IsDeleted
             };
 
-            await _missions.UpdateAsync(update);   
+            await _missions.UpdateAsync(update);
             TempData["Success"] = "Mission updated.";
             return RedirectToAction(nameof(Index));
+
+            TempData["Success"] = "Mission updated.";
+            return RedirectToAction(nameof(Index));
+
         }
 
-        // POST delete (soft)
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
@@ -143,7 +142,12 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
                 .ToList();
 
             vm.Tags = tags
-                .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name, Selected = selected.Contains(t.Id) })
+                .Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = t.Name,
+                    Selected = selected.Contains(t.Id)
+                })
                 .ToList();
         }
     }

@@ -1,22 +1,18 @@
-﻿
-using AutoMapper;
-using BountyHuntersBlog.Data;                
-using BountyHuntersBlog.Data.Models;          
-using BountyHuntersBlog.ViewModels.Admin.Users;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using BountyHuntersBlog.Data;
+using BountyHuntersBlog.Data.Models;
+using BountyHuntersBlog.ViewModels.Admin.Users;
 
 namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class AdminUsersController : Controller
+    public class AdminUsersController : BaseAdminController
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly BountyHuntersDbContext _db;   
+        private readonly BountyHuntersDbContext _db;
         private readonly IMapper _mapper;
 
         public AdminUsersController(
@@ -64,7 +60,6 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
             return View(items);
         }
 
-
         [HttpGet]
         public async Task<IActionResult> Details(string id)
         {
@@ -89,10 +84,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
             return View(vm);
         }
 
-
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Lock(string id, int days = 7)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -103,9 +95,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: /Admin/AdminUsers/Unlock/USER_ID
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Unlock(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -117,9 +107,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: /Admin/AdminUsers/AddToRole
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToRole(string id, string role)
         {
             if (string.IsNullOrWhiteSpace(role)) return RedirectToAction(nameof(Index));
@@ -138,9 +126,7 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: /Admin/AdminUsers/RemoveFromRole
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveFromRole(string id, string role)
         {
             if (string.IsNullOrWhiteSpace(role)) return RedirectToAction(nameof(Index));

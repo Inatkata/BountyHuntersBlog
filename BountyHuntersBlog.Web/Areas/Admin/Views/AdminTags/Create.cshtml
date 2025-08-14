@@ -1,14 +1,20 @@
 ﻿@model BountyHuntersBlog.ViewModels.Admin.Tags.AdminTagFormVM
+@{
+    ViewData["Title"] = "Create Tag";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
 
-<h2>Create Tag</h2>
+<h2 class="mb-3">Create Tag</h2>
 
-<form method="post">
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<form asp-area="Admin" asp-controller="AdminTags" asp-action="Create" method="post" class="card p-3">
     @Html.AntiForgeryToken()
-    <partial name="_Form" model="Model" />
-    <button class="btn btn-primary" type="submit">Save</button>
-    <a class="btn btn-secondary" asp-action="Index">Back</a>
+    @await Html.PartialAsync("_Form", Model)
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-area="Admin" asp-controller="AdminTags" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </div>
 </form>
 
-@section Scripts {
-    <partial name="~/Areas/Admin/Views/Shared/_ValidationScriptPartial.cshtml" />
-}
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

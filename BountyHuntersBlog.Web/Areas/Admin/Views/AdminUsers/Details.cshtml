@@ -4,36 +4,128 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h2>User Details - @Model.UserName</h2>
-<hr/>
+<a asp-area="Admin" asp-controller="AdminUsers" asp-action="Index" class="btn btn-link p-0 mb-2">← Back to list</a>
+
+<h2>User Details</h2>
 
 <dl class="row">
-    <dt class="col-sm-2">Display Name</dt>
-    <dd class="col-sm-10">@Model.DisplayName</dd>
+    <dt class="col-sm-2">Username</dt>
+    <dd class="col-sm-10">@Model.UserName</dd>
 
     <dt class="col-sm-2">Email</dt>
     <dd class="col-sm-10">@Model.Email</dd>
 
+    <dt class="col-sm-2">Display Name</dt>
+    <dd class="col-sm-10">@Model.DisplayName</dd>
+
     <dt class="col-sm-2">Roles</dt>
     <dd class="col-sm-10">
-        @foreach (var role in Model.Roles) { <span class="badge bg-secondary me-1">@role</span> }
+        @(Model.Roles.Any() ? string.Join(", ", Model.Roles) : "—")
     </dd>
 
-    <dt class="col-sm-2">Locked Out</dt>
-    <dd class="col-sm-10">@(Model.IsLockedOut ? "Yes" : "No")</dd>
+    <dt class="col-sm-2">Likes Count</dt>
+    <dd class="col-sm-10">@Model.LikesCount</dd>
+
+    <dt class="col-sm-2">Status</dt>
+    <dd class="col-sm-10">
+        @if (Model.IsLockedOut)
+        {
+            <span class="badge bg-danger">Locked Out</span>
+        }
+        else
+        {
+            <span class="badge bg-success">Active</span>
+        }
+    </dd>
 </dl>
 
-<h4>Missions (@Model.Missions.Count())</h4>
-<ul>
-    @foreach (var m in Model.Missions) { <li>@m.Title</li> }
-</ul>
+<hr />
 
-<h4>Comments (@Model.Comments.Count())</h4>
-<ul>
-    @foreach (var c in Model.Comments) { <li>@c.Content</li> }
-</ul>
+<h4 class="mb-2">Actions</h4>
+<div class="d-flex flex-wrap gap-3 align-items-center mb-4">
+    @if (Model.IsLockedOut)
+    {
+        <form asp-area="Admin" asp-controller="AdminUsers" asp-action="Unlock" asp-route-id="@Model.Id" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-success">Unlock</button>
+        </form>
+    }
+    else
+    {
+        <form asp-area="Admin" asp-controller="AdminUsers" asp-action="Lock" asp-route-id="@Model.Id" method="post" class="d-flex align-items-center gap-2">
+            @Html.AntiForgeryToken()
+            <input type="number" name="days" value="7" min="1" class="form-control" style="width:90px;" />
+            <button class="btn btn-warning">Lock</button>
+        </form>
+    }
+</div>
 
-<h4>Likes Count</h4>
-<p>@Model.LikesCount</p>
+<h4 class="mb-2">Role Management</h4>
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6 class="mb-3">Add to role</h6>
+            <form asp-area="Admin" asp-controller="AdminUsers" asp-action="AddToRole" method="post" class="d-flex gap-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="text" name="role" class="form-control" placeholder="Role name (e.g. Admin)" />
+                <button class="btn btn-primary" type="submit">Add</button>
+            </form>
+            <small class="text-muted d-block mt-2">If the role does not exist, it will be created.</small>
+        </div>
+    </div>
 
-<a asp-area="Admin" asp-controller="AdminUsers" asp-action="Index" class="btn btn-secondary">Back to List</a>
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6 class="mb-3">Remove from role</h6>
+            <form asp-area="Admin" asp-controller="AdminUsers" asp-action="RemoveFromRole" method="post" class="d-flex gap-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <select name="role" class="form-select" @(Model.Roles.Any() ? "" : "disabled")>
+                    @if (!Model.Roles.Any())
+                    {
+                        <option value="">(no roles)</option>
+                    }
+                    else
+                    {
+                        @foreach (var r in Model.Roles)
+                        {
+                            <option value="@r">@r</option>
+                        }
+                    }
+                </select>
+                <button class="btn btn-outline-danger" type="submit" @(Model.Roles.Any() ? "" : "disabled")>Remove</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<h4 class="mt-4">Missions</h4>
+@if (!Model.Missions.Any())
+{
+    <p class="text-muted">No missions created by this user.</p>
+}
+else
+{
+    <ul>
+        @foreach (var m in Model.Missions)
+        {
+            <li>@m.Title</li>
+        }
+    </ul>
+}
+
+<h4>Comments</h4>
+@if (!Model.Comments.Any())
+{
+    <p class="text-muted">No comments made by this user.</p>
+}
+else
+{
+    <ul>
+        @foreach (var c in Model.Comments)
+        {
+            <li>@c.Content</li>
+        }
+    </ul>
+}

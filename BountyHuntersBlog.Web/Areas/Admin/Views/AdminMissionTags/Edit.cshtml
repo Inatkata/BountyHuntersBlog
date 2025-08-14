@@ -1,28 +1,30 @@
 ﻿@model BountyHuntersBlog.ViewModels.Missions.MissionEditViewModel
 @{
-    ViewData["Title"] = "Edit Tags for Mission";
+    ViewData["Title"] = "Edit Mission Tags";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Edit Tags for Mission: @Model.Title</h2>
-<hr />
+<a class="btn btn-link p-0 mb-2"
+   asp-area="Admin" asp-controller="AdminMissions" asp-action="Edit" asp-route-id="@Model.Id">← Back to mission</a>
 
-<form asp-action="Edit" method="post">
+<h2 class="mb-3">Edit Tags — @Model.Title</h2>
+
+@if (TempData["Success"] is string s) { <div class="alert alert-success">@s</div> }
+@if (TempData["Error"] is string e) { <div class="alert alert-danger">@e</div> }
+
+<form asp-area="Admin" asp-controller="AdminMissionTags" asp-action="Edit" method="post" class="card p-3">
     @Html.AntiForgeryToken()
     <input type="hidden" name="missionId" value="@Model.Id" />
 
     <div class="mb-3">
         <label class="form-label">Tags</label>
-        <select name="tagIds" class="form-select" multiple size="8">
-            @foreach (var tag in Model.Tags)
-            {
-                <option value="@tag.Value" selected="@tag.Selected">@tag.Text</option>
-            }
-        </select>
+        <select name="tagIds" class="form-select" asp-items="Model.Tags" multiple size="12"></select>
+        <small class="text-muted d-block">Hold Ctrl/Cmd to select multiple</small>
     </div>
 
     <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Save Tags</button>
-        <a asp-area="Admin" asp-controller="AdminMissions" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-area="Admin" asp-controller="AdminMissions" asp-action="Edit" asp-route-id="@Model.Id"
+           class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>

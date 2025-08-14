@@ -1,28 +1,20 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using BountyHuntersBlog.Services.DTOs;
 using BountyHuntersBlog.Services.Interfaces;
 using BountyHuntersBlog.ViewModels.Admin.Tags;
-using BountyHuntersBlog.ViewModels.Missions;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-
 
 namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class AdminTagsController : Controller
+    public class AdminTagsController : BaseAdminController
     {
         private readonly ITagService _tags;
         private readonly IMapper _mapper;
-        private readonly IMissionService _missions;
 
-        public AdminTagsController(ITagService tags, IMapper mapper, IMissionService missions)
+        public AdminTagsController(ITagService tags, IMapper mapper)
         {
             _tags = tags;
             _mapper = mapper;
-            _missions = missions;
         }
 
         [HttpGet]
@@ -37,67 +29,43 @@ namespace BountyHuntersBlog.Web.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create() => View(new AdminTagFormVM());
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(AdminTagFormVM vm)
         {
             if (!ModelState.IsValid) return View(vm);
 
-            await _tags.CreateAsync(new TagDto
-            {
-                Name = vm.Name,
-                IsDeleted = vm.IsDeleted
-            });
-
+            await _tags.CreateAsync(new TagDto { Name = vm.Name, IsDeleted = vm.IsDeleted });
+            TempData["Success"] = "Tag created.";
             return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int missionId)
+        public async Task<IActionResult> Edit(int id)
         {
-            var mission = await _missions.GetByIdAsync(missionId);
-            if (mission == null) return NotFound();
+            var dto = await _tags.GetByIdAsync(id);
+            if (dto == null) return NotFound();
 
-            var allTags = (await _tags.AllAsync()).ToList();
-            var selected = mission.TagIds.ToHashSet();
-
-            var vm = new MissionEditViewModel
-            {
-                Id = mission.Id,
-                Title = mission.Title,
-                Tags = allTags.Select(t => new SelectListItem(
-                    text: t.Name,
-                    value: t.Id.ToString(),
-                    selected: selected.Contains(t.Id)
-                )).ToList()
-            };
-
+            var vm = _mapper.Map<AdminTagFormVM>(dto);
             return View(vm);
         }
 
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(AdminTagFormVM vm)
         {
             if (!ModelState.IsValid) return View(vm);
 
-            var ok = await _tags.UpdateAsync(new TagDto
-            {
-                Id = vm.Id,
-                Name = vm.Name,
-                IsDeleted = vm.IsDeleted
-            });
-
+            var ok = await _tags.UpdateAsync(new TagDto { Id = vm.Id, Name = vm.Name, IsDeleted = vm.IsDeleted });
             if (!ok) return NotFound();
+
+            TempData["Success"] = "Tag updated.";
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             await _tags.SoftDeleteAsync(id);
+            TempData["Success"] = "Tag deleted.";
             return RedirectToAction(nameof(Index));
         }
     }

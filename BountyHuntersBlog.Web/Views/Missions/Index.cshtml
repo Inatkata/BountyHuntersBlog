@@ -1,3 +1,6 @@
+
+@using BountyHuntersBlog.Web.Controllers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model BountyHuntersBlog.ViewModels.Missions.MissionIndexViewModel
 
 <h2 class="mb-3">Missions</h2>
@@ -30,12 +33,21 @@ else
         }
     </div>
 
-    @{
-        var pager = new BountyHuntersBlog.ViewModels.Shared.PaginationViewModel {
-            Page = Model.Page, PageSize = Model.PageSize, TotalCount = Model.TotalCount,
-            Action = "Index", Controller = "Missions",
-            RouteValues = new { q = Model.Q, categoryId = Model.CategoryId, tagId = Model.TagId }
+    
+        var pager = new BountyHuntersBlog.ViewModels.Shared.PaginationViewModel
+        {
+            Page = Model.Page,
+            PageSize = Model.PageSize,
+            TotalCount = Model.TotalCount,
+            Action = nameof(MissionsController.Index),
+            Controller = "Missions",
+            RouteValues = new Dictionary<string, string?>
+            {
+                [nameof(Model.Q)] = Model.Q,
+                [nameof(Model.CategoryId)] = Model.CategoryId?.ToString(),
+                [nameof(Model.TagId)] = Model.TagId?.ToString()
+            }
         };
     }
-    <partial name="~/Views/Shared/_Pagination.cshtml" model="pager" />
+
 }

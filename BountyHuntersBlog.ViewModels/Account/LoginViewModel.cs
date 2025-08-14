@@ -4,8 +4,8 @@ namespace BountyHuntersBlog.ViewModels.Account
 {
     public class LoginViewModel
     {
-        [Required, EmailAddress]
-        public string Email { get; set; } = null!;
+        [Required, StringLength(50)]
+        public string Username { get; set; } = null!;
 
         [Required, DataType(DataType.Password)]
         public string Password { get; set; } = null!;

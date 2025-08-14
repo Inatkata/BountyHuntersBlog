@@ -1,0 +1,50 @@
+﻿@model BountyHuntersBlog.Services.DTOs.MissionDto
+@{
+    ViewData["Title"] = "Mission Details";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<a class="btn btn-link p-0 mb-2" asp-area="Admin" asp-controller="AdminMissions" asp-action="Index">← Back to list</a>
+<h2>Mission Details</h2>
+
+<dl class="row">
+    <dt class="col-sm-2">Title</dt>
+    <dd class="col-sm-10">@Model.Title</dd>
+
+    <dt class="col-sm-2">Category</dt>
+    <dd class="col-sm-10">@Model.CategoryName</dd>
+
+    <dt class="col-sm-2">Tags</dt>
+    <dd class="col-sm-10">
+        @(Model.TagNames != null && Model.TagNames.Any()
+            ? string.Join(", ", Model.TagNames)
+            : "—")
+    </dd>
+
+    <dt class="col-sm-2">Image</dt>
+    <dd class="col-sm-10">
+        @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Title" class="img-thumbnail" style="max-width:260px;" />
+        }
+        else { <span class="text-muted">No image</span> }
+    </dd>
+
+    <dt class="col-sm-2">Description</dt>
+    <dd class="col-sm-10" style="white-space:pre-wrap;">@Model.Description</dd>
+
+    <dt class="col-sm-2">Completed</dt>
+    <dd class="col-sm-10">@(Model.IsCompleted ? "Yes" : "No")</dd>
+
+    <dt class="col-sm-2">Deleted</dt>
+    <dd class="col-sm-10">@(Model.IsDeleted ? "Yes" : "No")</dd>
+</dl>
+
+<div class="d-flex gap-2">
+    <a class="btn btn-outline-primary"
+       asp-area="Admin" asp-controller="AdminMissions" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+    <form asp-area="Admin" asp-controller="AdminMissions" asp-action="Delete" asp-route-id="@Model.Id" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this mission?');">Delete</button>
+    </form>
+</div>

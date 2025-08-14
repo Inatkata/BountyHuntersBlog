@@ -2,6 +2,18 @@
 @{
     ViewData["Title"] = "Dashboard";
 }
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+<h2>Admin Dashboard</h2>
+<ul>
+    <li><a asp-area="Admin" asp-controller="AdminUsers" asp-action="Index">Users</a></li>
+    <li><a asp-area="Admin" asp-controller="AdminMissions" asp-action="Index">Missions</a></li>
+    <li><a asp-area="Admin" asp-controller="AdminCategories" asp-action="Index">Categories</a></li>
+    <li><a asp-area="Admin" asp-controller="AdminTags" asp-action="Index">Tags</a></li>
+    <li><a asp-area="Admin" asp-controller="AdminComments" asp-action="Index">Comments</a></li>
+</ul>
 
 <div class="row g-3">
     <div class="col-lg-3 col-md-6">

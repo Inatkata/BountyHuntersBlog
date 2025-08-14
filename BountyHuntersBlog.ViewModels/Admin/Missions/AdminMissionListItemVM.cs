@@ -1,4 +1,4 @@
-﻿// BountyHuntersBlog.ViewModels/Admin/Missions/AdminMissionListItemVM.cs
+﻿
 namespace BountyHuntersBlog.ViewModels.Admin.Missions
 {
     public class AdminMissionListItemVM

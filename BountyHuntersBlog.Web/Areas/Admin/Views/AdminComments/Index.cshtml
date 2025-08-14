@@ -1,12 +1,20 @@
-﻿@* Areas/Admin/Views/AdminComments/Index.cshtml *@
-@model IReadOnlyList<BountyHuntersBlog.ViewModels.Admin.Comments.AdminCommentListItemVM>
+﻿@model IEnumerable<BountyHuntersBlog.ViewModels.Admin.Comments.AdminCommentListItemVM>
 @{
     ViewData["Title"] = "Comments";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
+
 <h2 class="mb-3">Comments</h2>
 
-@if (Model == null || !Model.Any())
+@if (TempData["Success"] is string s)
+{
+    <div class="alert alert-success">@s</div>
+}
+@if (TempData["Error"] is string e)
+{
+    <div class="alert alert-danger">@e</div>
+}
+
+@if (!Model.Any())
 {
     <div class="alert alert-info">No comments found.</div>
 }
@@ -15,12 +23,13 @@ else
     <table class="table table-striped align-middle">
         <thead>
             <tr>
-                <th style="width:80px">Id</th>
-                <th>User</th>
-                <th>Mission</th>
+                <th style="width:80px;">Id</th>
                 <th>Content</th>
-                <th style="width:120px">Status</th>
-                <th style="width:160px" class="text-end">Actions</th>
+                <th style="width:180px;">Author</th>
+                <th style="width:220px;">Mission</th>
+                <th style="width:170px;">Created</th>
+                <th style="width:110px;">Deleted</th>
+                <th style="width:200px;"></th>
             </tr>
         </thead>
         <tbody>
@@ -28,36 +37,23 @@ else
             {
                 <tr>
                     <td>@c.Id</td>
+                    <td class="text-truncate" style="max-width:420px;" title="@c.Content">@c.Content</td>
                     <td>@c.UserName</td>
                     <td>@c.MissionTitle</td>
-                    <td>@c.Content</td>
-                    <td>
-                        @if (c.IsDeleted)
-                        {
-                            <span class="badge bg-danger">Deleted</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-success">Active</span>
-                        }
-                    </td>
+                    <td>@c.CreatedOn.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@(c.IsDeleted ? "Yes" : "No")</td>
                     <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary"
-                           asp-area="Admin" asp-controller="AdminComments" asp-action="Details" asp-route-id="@c.Id">
-                            Details
-                        </a>
-                        @if (!c.IsDeleted)
-                        {
-                            <form method="post" class="d-inline"
-                                  asp-area="Admin" asp-controller="AdminComments" asp-action="Delete"
-                                  asp-route-id="@c.Id">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Soft delete this comment?');">
-                                    Delete
-                                </button>
-                            </form>
-                        }
+                        <a asp-area="Admin" asp-controller="AdminComments" asp-action="Details" asp-route-id="@c.Id"
+                           class="btn btn-sm btn-outline-secondary">Details</a>
+
+                        <form asp-area="Admin" asp-controller="AdminComments" asp-action="Delete" asp-route-id="@c.Id"
+                              method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Delete this comment?');">
+                                Delete
+                            </button>
+                        </form>
                     </td>
                 </tr>
             }

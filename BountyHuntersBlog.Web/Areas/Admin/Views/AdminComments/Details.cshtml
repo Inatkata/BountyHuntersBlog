@@ -1,0 +1,25 @@
+﻿@model BountyHuntersBlog.ViewModels.Admin.Comments.AdminCommentListItemVM
+@{
+    ViewData["Title"] = $"Comment #{Model.Id}";
+}
+
+<a class="btn btn-link" asp-area="Admin" asp-controller="AdminComments" asp-action="Index">← Back to list</a>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title mb-1">Comment #@Model.Id</h5>
+        <div class="text-muted mb-3">
+            by <strong>@Model.UserName</strong> on <em>@Model.CreatedOn.ToString("yyyy-MM-dd HH:mm")</em>
+            — Mission: <strong>@Model.MissionTitle</strong>
+        </div>
+        <p class="card-text" style="white-space:pre-wrap;">@Model.Content</p>
+        <p class="mb-0"><span class="badge bg-@(Model.IsDeleted ? "danger" : "success")">
+            @(Model.IsDeleted ? "Deleted" : "Active")
+        </span></p>
+    </div>
+</div>
+
+<form asp-area="Admin" asp-controller="AdminComments" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this comment?');">Delete</button>
+</form>

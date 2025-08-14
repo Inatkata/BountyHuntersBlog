@@ -1,5 +1,4 @@
-﻿@* Areas/Admin/Views/AdminMissions/_Form.cshtml *@
-@model BountyHuntersBlog.ViewModels.Admin.Missions.AdminMissionFormVM
+﻿@model BountyHuntersBlog.ViewModels.Admin.Missions.AdminMissionFormVM
 
 <div class="mb-3">
     <label asp-for="Title" class="form-label"></label>
@@ -9,7 +8,7 @@
 
 <div class="mb-3">
     <label asp-for="Description" class="form-label"></label>
-    <textarea asp-for="Description" class="form-control" rows="6"></textarea>
+    <textarea asp-for="Description" rows="5" class="form-control"></textarea>
     <span asp-validation-for="Description" class="text-danger"></span>
 </div>
 
@@ -19,25 +18,27 @@
     <span asp-validation-for="ImageUrl" class="text-danger"></span>
 </div>
 
-<div class="mb-3">
-    <label asp-for="CategoryId" class="form-label"></label>
-    <select asp-for="CategoryId" class="form-select" asp-items="Model.Categories">
-        <option value="">-- select category --</option>
-    </select>
-    <span asp-validation-for="CategoryId" class="text-danger"></span>
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="CategoryId" class="form-label">Category</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="Model.Categories">
+            <option value="">-- choose category --</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Tags</label>
+        <select asp-for="TagIds" class="form-select" asp-items="Model.Tags" multiple size="8"></select>
+        <small class="text-muted d-block">Hold Ctrl/Cmd to select multiple</small>
+    </div>
 </div>
 
-<div class="mb-3">
-    <label class="form-label">Tags</label>
-    <select asp-for="TagIds" class="form-select" asp-items="Model.Tags" multiple size="8"></select>
+<div class="form-check mt-3">
+    <input asp-for="IsCompleted" class="form-check-input" />
+    <label asp-for="IsCompleted" class="form-check-label"></label>
 </div>
 
-<div class="form-check mb-3">
-    <input class="form-check-input" asp-for="IsCompleted" />
-    <label class="form-check-label" asp-for="IsCompleted"></label>
-</div>
-
-<div class="form-check mb-3">
-    <input class="form-check-input" asp-for="IsDeleted" />
-    <label class="form-check-label" asp-for="IsDeleted"></label>
+<div class="form-check mt-2">
+    <input asp-for="IsDeleted" class="form-check-input" />
+    <label asp-for="IsDeleted" class="form-check-label"></label>
 </div>

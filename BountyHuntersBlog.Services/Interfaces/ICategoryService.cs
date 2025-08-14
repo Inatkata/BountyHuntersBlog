@@ -10,5 +10,7 @@ namespace BountyHuntersBlog.Services.Interfaces
         Task<int> CreateAsync(CategoryDto dto);
         Task<bool> UpdateAsync(CategoryDto dto);
         Task<bool> SoftDeleteAsync(int id);
+       
+
     }
 }

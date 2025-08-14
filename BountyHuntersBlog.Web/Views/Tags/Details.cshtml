@@ -1,3 +1,33 @@
-@model MissionIndexViewModel
+@model BountyHuntersBlog.ViewModels.Missions.MissionIndexViewModel
+@{
+    ViewData["Title"] = $"Tag: {ViewData["TagName"]}";
+}
 <h2>Missions tagged with "@ViewData["TagName"]"</h2>
-@await Html.PartialAsync("_MissionList", Model.Items)
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info">No missions for this tag.</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-3">
+        @foreach (var m in Model.Items)
+        {
+            @await Html.PartialAsync("~/Views/Missions/_MissionCard.cshtml", m)
+        }
+    </div>
+
+    {
+        var pager = new BountyHuntersBlog.ViewModels.Shared.PaginationViewModel
+        {
+            Page = Model.Page,
+            PageSize = Model.PageSize,
+            TotalCount = Model.TotalCount,
+            Action = "Details",
+            Controller = "Tags",
+            RouteValues = new Dictionary<string, string?> { ["id"] = Model.TagId?.ToString() }
+        };
+
+        <partial name="~/Views/Shared/_Pagination.cshtml" model="pager"/>
+    }
+}

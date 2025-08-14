@@ -1,40 +1,21 @@
-using System.Diagnostics;
-using BountyHuntersBlog.Web.Models;
+// BountyHuntersBlog.Web/Controllers/HomeController.cs
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BountyHuntersBlog.Web.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Index() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(int? statusCode)
         {
-            try
-            {
-                return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-            }
-            catch
-            {
-                // ??? ?????? Error.cshtml, ???????????? ??? ????????? ????????
-                return RedirectToAction(nameof(Index));
-            }
+
+            return RedirectToAction("Index", "Error");
+
         }
     }
 }

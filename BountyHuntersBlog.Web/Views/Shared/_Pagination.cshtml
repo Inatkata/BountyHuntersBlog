@@ -1,13 +1,21 @@
 ﻿@model BountyHuntersBlog.ViewModels.Shared.PaginationViewModel
 @{
-    int totalPages = (int)Math.Ceiling((double)Model.TotalCount / Math.Max(1, Model.PageSize));
+    var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Math.Max(1, Model.PageSize));
     if (totalPages < 2) { return; }
-    var route = Html.ViewContext.HttpContext.Request.Query
-        .ToDictionary(kvp => kvp.Key, kvp => (string?)kvp.Value)
-        .ToDictionary(k => k.Key, v => (object?)v.Value);
+
+    // текущите query-та
+    var current = Html.ViewContext.HttpContext.Request.Query
+        .ToDictionary(kvp => kvp.Key, kvp => (string?)kvp.Value);
+
+    // добавяме RouteValues от VM (ако има)
     if (Model.RouteValues != null)
-        foreach (var p in Model.RouteValues.GetType().GetProperties())
-            route[p.Name] = p.GetValue(Model);
+        foreach (var p in Model.RouteValues)
+            current[p.Key] = p.Value;
+
+    // TagHelper-ът иска IDictionary<string,string>
+    var route = current
+        .Where(kv => kv.Value != null)
+        .ToDictionary(kv => kv.Key, kv => kv.Value!);
 }
 <nav aria-label="pagination">
     <ul class="pagination mt-3">

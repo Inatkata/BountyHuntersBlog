@@ -1,5 +1,4 @@
-﻿// BountyHuntersBlog.ViewModels/Admin/Missions/AdminMissionFormVM.cs
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace BountyHuntersBlog.ViewModels.Admin.Missions
